@@ -227,6 +227,9 @@ async function goVideo(){
   if(overlay){ overlay.style.display='flex'; overlay.style.opacity='1'; }
   document.getElementById('video-hint').textContent='▶ 請開始觀看影片，隨時可點擊暫停並點擊「儲存觀看紀錄」保留進度';
   document.getElementById('video-hint').style.color='var(--ink3)';
+  document.getElementById('video-hint').style.fontSize='.85rem';
+  document.getElementById('video-hint').style.fontWeight='400';
+  document.getElementById('btn-save-progress').style.display = '';
 
   if(!YOUTUBE_VIDEO_ID){
     document.getElementById('video-no-setting').style.display='flex';
@@ -282,8 +285,11 @@ function overlayStartVideo(){
 }
 
 function onVideoEnded(){
-  document.getElementById('video-hint').textContent='✓ 影片已觀看完畢';
+  document.getElementById('video-hint').textContent='恭喜~您已完成本次教育訓練，學習紀錄已儲存';
   document.getElementById('video-hint').style.color='var(--green)';
+  document.getElementById('video-hint').style.fontSize='1.7rem';
+  document.getElementById('video-hint').style.fontWeight='700';
+  document.getElementById('btn-save-progress').style.display = 'none';
   var seconds = ytPlayer && typeof ytPlayer.getDuration === 'function' ? ytPlayer.getDuration() : ytMaxTime;
   recordVideo('完成', seconds);
 }
