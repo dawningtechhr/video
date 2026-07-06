@@ -129,7 +129,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
 
 <div id="screen-video" class="screen" style="align-items:center;justify-content:center;flex-direction:column;background:var(--paper);padding:2rem;text-align:center">
   <div style="max-width:860px;width:100%">
-    <p style="font-size:.8rem;font-weight:700;color:var(--danger);background:var(--danger-light);display:inline-block;padding:.25rem .85rem;border-radius:12px;margin-bottom:1rem;letter-spacing:.05em">教育訓練影片</p>
+    <img id="video-logo" alt="敦新" style="height:48px;width:auto;margin-bottom:1rem">
     <h2 class="course-name" id="video-course-title">教育訓練</h2>
     <!-- YouTube 播放器容器 -->
     <div style="border-radius:8px;overflow:hidden;border:1px solid var(--paper3);background:#000;aspect-ratio:16/9;width:100%;position:relative">
@@ -285,7 +285,7 @@ function overlayStartVideo(){
 }
 
 function onVideoEnded(){
-  document.getElementById('video-hint').textContent='恭喜~您已完成本次教育訓練，學習紀錄已儲存';
+  document.getElementById('video-hint').textContent='恭喜~您已完成本次學習';
   document.getElementById('video-hint').style.color='var(--green)';
   document.getElementById('video-hint').style.fontSize='1.7rem';
   document.getElementById('video-hint').style.fontWeight='700';
@@ -399,6 +399,9 @@ function proceedAfterLogin(){
   }
   goVideo();
 }
+
+// 影片頁 LOGO 沿用封面頁的敦新科技 base64 圖檔
+document.getElementById('video-logo').src = document.querySelector('#screen-cover .logo-wrap img').src;
 
 // 頁面載入時預先取得影片設定
 fetchVideoSettings();
