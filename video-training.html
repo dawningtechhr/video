@@ -1,0 +1,397 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  // 提早定義，避免 IFrame API 在主 script 執行前觸發被漏掉
+  window._ytReadyFlag = false;
+  function onYouTubeIframeAPIReady(){ window._ytReadyFlag = true; }
+</script>
+<script src="https://www.youtube.com/iframe_api"></script>
+<title>教育訓練影片學習</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1814;--ink2:#3d3a34;--ink3:#7a7570;
+  --paper:#faf9f6;--paper2:#f2f0eb;--paper3:#e8e5de;
+  --accent:#F47920;--accent2:#D45F0A;--accent-light:#FEF5EC;
+  --green:#1a7a3a;--green-light:#e8f5ed;
+  --orange:#F47920;--orange-light:#FEF5EC;
+  --danger:#F47920;--danger-light:#FEF5EC;
+  --red:#8b2020;--red-light:#fde8e8;
+  --purple:#5a3a9a;--purple-light:#f0ebfa;
+  --navy:#1a3a6a;
+  --radius:4px;--radius-lg:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* COVER */
+#screen-cover{background:var(--paper);align-items:center;justify-content:center;text-align:center;padding:2rem}
+#screen-cover .logo-wrap{margin-bottom:2rem;padding-bottom:1.75rem;border-bottom:1px solid var(--paper3)}
+#screen-cover .logo-wrap img{height:auto;max-height:88px;max-width:265px;width:auto}
+#screen-cover .new-law-badge{background:var(--accent-light);color:var(--accent2);border:1px solid rgba(244,121,32,.3);border-radius:20px;padding:.35rem 1.2rem;font-size:.82rem;font-weight:700;letter-spacing:.08em;display:inline-block;margin-bottom:1.25rem}
+#screen-cover h1{font-size:2rem;font-weight:700;color:var(--ink);line-height:1.35;margin-bottom:.6rem}
+#screen-cover h2{font-size:.95rem;font-weight:400;color:var(--ink2);margin-bottom:2.25rem;line-height:1.6}
+#screen-cover .meta{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.75rem}
+#screen-cover .meta span{background:var(--paper2);color:var(--ink2);border-radius:20px;padding:.35rem 1rem;font-size:.82rem;border:1px solid var(--paper3)}
+#screen-cover .btn-start{background:var(--accent);color:#fff;font-size:.95rem;font-weight:700;padding:.9rem 2.75rem;border-radius:30px;border:none;cursor:pointer;font-family:inherit;transition:transform .15s,box-shadow .15s}
+#screen-cover .btn-start:hover{background:var(--accent2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(244,121,32,.35)}
+
+/* BUTTONS */
+.btn{font-family:inherit;cursor:pointer;border-radius:var(--radius);font-size:.88rem;font-weight:500;padding:.55rem 1.4rem;transition:all .15s;border:none}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-secondary{background:transparent;color:var(--ink2);border:1px solid var(--paper3)}
+.btn-secondary:hover{background:var(--paper)}
+.btn-success{background:var(--green);color:#fff}
+.btn-success:hover{background:#14602e}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+.form-group{margin-bottom:1.1rem}
+.form-group label{display:block;font-size:.8rem;font-weight:700;color:var(--ink2);margin-bottom:.35rem}
+.form-group input,.form-group select{width:100%;padding:.62rem .9rem;border:1px solid var(--paper3);border-radius:var(--radius);font-family:inherit;font-size:.88rem;color:var(--ink);background:var(--paper);outline:none;transition:border-color .15s}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(244,121,32,.15)}
+
+/* LOGIN */
+#screen-login{align-items:center;justify-content:center;background:var(--paper)}
+.login-card{background:#fff;border-radius:12px;border:1px solid var(--paper3);padding:2.25rem;width:100%;max-width:460px;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.login-card h2{font-size:1.3rem;font-weight:700;color:var(--ink);margin-bottom:.35rem}
+.login-card>p{font-size:.85rem;color:var(--ink3);margin-bottom:1.75rem}
+.login-id-row{display:flex;gap:.6rem}
+.login-id-row input{flex:1}
+.login-id-row button{white-space:nowrap}
+#login-progress-area{margin-top:1.25rem}
+.progress-badge{border-radius:var(--radius-lg);padding:.85rem 1.1rem;font-size:.85rem;font-weight:500;display:flex;align-items:flex-start;gap:.65rem;margin-bottom:1rem}
+.progress-badge .pb-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px}
+.progress-badge .pb-text{line-height:1.6}
+.progress-badge .pb-label{font-weight:700;display:block;font-size:.8rem;letter-spacing:.04em;margin-bottom:.2rem}
+.progress-badge.none{background:#f5f5f4;border:1px solid #e0ddd6;color:var(--ink2)}
+.progress-badge.in_progress{background:#fff8e6;border:1px solid #f0d870;color:#7a5f00}
+.progress-badge.done{background:var(--green-light);border:1px solid #b7eb8f;color:#135200}
+.manual-fields{border-top:1px solid var(--paper3);padding-top:1rem;margin-top:.25rem}
+.manual-fields .mf-hint{font-size:.78rem;color:var(--ink3);margin-bottom:.85rem}
+
+/* VIDEO */
+#screen-video .course-name{font-size:1.45rem;font-weight:700;color:var(--ink);margin-bottom:1.5rem}
+.watch-actions{display:flex;justify-content:center;gap:.75rem;flex-wrap:wrap;margin-top:1rem}
+.save-banner{border-radius:var(--radius-lg);padding:.75rem 1rem;text-align:center;font-size:.83rem;margin-top:1rem;display:none}
+.save-banner.ok{background:var(--green-light);color:var(--green);display:block}
+.save-banner.err{background:var(--danger-light);color:var(--danger);display:block}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div id="screen-cover" class="screen active">
+  <div class="logo-wrap"><img src="data:image/webp;base64,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" alt="敦新"></div>
+  <h1 id="cover-course-title">教育訓練影片學習</h1>
+  <br>
+  <div class="meta">
+    <span>🎬 影片學習</span>
+  </div>
+  <button class="btn-start" onclick="goLogin()">開始觀看 →</button>
+</div>
+
+<div id="screen-login" class="screen">
+  <div class="login-card">
+    <h2>員工訓練登入</h2>
+    <p>請輸入工號查詢您的訓練進度</p>
+    <div class="login-id-row">
+      <input type="text" id="login-empid" placeholder="請輸入員工工號" onkeydown="if(event.key==='Enter')lookupEmployee()">
+      <button class="btn btn-primary" onclick="lookupEmployee()" id="btn-lookup">查詢</button>
+    </div>
+
+    <div id="login-progress-area" style="display:none">
+      <div id="login-status-badge" class="progress-badge none" style="margin-top:1rem">
+        <span class="pb-icon">⏳</span>
+        <span class="pb-text"><span class="pb-label">查詢中…</span></span>
+      </div>
+
+      <div id="login-manual-fields" class="manual-fields" style="display:none">
+        <p class="mf-hint">請填寫以下資料：</p>
+        <div class="form-group"><label>姓名 *</label><input type="text" id="login-name" placeholder="請輸入姓名"></div>
+        <div class="form-group"><label>部門 *</label><input type="text" id="login-dept" placeholder="請輸入部門名稱"></div>
+      </div>
+
+      <div id="login-user-info" style="display:none;background:var(--paper2);border-radius:var(--radius-lg);padding:.75rem 1rem;margin-bottom:.9rem;font-size:.85rem;color:var(--ink2)">
+        <strong id="login-show-name" style="color:var(--ink)"></strong>
+        &nbsp;|&nbsp;<span id="login-show-dept"></span>
+      </div>
+
+      <button class="btn btn-primary" id="btn-proceed" style="width:100%;padding:.72rem;font-size:.92rem" onclick="proceedAfterLogin()">繼續 →</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-video" class="screen" style="align-items:center;justify-content:center;flex-direction:column;background:var(--paper);padding:2rem;text-align:center">
+  <div style="max-width:860px;width:100%">
+    <p style="font-size:.8rem;font-weight:700;color:var(--danger);background:var(--danger-light);display:inline-block;padding:.25rem .85rem;border-radius:12px;margin-bottom:1rem;letter-spacing:.05em">教育訓練影片</p>
+    <h2 class="course-name" id="video-course-title">教育訓練</h2>
+    <!-- YouTube 播放器容器 -->
+    <div style="border-radius:8px;overflow:hidden;border:1px solid var(--paper3);background:#000;aspect-ratio:16/9;width:100%;position:relative">
+      <div id="video-no-setting" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:.75rem;color:#aaa;font-size:.9rem">
+        <span style="font-size:2.5rem">🎬</span>
+        <span>影片尚未設定，請通知管理員至後台設定影片連結</span>
+      </div>
+      <!-- YouTube IFrame API 播放器容器 -->
+      <div id="yt-player-wrap" style="position:absolute;inset:0;width:100%;height:100%">
+        <div id="yt-player" style="width:100%;height:100%"></div>
+      </div>
+      <!-- 點擊遮罩：啟動播放 -->
+      <div id="video-play-overlay" onclick="overlayStartVideo()" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,.5);transition:opacity .3s;z-index:10">
+        <div style="width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;margin-bottom:.9rem;box-shadow:0 4px 20px rgba(0,0,0,.4)">
+          <span style="font-size:2rem;margin-left:4px">▶</span>
+        </div>
+        <span style="color:#fff;font-size:.9rem;font-weight:500;text-shadow:0 1px 4px rgba(0,0,0,.6)">點此開始播放</span>
+      </div>
+    </div>
+    <p id="video-hint" style="margin-top:1rem;font-size:.85rem;color:var(--ink3)">▶ 請開始觀看影片，隨時可點擊「儲存觀看紀錄」保留進度</p>
+    <div class="watch-actions">
+      <button id="btn-save-progress" class="btn btn-secondary" onclick="saveWatchProgress()">💾 儲存觀看紀錄</button>
+      <button class="btn btn-secondary" onclick="goLogin()">🔁 查詢其他工號</button>
+    </div>
+    <div id="save-banner" class="save-banner"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════ GOOGLE SHEETS ═══════════════
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTFLnHGVNDY5U6cCjAs6nNk0sPP0liFEc7B68WhcyR0eUFSD_Id_JzKJACcBf8rP2yvw/exec';
+
+// ═══════════════ 員工查詢（指定人員 / 影片紀錄）═══════════════
+async function lookupEmployeeFromAPI(empId) {
+  try {
+    const r = await fetch(GOOGLE_SCRIPT_URL + '?action=lookupEmployee&empId=' + encodeURIComponent(empId));
+    return await r.json(); // { found, source, name, dept } or { found: false }
+  } catch(e) { return { found: false }; }
+}
+
+// ═══════════════ 影片設定（YouTube iframe）═══════════════
+let YOUTUBE_VIDEO_ID = '';
+let COURSE_NAME = '';
+
+async function fetchVideoSettings(){
+  try {
+    const d = JSON.parse(await (await fetch(GOOGLE_SCRIPT_URL + '?action=getVideoSettings')).text());
+    if(d.fileId) YOUTUBE_VIDEO_ID = d.fileId;
+    COURSE_NAME = d.courseName || '教育訓練';
+    document.getElementById('cover-course-title').textContent = COURSE_NAME;
+    document.getElementById('video-course-title').textContent = COURSE_NAME;
+    document.title = COURSE_NAME;
+  } catch(e){ console.error('[VideoSettings]', e); }
+}
+
+let ytPlayer  = null;
+let ytMaxTime = 0;
+let ytWatcher = null;
+
+function startSeekWatcher(){
+  clearInterval(ytWatcher);
+  ytWatcher = setInterval(function(){
+    if(!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+    var state = ytPlayer.getPlayerState();
+    if(state !== 1 && state !== 2) return; // 只在播放(1)或暫停(2)時檢查
+    var cur = ytPlayer.getCurrentTime();
+    if(cur > ytMaxTime + 3){
+      // 跳段超前：拉回合法位置
+      ytPlayer.seekTo(ytMaxTime, true);
+    } else if(state === 1 && cur > ytMaxTime){
+      // 正常播放：更新最遠位置
+      ytMaxTime = cur;
+    }
+  }, 500);
+}
+
+let userData = {};
+let progressStatus = 'none'; // none | in_progress | done
+let savedWatchedSeconds = 0;
+
+// ═══════════════ NAVIGATION ═══════════════
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+function goLogin(){ show('login'); }
+
+async function goVideo(){
+  if(!YOUTUBE_VIDEO_ID) await fetchVideoSettings();
+
+  document.getElementById('save-banner').className = 'save-banner';
+  document.getElementById('save-banner').textContent = '';
+
+  var overlay = document.getElementById('video-play-overlay');
+  if(overlay){ overlay.style.display='flex'; overlay.style.opacity='1'; }
+  document.getElementById('video-hint').textContent='▶ 請開始觀看影片，隨時可點擊「儲存觀看紀錄」保留進度';
+  document.getElementById('video-hint').style.color='var(--ink3)';
+
+  if(!YOUTUBE_VIDEO_ID){
+    document.getElementById('video-no-setting').style.display='flex';
+    show('video'); return;
+  }
+  document.getElementById('video-no-setting').style.display='none';
+
+  // 清除舊播放器與計時器
+  clearInterval(ytWatcher);
+  if(ytPlayer){ try{ ytPlayer.destroy(); }catch(e){} ytPlayer = null; }
+  ytMaxTime = savedWatchedSeconds || 0;
+
+  // destroy() 會移除原 div，每次重新建立
+  document.getElementById('yt-player-wrap').innerHTML =
+    '<div id="yt-player" style="width:100%;height:100%"></div>';
+
+  show('video');
+
+  var waitReady = function(cb){
+    if(window._ytReadyFlag && typeof YT !== 'undefined' && YT.Player) cb();
+    else setTimeout(function(){ waitReady(cb); }, 200);
+  };
+  waitReady(function(){
+    ytPlayer = new YT.Player('yt-player', {
+      videoId: YOUTUBE_VIDEO_ID,
+      playerVars: { rel:0, modestbranding:1, controls:1 },
+      events: {
+        onReady: function(){
+          if(ytMaxTime > 0) ytPlayer.seekTo(ytMaxTime, true);
+          startSeekWatcher();
+        },
+        onStateChange: function(e){
+          if(e.data === YT.PlayerState.ENDED){
+            clearInterval(ytWatcher);
+            onVideoEnded();
+          }
+        }
+      }
+    });
+  });
+}
+
+function overlayStartVideo(){
+  var overlay = document.getElementById('video-play-overlay');
+  overlay.style.opacity='0';
+  setTimeout(function(){ overlay.style.display='none'; }, 300);
+  if(ytPlayer && typeof ytPlayer.playVideo === 'function') ytPlayer.playVideo();
+}
+
+function onVideoEnded(){
+  document.getElementById('video-hint').textContent='✓ 影片已觀看完畢';
+  document.getElementById('video-hint').style.color='var(--green)';
+  var seconds = ytPlayer && typeof ytPlayer.getDuration === 'function' ? ytPlayer.getDuration() : ytMaxTime;
+  recordVideo('完成', seconds);
+}
+
+function saveWatchProgress(){
+  if(!userData.empId){ alert('請先完成員工登入'); return; }
+  var seconds = ytPlayer && typeof ytPlayer.getCurrentTime === 'function' ? ytPlayer.getCurrentTime() : ytMaxTime;
+  recordVideo('進行中', seconds);
+}
+
+function recordVideo(status, seconds){
+  const banner = document.getElementById('save-banner');
+  banner.className = 'save-banner';
+  banner.textContent = '⏳ 儲存中…';
+  const data = {
+    action:'recordVideo', timestamp:new Date().toLocaleString('zh-TW'),
+    name:userData.name, dept:userData.dept, empId:userData.empId,
+    videoStatus: status, watchedSeconds: Math.round(seconds || 0)
+  };
+  fetch(GOOGLE_SCRIPT_URL, { method:'POST', body:JSON.stringify(data) })
+    .then(()=>{
+      banner.className = 'save-banner ok';
+      banner.textContent = status === '完成' ? '✅ 已完成觀看，紀錄已儲存' : '✅ 觀看紀錄已儲存，下次登入可從此進度繼續觀看';
+      savedWatchedSeconds = Math.round(seconds || 0);
+    })
+    .catch(()=>{
+      banner.className = 'save-banner err';
+      banner.textContent = '⚠️ 儲存失敗，請確認網路連線後再試一次';
+    });
+}
+
+// ═══════════════ 員工登入 ═══════════════
+async function lookupEmployee(){
+  const empId = document.getElementById('login-empid').value.trim().toUpperCase();
+  if(!empId){ alert('請輸入員工工號'); return; }
+
+  const btn = document.getElementById('btn-lookup');
+  btn.disabled = true; btn.textContent = '查詢中…';
+
+  // 依序查：指定人員 → 影片紀錄
+  const result = await lookupEmployeeFromAPI(empId);
+  const manualArea = document.getElementById('login-manual-fields');
+  const userInfo = document.getElementById('login-user-info');
+
+  if(result.found){
+    userData = { empId, name: result.name, dept: result.dept, autoFilled: true };
+    document.getElementById('login-show-name').textContent = result.name;
+    document.getElementById('login-show-dept').textContent = result.dept;
+    userInfo.style.display = 'block';
+    manualArea.style.display = 'none';
+  } else {
+    userData = { empId, name:'', dept:'', autoFilled: false };
+    manualArea.style.display = 'block';
+    userInfo.style.display = 'none';
+  }
+
+  // 查詢觀看進度
+  const progress = await fetchProgress(empId);
+  progressStatus = progress.status;
+  savedWatchedSeconds = progress.watchedSeconds || 0;
+  showLoginProgress(progressStatus);
+
+  document.getElementById('login-progress-area').style.display = 'block';
+  btn.disabled = false; btn.textContent = '查詢';
+}
+
+async function fetchProgress(empId){
+  try{
+    const url = GOOGLE_SCRIPT_URL + '?action=getProgress&empId=' + encodeURIComponent(empId);
+    const res = await fetch(url, { redirect:'follow' });
+    return await res.json();
+  } catch(e){
+    return { status: 'none', watchedSeconds: 0 };
+  }
+}
+
+function formatMinSec(seconds){
+  const s = Math.round(seconds || 0);
+  const m = Math.floor(s/60), r = s%60;
+  return `${m}分${r}秒`;
+}
+
+function showLoginProgress(status){
+  const badge = document.getElementById('login-status-badge');
+  const configs = {
+    none:        { cls:'none',        icon:'📋', label:'尚未開始觀看',   desc:'請點擊下方按鈕開始觀看課程影片' },
+    in_progress: { cls:'in_progress', icon:'🎬', label:'觀看中',         desc:`已觀看至 ${formatMinSec(savedWatchedSeconds)}，可繼續接續觀看` },
+    done:        { cls:'done',        icon:'✅', label:'已完成觀看',     desc:'您已完成本課程影片觀看，亦可重新觀看複習' },
+  };
+  const cfg = configs[status] || configs.none;
+  badge.className = 'progress-badge ' + cfg.cls;
+  badge.innerHTML = `<span class="pb-icon">${cfg.icon}</span><span class="pb-text"><span class="pb-label">${cfg.label}</span>${cfg.desc}</span>`;
+
+  const proceedBtn = document.getElementById('btn-proceed');
+  if(status === 'done')             proceedBtn.textContent = '重新觀看 →';
+  else if(status === 'in_progress') proceedBtn.textContent = '繼續觀看 →';
+  else                               proceedBtn.textContent = '開始觀看 →';
+}
+
+function proceedAfterLogin(){
+  // 若查無資料，先驗證手動填寫欄位
+  if(!userData.autoFilled){
+    const name = document.getElementById('login-name').value.trim();
+    const dept = document.getElementById('login-dept').value.trim();
+    if(!name || !dept){ alert('請填寫姓名與部門'); return; }
+    userData.name = name; userData.dept = dept;
+  }
+  goVideo();
+}
+
+// 頁面載入時預先取得影片設定
+fetchVideoSettings();
+</script>
+</body>
+</html>

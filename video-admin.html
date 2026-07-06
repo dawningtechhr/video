@@ -1,0 +1,1372 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>職安訓練管理後台</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1814;--ink2:#3d3a34;--ink3:#7a7570;
+  --paper:#faf9f6;--paper2:#f2f0eb;--paper3:#e8e5de;
+  --accent:#F47920;--accent2:#D45F0A;--accent-light:#FEF5EC;
+  --red:#8b2020;--red-light:#fde8e8;
+  --green:#1a7a3a;--green-light:#e8f5ed;
+  --blue:#1a5fa8;--blue-light:#e8f0fb;
+  --radius:4px;--radius-lg:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+input,select{font-family:'Noto Sans TC',sans-serif;font-size:14px;color:var(--ink);background:var(--paper);border:1px solid var(--paper3);border-radius:var(--radius);padding:9px 13px;width:100%;outline:none;transition:border-color .2s}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(244,121,32,.15)}
+button{font-family:'Noto Sans TC',sans-serif;cursor:pointer;border:none;border-radius:var(--radius);font-size:13px;font-weight:500;transition:all .15s}
+
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* ── LOGIN ── */
+#s-login{align-items:center;justify-content:center;background:var(--paper)}
+.login-wrap{width:100%;max-width:380px;padding:20px}
+.login-logo{text-align:center;margin-bottom:2rem}
+.login-logo img{height:59px;margin-bottom:.75rem}
+.login-logo h1{font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:.25rem}
+.login-logo p{font-size:.8rem;color:var(--ink3)}
+.login-card{background:#fff;border-radius:var(--radius-lg);border:1px solid var(--paper3);padding:2rem;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.login-card h2{font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:1.25rem}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:.78rem;font-weight:700;color:var(--ink2);margin-bottom:.35rem}
+.login-err{background:var(--red-light);color:var(--red);font-size:.8rem;padding:.6rem .9rem;border-radius:var(--radius);margin-bottom:.9rem;display:none}
+.btn-login{width:100%;background:var(--accent);color:#fff;padding:.75rem;font-size:.9rem;font-weight:700;border-radius:var(--radius);margin-top:.5rem}
+.btn-login:hover{background:var(--accent2)}
+
+/* ── ADMIN LAYOUT ── */
+#s-admin{flex-direction:row}
+.sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid var(--paper3);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{padding:1.2rem 1.4rem;border-bottom:1px solid var(--paper3)}
+.sb-logo img{height:34px}
+.sb-logo p{font-size:.72rem;color:var(--ink3);margin-top:.25rem}
+.sb-nav{flex:1;padding:.6rem 0}
+.nav-item{display:flex;align-items:center;gap:.6rem;padding:.65rem 1.4rem;font-size:.85rem;color:var(--ink3);cursor:pointer;transition:all .12s;border-left:3px solid transparent}
+.nav-item:hover{background:var(--paper);color:var(--ink)}
+.nav-item.active{background:var(--accent-light);color:var(--accent);border-left-color:var(--accent);font-weight:500}
+.nav-item .ni{font-size:1rem;width:18px;text-align:center}
+.sb-footer{padding:1rem 1.4rem;border-top:1px solid var(--paper3)}
+.sb-user{display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem}
+.su-av{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#fff;font-weight:700;flex-shrink:0}
+.su-name{font-size:.82rem;font-weight:500;color:var(--ink)}
+.su-role{font-size:.7rem;color:var(--ink3)}
+.btn-logout{width:100%;background:var(--paper2);color:var(--ink2);padding:.55rem;border-radius:var(--radius);font-size:.8rem}
+.btn-logout:hover{background:var(--paper3)}
+
+.admin-main{flex:1;overflow-y:auto}
+.tab-content{display:none;padding:2rem 2.25rem;max-width:1080px}
+.tab-content.active{display:block}
+.page-title{font-size:1.4rem;font-weight:700;margin-bottom:.25rem}
+.page-sub{font-size:.85rem;color:var(--ink3);margin-bottom:1.75rem}
+
+/* STAT CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.75rem}
+.stat-card{background:#fff;border:1px solid var(--paper3);border-radius:var(--radius-lg);padding:1.1rem 1.25rem}
+.sc-val{font-size:1.75rem;font-weight:700;margin-bottom:.2rem}
+.sc-val.red{color:var(--red)}.sc-val.green{color:var(--green)}.sc-val.blue{color:var(--blue)}.sc-val.ink{color:var(--ink)}
+.sc-lbl{font-size:.75rem;color:var(--ink3)}
+
+/* TABLE */
+.table-wrap{background:#fff;border:1px solid var(--paper3);border-radius:var(--radius-lg);overflow:hidden}
+.table-head{padding:1rem 1.25rem;border-bottom:1px solid var(--paper3);display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+.table-head h3{font-size:.95rem;font-weight:700}
+.table-actions{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.search-box{position:relative}
+.search-box input{padding:.5rem .75rem .5rem 2rem;font-size:.82rem;width:200px}
+.search-box .si{position:absolute;left:.6rem;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:.85rem}
+.filter-select{width:120px;padding:.5rem .75rem;font-size:.82rem}
+table{width:100%;border-collapse:collapse}
+th{font-size:.75rem;font-weight:700;color:var(--ink3);text-align:left;padding:.65rem 1rem;background:var(--paper2);border-bottom:1px solid var(--paper3);white-space:nowrap}
+td{font-size:.85rem;padding:.75rem 1rem;border-bottom:1px solid var(--paper3);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--paper)}
+.badge{display:inline-flex;align-items:center;font-size:.75rem;font-weight:700;padding:.2rem .65rem;border-radius:12px}
+.badge.pass{background:var(--green-light);color:var(--green)}
+.badge.fail{background:var(--red-light);color:var(--red)}
+.table-empty{padding:3rem;text-align:center;color:var(--ink3);font-size:.9rem}
+
+/* BUTTONS */
+.btn-sm{padding:.45rem .9rem;font-size:.78rem}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-secondary{background:transparent;color:var(--ink2);border:1px solid var(--paper3)}
+.btn-secondary:hover{background:var(--paper2)}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:#14602e}
+
+/* LOADING */
+.loading-wrap{padding:4rem;text-align:center;color:var(--ink3)}
+.spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--paper3);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:.75rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center;padding:1.5rem}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:var(--radius-lg);width:100%;max-width:560px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column}
+.modal-head{padding:1.1rem 1.4rem;border-bottom:1px solid var(--paper3);display:flex;align-items:center;justify-content:space-between}
+.modal-head h3{font-size:1rem;font-weight:700}
+.btn-close{background:var(--paper2);color:var(--ink2);width:28px;height:28px;border-radius:50%;font-size:1.1rem;display:flex;align-items:center;justify-content:center}
+.modal-body{padding:1.4rem;overflow-y:auto;flex:1}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem}
+.detail-item{background:var(--paper2);border-radius:var(--radius);padding:.75rem 1rem}
+.detail-item .lbl{font-size:.72rem;color:var(--ink3);margin-bottom:.2rem}
+.detail-item .val{font-size:.9rem;font-weight:500}
+.score-big{text-align:center;padding:1.25rem;background:var(--paper2);border-radius:var(--radius-lg);margin-bottom:1rem}
+.score-big .num{font-size:2.5rem;font-weight:700}
+.score-big .num.pass{color:var(--green)}.score-big .num.fail{color:var(--red)}
+.score-big .sub{font-size:.82rem;color:var(--ink3);margin-top:.2rem}
+
+/* CONFIG */
+.config-card{background:#fff;border:1px solid var(--paper3);border-radius:var(--radius-lg);padding:1.4rem;margin-bottom:1rem}
+.config-card h3{font-size:.95rem;font-weight:700;margin-bottom:1rem;padding-bottom:.6rem;border-bottom:1px solid var(--paper3)}
+.config-row{display:flex;align-items:center;gap:1rem;margin-bottom:.75rem}
+.config-row label{font-size:.85rem;color:var(--ink2);width:140px;flex-shrink:0}
+.config-row input{max-width:320px}
+.config-hint{font-size:.75rem;color:var(--ink3);margin-top:.25rem}
+.url-display{font-size:.78rem;background:var(--paper2);border-radius:var(--radius);padding:.6rem .9rem;word-break:break-all;color:var(--ink2);margin-top:.5rem;font-family:monospace}
+
+/* ADMIN MANAGEMENT */
+.admin-list{display:flex;flex-direction:column;gap:0}
+.admin-row{display:flex;align-items:center;gap:1rem;padding:1rem 1.4rem;border-bottom:1px solid var(--paper3)}
+.admin-row:last-child{border-bottom:none}
+.admin-av{width:38px;height:38px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#fff;font-weight:700;flex-shrink:0}
+.admin-info{flex:1;min-width:0}
+.admin-name{font-size:.9rem;font-weight:700;color:var(--ink)}
+.admin-meta{font-size:.78rem;color:var(--ink3);margin-top:.15rem}
+.admin-actions{display:flex;align-items:center;gap:.5rem;flex-shrink:0}
+.role-badge{font-size:.72rem;font-weight:700;padding:.2rem .75rem;border-radius:12px;background:var(--accent-light);color:var(--accent2);border:1px solid rgba(244,121,32,.25)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{background:#6b1818}
+
+/* MODAL FORM */
+.modal-form .form-group{margin-bottom:1rem}
+.modal-form label{display:block;font-size:.78rem;font-weight:700;color:var(--ink2);margin-bottom:.35rem}
+.modal-form input,.modal-form select{width:100%}
+.form-hint{font-size:.72rem;color:var(--ink3);margin-top:.25rem}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.25rem;border-top:1px solid var(--paper3);background:var(--paper);font-size:.8rem;color:var(--ink3)}
+.pg-btns{display:flex;gap:.4rem}
+.pg-btn{background:#fff;border:1px solid var(--paper3);color:var(--ink2);padding:.35rem .7rem;border-radius:var(--radius);font-size:.78rem;cursor:pointer}
+.pg-btn:hover{background:var(--paper2)}
+.pg-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.pg-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* UPLOAD ZONE */
+.upload-zone{border:2px dashed var(--paper3);border-radius:var(--radius-lg);padding:2rem;text-align:center;cursor:pointer;transition:border-color .2s}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:var(--accent-light)}
+.upload-zone p{color:var(--ink3);font-size:.85rem;margin-top:.5rem}
+.upload-zone input[type=file]{display:none}
+
+/* NOTIFICATION CARDS */
+.notif-card{background:#fff;border:1px solid var(--paper3);border-radius:var(--radius-lg);padding:1.4rem;margin-bottom:1rem}
+/* VIDEO MANAGEMENT */
+.video-preview-wrap{background:#000;border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:16/9;width:100%;max-width:640px;margin-bottom:1rem;position:relative}
+.video-preview-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+.video-preview-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#666;font-size:.85rem;gap:.5rem}
+.video-preview-placeholder .ph-icon{font-size:2.5rem}
+.vid-row{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1rem}
+.vid-row label{font-size:.85rem;color:var(--ink2);width:160px;flex-shrink:0;padding-top:.6rem}
+.vid-row .vid-input-wrap{flex:1}
+.vid-row input{width:100%}
+.vid-hint{font-size:.75rem;color:var(--ink3);margin-top:.35rem;line-height:1.5}
+.duration-row{display:flex;align-items:center;gap:.5rem}
+.duration-row input{width:70px}
+.vid-status{display:inline-flex;align-items:center;gap:.4rem;font-size:.82rem;padding:.3rem .75rem;border-radius:12px;margin-left:.75rem}
+.vid-status.ok{background:var(--green-light);color:var(--green)}
+.vid-status.err{background:var(--red-light);color:var(--red)}
+.vid-status.loading{background:var(--paper2);color:var(--ink3)}
+.notif-card h3{font-size:.95rem;font-weight:700;margin-bottom:.75rem;padding-bottom:.6rem;border-bottom:1px solid var(--paper3)}
+.notif-row{display:flex;align-items:center;gap:1rem;margin-bottom:.75rem}
+.notif-row label{font-size:.85rem;color:var(--ink2);width:160px;flex-shrink:0}
+.notif-row input[type=date],.notif-row input[type=number]{max-width:200px}
+.toggle-wrap{display:flex;align-items:center;gap:.75rem}
+.toggle{position:relative;display:inline-block;width:44px;height:24px}
+.toggle input{display:none}
+.toggle-slider{position:absolute;inset:0;background:var(--paper3);border-radius:12px;cursor:pointer;transition:.2s}
+.toggle-slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle input:checked+.toggle-slider{background:var(--accent)}
+.toggle input:checked+.toggle-slider:before{transform:translateX(20px)}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:.4rem}
+.status-dot.on{background:var(--green)}.status-dot.off{background:var(--ink3)}
+</style>
+</head>
+<body>
+
+<!-- ═══════ LOGIN ═══════ -->
+<div id="s-login" class="screen active">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <img src="data:image/webp;base64,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">
+      <h1>職安訓練管理後台</h1>
+      <p>Safety Training Administration</p>
+    </div>
+    <div class="login-card">
+      <h2>🔐 管理員登入</h2>
+      <div class="login-err" id="login-err">帳號或密碼錯誤，請重試</div>
+      <div class="form-group"><label>帳號</label><input type="text" id="login-user" placeholder="請輸入帳號" value="admin"></div>
+      <div class="form-group"><label>密碼</label><input type="password" id="login-pwd" placeholder="請輸入密碼" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn-login" onclick="doLogin()">登入</button>
+      <div style="margin-top:1rem;font-size:.75rem;color:var(--ink3);text-align:center">預設密碼請於 Apps Script 中 <code>getAdminPassword()</code> 修改</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ ADMIN ═══════ -->
+<div id="s-admin" class="screen">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <img src="data:image/webp;base64,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">
+      <p>職安訓練管理後台</p>
+    </div>
+    <nav class="sb-nav">
+      <div class="nav-item active" onclick="showTab('dashboard')"><span class="ni">📊</span>儀表板</div>
+      <div class="nav-item" onclick="showTab('records')"><span class="ni">📋</span>觀看紀錄</div>
+      <div class="nav-item" onclick="showTab('admins');loadAdminsFromGS()"><span class="ni">👤</span>管理員設定</div>
+      <div class="nav-item" onclick="showTab('designated');loadDesignated()"><span class="ni">📋</span>指定人員設定</div>
+      <div class="nav-item" onclick="showTab('notification');loadReminderSettings()"><span class="ni">🔔</span>通知設定</div>
+      <div class="nav-item" onclick="showTab('video');loadVideoSettings()"><span class="ni">🎬</span>影片管理</div>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="su-av" id="sb-avatar">A</div>
+        <div><div class="su-name" id="sb-name">管理員</div><div class="su-role">Administrator</div></div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">登出</button>
+    </div>
+  </div>
+
+  <div class="admin-main">
+
+    <!-- DASHBOARD -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="page-title">儀表板</div>
+      <div class="page-sub" id="dash-updated">載入中…</div>
+      <div class="stat-grid" id="stat-grid">
+        <div class="stat-card"><div class="sc-val ink" id="st-total">—</div><div class="sc-lbl">應觀看人數</div></div>
+        <div class="stat-card"><div class="sc-val green" id="st-passed">—</div><div class="sc-lbl">已完成人數</div></div>
+        <div class="stat-card"><div class="sc-val red" id="st-failed">—</div><div class="sc-lbl">未完成人數</div></div>
+        <div class="stat-card"><div class="sc-val blue" id="st-rate">—</div><div class="sc-lbl">完成率</div></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head"><h3>最近觀看紀錄</h3><button class="btn-sm btn-primary" onclick="showTab('records')">查看全部 →</button></div>
+        <div id="dash-recent"></div>
+      </div>
+    </div>
+
+    <!-- RECORDS -->
+    <div class="tab-content" id="tab-records">
+      <div class="page-title">觀看紀錄</div>
+      <div class="page-sub">所有學員的影片觀看進度，可搜尋、篩選及匯出</div>
+      <div class="table-wrap">
+        <div class="table-head">
+          <h3>紀錄列表 <span id="rec-count" style="font-size:.8rem;font-weight:400;color:var(--ink3)"></span></h3>
+          <div class="table-actions">
+            <div class="search-box"><span class="si">🔍</span><input type="text" id="rec-search" placeholder="搜尋姓名、部門、工號…" oninput="filterRecords()"></div>
+            <select class="filter-select" id="rec-filter" onchange="filterRecords()">
+              <option value="">全部狀態</option>
+              <option value="完成">已完成</option>
+              <option value="進行中">觀看中</option>
+            </select>
+            <button class="btn-sm btn-secondary" onclick="loadRecords()">🔄 重新整理</button>
+            <button class="btn-sm btn-green" onclick="exportCSV()">⬇ 匯出 CSV</button>
+          </div>
+        </div>
+        <div id="rec-table-wrap">
+          <div class="loading-wrap"><div class="spinner"></div><div>資料載入中…</div></div>
+        </div>
+        <div class="pagination" id="rec-pagination" style="display:none">
+          <span id="pg-info"></span>
+          <div class="pg-btns" id="pg-btns"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMINS -->
+    <div class="tab-content" id="tab-admins">
+      <div class="page-title">管理員設定</div>
+      <div class="page-sub">管理系統管理員帳號</div>
+      <div class="table-wrap">
+        <div class="table-head">
+          <h3>管理員列表</h3>
+          <button class="btn-sm btn-primary" onclick="openAdminModal()">＋ 新增管理員</button>
+        </div>
+        <div class="admin-list" id="admin-list"></div>
+      </div>
+    </div>
+
+    <!-- DESIGNATED PERSONS -->
+    <div class="tab-content" id="tab-designated">
+      <div class="page-title">指定人員設定</div>
+      <div class="page-sub">管理需完成訓練的指定人員名單，影片觀看完成後自動更新結果</div>
+      <div class="table-wrap">
+        <div class="table-head">
+          <h3>人員列表 <span id="desig-count" style="font-size:.8rem;font-weight:400;color:var(--ink3)"></span></h3>
+          <div class="table-actions">
+            <button class="btn-sm btn-secondary" onclick="loadDesignated()">🔄 重新整理</button>
+            <button class="btn-sm btn-secondary" onclick="openUploadModal()">⬆ 批次上傳</button>
+            <button class="btn-sm btn-primary" onclick="openAddPersonModal()">＋ 新增人員</button>
+          </div>
+        </div>
+        <div id="desig-table-wrap">
+          <div class="loading-wrap"><div class="spinner"></div><div>資料載入中…</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATION SETTINGS -->
+    <div class="tab-content" id="tab-notification">
+      <div class="page-title">通知設定</div>
+      <div class="page-sub">發送訓練通知給指定人員，並設定定期提醒排程</div>
+
+      <div class="notif-card">
+        <h3>立即發送通知</h3>
+        <p style="font-size:.85rem;color:var(--ink2);margin-bottom:1rem">對指定人員名單中<strong>所有人員</strong>發送教育訓練通知信，邀請點選連結觀看課程影片。</p>
+        <div style="font-size:.8rem;color:var(--ink3);background:var(--paper2);padding:.75rem 1rem;border-radius:var(--radius);margin-bottom:1rem;word-break:break-all">
+          訓練連結：<a href="https://dawningtechhr.github.io/safety-training/safety-training.html" target="_blank" style="color:var(--accent)">https://dawningtechhr.github.io/safety-training/safety-training.html</a>
+        </div>
+        <button class="btn-sm btn-primary" onclick="sendInitialNotification()">📧 立即發送通知給全體指定人員</button>
+        <span id="notif-send-result" style="margin-left:.75rem;font-size:.82rem"></span>
+      </div>
+
+      <div class="notif-card">
+        <h3>定期提醒排程</h3>
+        <p style="font-size:.85rem;color:var(--ink2);margin-bottom:1rem">自動對名單中<strong>尚未完成觀看</strong>的人員發送提醒，請他們完成影片觀看。</p>
+        <div class="notif-row">
+          <label>啟用定期提醒</label>
+          <div class="toggle-wrap">
+            <label class="toggle"><input type="checkbox" id="notif-enabled"><span class="toggle-slider"></span></label>
+            <span id="notif-status-text" style="font-size:.82rem;color:var(--ink3)"><span class="status-dot off"></span>未啟用</span>
+          </div>
+        </div>
+        <div class="notif-row">
+          <label>起始通知日期</label>
+          <input type="date" id="notif-start-date">
+        </div>
+        <div class="notif-row">
+          <label>提醒頻率（天）</label>
+          <input type="number" id="notif-frequency" min="1" max="365" value="7" style="max-width:100px">
+          <span style="font-size:.82rem;color:var(--ink3)">天發送一次</span>
+        </div>
+        <div id="notif-last-sent" style="font-size:.78rem;color:var(--ink3);margin-bottom:.75rem"></div>
+        <button class="btn-sm btn-primary" onclick="saveReminderSettings()">💾 儲存排程設定</button>
+        <span id="notif-save-result" style="margin-left:.75rem;font-size:.82rem"></span>
+        <div style="margin-top:.75rem;font-size:.75rem;color:var(--ink3)">⚠️ 定期提醒需在 Google Apps Script 編輯器中授權 trigger 執行權限</div>
+      </div>
+    </div>
+
+    <!-- ══════════ 影片管理 ══════════ -->
+    <div class="tab-content" id="tab-video">
+      <div class="page-title">影片管理</div>
+      <div class="page-sub">設定課程名稱、教育訓練影片連結，儲存後訓練頁面將自動套用</div>
+
+      <!-- 課程名稱 -->
+      <div class="notif-card">
+        <h3>課程名稱</h3>
+        <div class="vid-row">
+          <label>課程名稱</label>
+          <div class="vid-input-wrap">
+            <input type="text" id="course-name-input" placeholder="請輸入課程名稱，例如：職場霸凌防治教育訓練">
+            <div class="vid-hint">將顯示於影片觀看頁面最上方，並用於通知信件的標題與內容。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 目前影片預覽 -->
+      <div class="notif-card">
+        <h3>目前影片預覽</h3>
+        <div class="video-preview-wrap" id="vid-preview-wrap">
+          <div class="video-preview-placeholder" id="vid-placeholder">
+            <span class="ph-icon">🎬</span>
+            <span>尚未設定影片</span>
+          </div>
+          <iframe id="vid-preview-iframe" src="" allowfullscreen style="display:none"></iframe>
+        </div>
+        <div id="vid-current-info" style="font-size:.82rem;color:var(--ink3);line-height:1.9">
+          <div>課程名稱：<span id="vid-current-course" style="color:var(--ink)">—</span></div>
+          <div>影片 ID：<span id="vid-current-id" style="font-family:monospace;color:var(--ink)">—</span></div>
+          <div>觀看時長：<span id="vid-current-dur" style="color:var(--ink)">—</span></div>
+        </div>
+      </div>
+
+      <!-- 更新影片設定 -->
+      <div class="notif-card">
+        <h3>更新影片設定</h3>
+
+        <div class="vid-row">
+          <label>YouTube 影片連結</label>
+          <div class="vid-input-wrap">
+            <input type="text" id="vid-link-input" placeholder="https://www.youtube.com/watch?v=…">
+            <div class="vid-hint">
+              請先至 YouTube 上傳影片（可設為「不公開」），再將影片連結貼於此處。系統將自動擷取影片 ID。
+            </div>
+          </div>
+        </div>
+
+        <div class="vid-row">
+          <label>擷取到的影片 ID</label>
+          <div class="vid-input-wrap">
+            <input type="text" id="vid-id-display" placeholder="自動填入" readonly style="background:var(--paper2);color:var(--ink3)">
+            <div class="vid-hint">貼上連結後系統自動解析，此欄位為唯讀。</div>
+          </div>
+        </div>
+
+        <!-- YouTube 精確偵測影片結束，無需手動設定時長 -->
+
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.75rem;margin-top:.25rem">
+          <button class="btn-sm btn-secondary" onclick="previewVideo()">👁 預覽影片</button>
+          <button class="btn-sm btn-primary" onclick="saveVideoSettings()">💾 儲存並套用</button>
+          <span id="vid-save-status"></span>
+        </div>
+      </div>
+
+      <!-- 上傳說明 -->
+      <div class="notif-card">
+        <h3>如何上傳影片至 YouTube</h3>
+        <ol style="font-size:.85rem;color:var(--ink2);line-height:2.2;padding-left:1.25rem">
+          <li>開啟 <a href="https://www.youtube.com" target="_blank" style="color:var(--accent)">YouTube</a> 並登入 Google 帳號</li>
+          <li>點擊右上角「建立」→「上傳影片」，選擇影片檔案</li>
+          <li>在「公開設定」選擇「<strong>不公開</strong>」（知道連結才能觀看，不出現在搜尋）</li>
+          <li>上傳完成後，複製影片網址（格式：youtube.com/watch?v=XXXXXXXXXXX）</li>
+          <li>貼至上方欄位，點擊「💾 儲存並套用」</li>
+        </ol>
+        <div style="background:var(--paper2);border-radius:var(--radius);padding:.75rem 1rem;margin-top:.75rem;font-size:.8rem;color:var(--ink3)">
+          ✅ YouTube 可精確偵測影片播放完畢，員工看完後系統自動解鎖，無需設定時長。
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADMIN MODAL -->
+<div class="modal-overlay" id="modal-admin">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="admin-modal-title">新增管理員</h3>
+      <button class="btn-close" onclick="closeAdminModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-form">
+        <input type="hidden" id="adm-id">
+        <div class="form-group">
+          <label>姓名 <span style="color:var(--red)">*</span></label>
+          <input type="text" id="adm-name" placeholder="請輸入姓名">
+        </div>
+        <div class="form-group">
+          <label>帳號 <span style="color:var(--red)">*</span></label>
+          <input type="text" id="adm-username" placeholder="請輸入登入帳號">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="adm-email" placeholder="選填">
+        </div>
+        <div class="form-group">
+          <label>角色</label>
+          <select id="adm-role">
+            <option value="超級管理員">超級管理員</option>
+            <option value="一般管理員">一般管理員</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label id="adm-pwd-label">密碼 <span style="color:var(--red)">*</span></label>
+          <input type="password" id="adm-pwd" placeholder="請輸入密碼">
+          <div class="form-hint" id="adm-pwd-hint"></div>
+        </div>
+        <div id="adm-err" style="color:var(--red);font-size:.8rem;margin-bottom:.5rem;display:none"></div>
+        <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">
+          <button class="btn-sm btn-secondary" onclick="closeAdminModal()">取消</button>
+          <button class="btn-sm btn-primary" onclick="saveAdmin()">儲存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PERSON MODAL -->
+<div class="modal-overlay" id="modal-add-person">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>新增指定人員</h3>
+      <button class="btn-close" onclick="closeAddPersonModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-form">
+        <div class="form-group">
+          <label>部門 <span style="color:var(--red)">*</span></label>
+          <input type="text" id="ap-dept" placeholder="請輸入部門">
+        </div>
+        <div class="form-group">
+          <label>工號 <span style="color:var(--red)">*</span></label>
+          <input type="text" id="ap-empid" placeholder="請輸入工號">
+        </div>
+        <div class="form-group">
+          <label>姓名 <span style="color:var(--red)">*</span></label>
+          <input type="text" id="ap-name" placeholder="請輸入姓名">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="ap-email" placeholder="選填，用於通知發送">
+        </div>
+        <div id="ap-err" style="color:var(--red);font-size:.8rem;margin-bottom:.5rem;display:none"></div>
+        <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">
+          <button class="btn-sm btn-secondary" onclick="closeAddPersonModal()">取消</button>
+          <button class="btn-sm btn-primary" id="ap-save-btn" onclick="saveAddPerson()">新增</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="modal-overlay" id="modal-upload">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>批次上傳指定人員</h3>
+      <button class="btn-close" onclick="closeUploadModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.82rem;color:var(--ink2);margin-bottom:.75rem">上傳 CSV 檔案或貼上資料（格式：部門,工號,姓名,email，第一列為標題）。<br>上傳後將<strong>取代</strong>現有名單，原有結果欄位將被清空。</p>
+      <div style="background:var(--paper2);border-radius:var(--radius);padding:.6rem .9rem;font-family:monospace;font-size:.78rem;color:var(--ink2);margin-bottom:.9rem">
+        部門,工號,姓名,email<br>人資部,A001,王小明,wang@example.com<br>業務部,A002,李小華,lee@example.com
+      </div>
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('csv-file').click()">
+        <input type="file" id="csv-file" accept=".csv,text/csv" onchange="handleFileSelect(event)">
+        <div style="font-size:2rem">📁</div>
+        <p>點擊選擇 CSV 檔案，或將檔案拖曳至此</p>
+        <p id="file-name" style="color:var(--accent);font-weight:500;margin-top:.35rem"></p>
+      </div>
+      <div style="text-align:center;margin:.75rem 0;color:var(--ink3);font-size:.8rem">— 或 —</div>
+      <textarea id="csv-paste" placeholder="貼上 CSV 內容…" style="width:100%;height:120px;font-family:monospace;font-size:.78rem;padding:.75rem;border:1px solid var(--paper3);border-radius:var(--radius);outline:none;resize:vertical;color:var(--ink);background:var(--paper)"></textarea>
+      <div id="upload-preview" style="margin-top:.75rem;font-size:.82rem;color:var(--ink2)"></div>
+      <div id="upload-err" style="color:var(--red);font-size:.8rem;margin-top:.5rem;display:none"></div>
+      <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">
+        <button class="btn-sm btn-secondary" onclick="closeUploadModal()">取消</button>
+        <button class="btn-sm btn-primary" id="upload-confirm-btn" onclick="confirmUpload()">確認上傳</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>觀看詳情</h3>
+      <button class="btn-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════ CONFIG ═══════════
+const CFG_KEY = 'safety_admin_url';
+let GS_URL = localStorage.getItem(CFG_KEY) || 'https://script.google.com/macros/s/AKfycbyTFLnHGVNDY5U6cCjAs6nNk0sPP0liFEc7B68WhcyR0eUFSD_Id_JzKJACcBf8rP2yvw/exec';
+let allRecords = [];
+let filteredRecords = [];
+let currentPage = 1;
+const PAGE_SIZE = 20;
+let sortCol = '';
+let sortAsc = true;
+
+function formatTimestamp(ts){
+  if(!ts) return String(ts);
+  const d = new Date(ts);
+  if(isNaN(d.getTime())) return String(ts);
+  try{
+    const p = {};
+    new Intl.DateTimeFormat('zh-TW',{
+      timeZone:'Asia/Taipei',
+      year:'numeric', month:'2-digit', day:'2-digit',
+      hour:'2-digit', minute:'2-digit', hour12:false
+    }).formatToParts(d).forEach(({type,value})=>{ p[type]=value; });
+    return `${p.year}/${p.month}/${p.day} ${p.hour}:${p.minute}`;
+  }catch(e){ return String(ts); }
+}
+
+function sortRecords(col){
+  if(sortCol === col){ sortAsc = !sortAsc; }
+  else { sortCol = col; sortAsc = true; }
+  const dir = sortAsc ? 1 : -1;
+  filteredRecords.sort((a,b)=>{
+    let va, vb;
+    if(col==='dept'){ va=a.dept||''; vb=b.dept||''; return va.localeCompare(vb,'zh-TW')*dir; }
+    if(col==='empId'){ va=String(a.empId??''); vb=String(b.empId??''); return va.localeCompare(vb,'zh-TW',{numeric:true,sensitivity:'base'})*dir; }
+    if(col==='name'){ va=a.name||''; vb=b.name||''; return va.localeCompare(vb,'zh-TW')*dir; }
+    if(col==='status'){ va=a.status||''; vb=b.status||''; return va.localeCompare(vb,'zh-TW')*dir; }
+    return 0;
+  });
+  currentPage = 1;
+  renderTable();
+}
+
+function sortArrow(col){
+  if(sortCol !== col) return '<span style="color:var(--paper3);font-size:.7rem;margin-left:3px">⇅</span>';
+  return `<span style="font-size:.7rem;margin-left:3px">${sortAsc?'▲':'▼'}</span>`;
+}
+
+// ═══════════ LOGIN ═══════════
+function doLogin(){
+  const user = document.getElementById('login-user').value.trim();
+  const pwd  = document.getElementById('login-pwd').value;
+  const err  = document.getElementById('login-err');
+  err.style.display = 'none';
+
+  if(!user || !pwd){ err.textContent='請填寫帳號及密碼'; err.style.display='block'; return; }
+
+  // 優先以試算表驗證；GS 無法連線時才降級使用本地快取
+  if(GS_URL){
+    err.textContent='驗證中…'; err.style.display='block';
+    fetch(`${GS_URL}?action=auth&user=${encodeURIComponent(user)}&pwd=${encodeURIComponent(pwd)}`)
+      .then(r=>r.json())
+      .then(d=>{
+        if(d.ok){ enterAdmin(d.name || user); }
+        else{ err.textContent='帳號或密碼錯誤，請重試'; }
+      })
+      .catch(()=>{
+        // GS 連線失敗，降級比對本地快取
+        const matched = getCachedAdmins().find(a => a.username === user && a.password === pwd);
+        if(matched){ enterAdmin(matched.name); }
+        else{ err.textContent='連線失敗且本地無符合帳號，請確認網路或 Apps Script URL 設定'; }
+      });
+    return;
+  }
+
+  // 無 GS_URL，僅比對本地快取
+  const matched = getCachedAdmins().find(a => a.username === user && a.password === pwd);
+  if(matched){ enterAdmin(matched.name); return; }
+  err.textContent='帳號或密碼錯誤，請重試';
+  err.style.display='block';
+}
+
+function enterAdmin(user){
+  document.getElementById('login-err').style.display='none';
+  document.getElementById('sb-name').textContent = user;
+  document.getElementById('sb-avatar').textContent = user.charAt(0).toUpperCase();
+  show('s-admin');
+  loadDashboard();
+  loadRecords();
+}
+
+function doLogout(){
+  show('s-login');
+  document.getElementById('login-pwd').value = '';
+}
+
+// ═══════════ NAVIGATION ═══════════
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function showTab(name){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{ if(n.textContent.includes(tabLabel(name))) n.classList.add('active'); });
+}
+function tabLabel(n){ return {dashboard:'儀表板',records:'觀看紀錄',admins:'管理員設定',designated:'指定人員設定',notification:'通知設定',config:'系統設定'}[n]||n; }
+
+// ═══════════ DASHBOARD ═══════════
+function loadDashboard(){
+  if(!GS_URL){ renderDashboardDemo(); return; }
+  fetch(`${GS_URL}?action=stats`)
+    .then(r=>r.json())
+    .then(d=>{
+      document.getElementById('st-total').textContent  = d.totalRequired;
+      document.getElementById('st-passed').textContent = d.completed;
+      document.getElementById('st-failed').textContent = d.notCompleted;
+      document.getElementById('st-rate').textContent   = d.completionRate;
+      document.getElementById('dash-updated').textContent = '資料更新時間：' + new Date().toLocaleString('zh-TW');
+    })
+    .catch(()=>renderDashboardDemo());
+}
+
+function renderDashboardDemo(){
+  document.getElementById('st-total').textContent  = '—';
+  document.getElementById('st-passed').textContent = '—';
+  document.getElementById('st-failed').textContent = '—';
+  document.getElementById('st-rate').textContent   = '—';
+  document.getElementById('dash-updated').textContent = '⚠️ 尚未設定 Apps Script URL，請至「系統設定」完成設定';
+}
+
+function formatWatchTime(seconds){
+  const s = Number(seconds) || 0;
+  const m = Math.floor(s/60), r = s%60;
+  return `${m}分${r}秒`;
+}
+
+function renderDashboardRecent(records){
+  const recent = [...records].reverse().slice(0,10);
+  const el = document.getElementById('dash-recent');
+  if(!recent.length){ el.innerHTML='<div class="table-empty">尚無觀看紀錄</div>'; return; }
+  el.innerHTML = `<table><thead><tr>
+    <th>時間</th><th>部門</th><th>工號</th><th>姓名</th><th>觀看時長</th><th>狀態</th>
+  </tr></thead><tbody>${recent.map(r=>`<tr>
+    <td style="white-space:nowrap">${formatTimestamp(r.timestamp)}</td><td>${r.dept}</td><td style="color:var(--ink3)">${r.empId}</td>
+    <td><strong>${r.name}</strong></td>
+    <td>${formatWatchTime(r.watchedSeconds)}</td>
+    <td><span class="badge ${r.status==='完成'?'pass':'fail'}">${r.status==='完成'?'已完成':'觀看中'}</span></td>
+  </tr>`).join('')}</tbody></table>`;
+}
+
+// ═══════════ RECORDS ═══════════
+function loadRecords(){
+  const wrap = document.getElementById('rec-table-wrap');
+  wrap.innerHTML = '<div class="loading-wrap"><div class="spinner"></div><div>資料載入中…</div></div>';
+
+  if(!GS_URL){
+    allRecords = [];
+    renderTable();
+    renderDashboardRecent([]);
+    return;
+  }
+
+  fetch(`${GS_URL}?action=records`)
+    .then(r=>r.json())
+    .then(d=>{
+      allRecords = d.records || [];
+      filterRecords();
+      renderDashboardRecent(allRecords);
+      loadDashboard();
+    })
+    .catch(()=>{
+      wrap.innerHTML = '<div class="table-empty">❌ 無法連線至 Google 試算表，請確認 Apps Script URL 設定</div>';
+    });
+}
+
+function filterRecords(){
+  const q   = (document.getElementById('rec-search').value||'').toLowerCase();
+  const f   = document.getElementById('rec-filter').value;
+  filteredRecords = allRecords.filter(r=>{
+    const matchQ = !q || (r.name+r.dept+r.empId).toLowerCase().includes(q);
+    const matchF = !f || r.status === f;
+    return matchQ && matchF;
+  });
+  currentPage = 1;
+  renderTable();
+}
+
+function renderTable(){
+  const total = filteredRecords.length;
+  document.getElementById('rec-count').textContent = total ? `（共 ${total} 筆）` : '';
+  const wrap = document.getElementById('rec-table-wrap');
+  const pg   = document.getElementById('rec-pagination');
+
+  if(!total){
+    wrap.innerHTML = `<div class="table-empty">${allRecords.length?'無符合條件的紀錄':'尚無觀看紀錄，等待學員開始觀看後自動同步'}</div>`;
+    pg.style.display = 'none'; return;
+  }
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const start = (currentPage-1)*PAGE_SIZE;
+  const rows  = filteredRecords.slice(start, start+PAGE_SIZE);
+
+  const thStyle = 'cursor:pointer;user-select:none;white-space:nowrap';
+  wrap.innerHTML = `<table><thead><tr>
+    <th>#</th>
+    <th style="${thStyle}" data-col="dept">部門${sortArrow('dept')}</th>
+    <th style="${thStyle}" data-col="empId">工號${sortArrow('empId')}</th>
+    <th style="${thStyle}" data-col="name">姓名${sortArrow('name')}</th>
+    <th style="${thStyle}" data-col="status">狀態${sortArrow('status')}</th>
+    <th>觀看時長</th><th>時間</th><th></th>
+  </tr></thead><tbody>${rows.map((r,i)=>`<tr>
+    <td style="color:var(--ink3)">${start+i+1}</td>
+    <td>${r.dept}</td>
+    <td style="color:var(--ink3)">${r.empId}</td>
+    <td><strong>${r.name}</strong></td>
+    <td><span class="badge ${r.status==='完成'?'pass':'fail'}">${r.status==='完成'?'已完成':'觀看中'}</span></td>
+    <td style="color:var(--ink3)">${formatWatchTime(r.watchedSeconds)}</td>
+    <td style="white-space:nowrap">${formatTimestamp(r.timestamp)}</td>
+    <td style="white-space:nowrap">
+      <button class="btn-sm btn-secondary" data-idx="${start+i}">詳情</button>
+      <button class="btn-sm btn-danger" data-del-idx="${start+i}" style="margin-left:.35rem">刪除</button>
+    </td>
+  </tr>`).join('')}</tbody></table>`;
+
+  // 綁定排序欄標題點擊事件
+  wrap.querySelectorAll('th[data-col]').forEach(th => {
+    th.addEventListener('click', () => sortRecords(th.dataset.col));
+  });
+  // 綁定詳情按鈕點擊事件
+  wrap.querySelectorAll('button[data-idx]').forEach(btn => {
+    btn.addEventListener('click', () => showDetail(Number(btn.dataset.idx)));
+  });
+  // 綁定刪除按鈕點擊事件
+  wrap.querySelectorAll('button[data-del-idx]').forEach(btn => {
+    btn.addEventListener('click', () => deleteRecord(Number(btn.dataset.delIdx)));
+  });
+
+  pg.style.display = 'flex';
+  document.getElementById('pg-info').textContent = `第 ${start+1}–${Math.min(start+PAGE_SIZE,total)} 筆，共 ${total} 筆`;
+  const btns = document.getElementById('pg-btns');
+  btns.innerHTML = `
+    <button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>
+    ${Array.from({length:totalPages},(_,i)=>`<button class="pg-btn ${i+1===currentPage?'active':''}" onclick="goPage(${i+1})">${i+1}</button>`).join('')}
+    <button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;
+}
+
+function goPage(n){
+  const total = Math.ceil(filteredRecords.length/PAGE_SIZE);
+  if(n<1||n>total) return;
+  currentPage=n; renderTable();
+  document.getElementById('tab-records').scrollTo({top:0,behavior:'smooth'});
+}
+
+// ═══════════ DELETE RECORD ═══════════
+function deleteRecord(idx){
+  const r = filteredRecords[idx];
+  if(!confirm(`確定要刪除「${r.name}（${r.dept}）」的觀看紀錄？`)) return;
+
+  const doLocalDelete = () => {
+    const empId = String(r.empId);
+    allRecords = allRecords.filter(x => String(x.empId) !== empId);
+    filterRecords();
+    renderDashboardRecent(allRecords);
+  };
+
+  if(!GS_URL){ doLocalDelete(); return; }
+
+  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'deleteVideoRecord', empId: r.empId }) })
+    .then(res => res.json())
+    .then(d => {
+      if(d.status === 'error'){ alert('刪除失敗：' + (d.message||'未知錯誤')); return; }
+      doLocalDelete();
+    })
+    .catch(() => doLocalDelete());
+}
+
+// ═══════════ DETAIL MODAL ═══════════
+function showDetail(idx){
+  const r = filteredRecords[idx];
+  const done = r.status==='完成';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="score-big">
+      <div class="num ${done?'pass':'fail'}">${done?'✅':'⏳'}</div>
+      <div style="font-size:1.1rem;font-weight:700;color:var(--ink2);margin:.4rem 0 .2rem">${formatWatchTime(r.watchedSeconds)}</div>
+      <div class="sub"><span class="badge ${done?'pass':'fail'}">${done?'已完成':'觀看中'}</span></div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-item"><div class="lbl">姓名</div><div class="val">${r.name}</div></div>
+      <div class="detail-item"><div class="lbl">部門</div><div class="val">${r.dept}</div></div>
+      <div class="detail-item"><div class="lbl">工號</div><div class="val">${r.empId}</div></div>
+      <div class="detail-item"><div class="lbl">最後更新時間</div><div class="val">${formatTimestamp(r.timestamp)}</div></div>
+    </div>`;
+  document.getElementById('modal-detail').classList.add('open');
+}
+function closeModal(){ document.getElementById('modal-detail').classList.remove('open'); }
+document.getElementById('modal-detail').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
+
+// ═══════════ EXPORT CSV ═══════════
+function exportCSV(){
+  if(!filteredRecords.length){ alert('沒有可匯出的資料'); return; }
+  const header = ['時間','姓名','部門','工號','狀態','觀看時長(秒)'];
+  const rows   = filteredRecords.map(r=>[
+    `"${r.timestamp}"`,`"${r.name}"`,`"${r.dept}"`,`"${r.empId}"`,
+    `"${r.status}"`, r.watchedSeconds
+  ].join(','));
+  const csv  = '﻿' + [header.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download=`影片觀看紀錄_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'')}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ═══════════ CONFIG ═══════════
+function saveConfig(){
+  const url = document.getElementById('cfg-url').value.trim();
+  GS_URL = url;
+  localStorage.setItem(CFG_KEY, url);
+  const r = document.getElementById('cfg-result');
+  r.textContent = '✅ 設定已儲存';
+  r.style.color = 'var(--green)';
+  setTimeout(()=>r.textContent='',3000);
+}
+
+function testConnection(){
+  const url = document.getElementById('cfg-url').value.trim();
+  const r   = document.getElementById('cfg-result');
+  if(!url){ r.textContent='⚠️ 請先填入 URL'; r.style.color='var(--accent)'; return; }
+  r.textContent='測試連線中…'; r.style.color='var(--ink3)';
+  fetch(`${url}?action=stats`)
+    .then(res=>res.json())
+    .then(d=>{
+      r.textContent = `✅ 連線成功！試算表共 ${d.total||0} 筆紀錄`;
+      r.style.color = 'var(--green)';
+    })
+    .catch(()=>{
+      r.textContent = '❌ 連線失敗，請確認 URL 是否正確且已部署為「所有人可存取」';
+      r.style.color = 'var(--accent)';
+    });
+}
+
+// ═══════════ ADMIN MANAGEMENT ═══════════
+const ADMINS_KEY = 'safety_admins';
+
+function getCachedAdmins(){
+  const raw = localStorage.getItem(ADMINS_KEY);
+  if(raw) try{ return JSON.parse(raw); }catch(e){}
+  return [{ id:'1', name:'系統管理員', username:'admin', email:'', role:'超級管理員', password:'admin1234' }];
+}
+function setCachedAdmins(list){ localStorage.setItem(ADMINS_KEY, JSON.stringify(list)); }
+
+// 從 GS 載入管理員並更新快取
+function loadAdminsFromGS(callback){
+  const el = document.getElementById('admin-list');
+  if(el) el.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--ink3)"><div class="spinner" style="margin:0 auto .5rem"></div><div>載入中…</div></div>';
+  if(!GS_URL){ renderAdminList(); if(callback) callback(); return; }
+  fetch(`${GS_URL}?action=getAdmins`)
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.admins){ setCachedAdmins(d.admins); }
+      renderAdminList();
+      if(callback) callback();
+    })
+    .catch(()=>{ renderAdminList(); if(callback) callback(); });
+}
+
+function renderAdminList(){
+  const list = getCachedAdmins();
+  const el = document.getElementById('admin-list');
+  if(!el) return;
+  if(!list.length){ el.innerHTML='<div style="padding:2rem;text-align:center;color:var(--ink3)">尚無管理員資料</div>'; return; }
+  el.innerHTML = list.map(a=>`
+    <div class="admin-row">
+      <div class="admin-av">${a.name.charAt(0)}</div>
+      <div class="admin-info">
+        <div class="admin-name">${a.name}</div>
+        <div class="admin-meta">${a.username}${a.email?' · '+a.email:''}</div>
+      </div>
+      <div class="admin-actions">
+        <span class="role-badge">${a.role}</span>
+        <button class="btn-sm btn-secondary" onclick="openAdminModal('${a.id}')">編輯</button>
+        <button class="btn-sm btn-danger" onclick="deleteAdmin('${a.id}')">刪除</button>
+      </div>
+    </div>`).join('');
+}
+
+function openAdminModal(id){
+  const isEdit = !!id;
+  document.getElementById('admin-modal-title').textContent = isEdit ? '編輯管理員' : '新增管理員';
+  document.getElementById('adm-err').style.display = 'none';
+  document.getElementById('adm-id').value = id || '';
+  document.getElementById('adm-pwd-label').innerHTML = isEdit
+    ? '新密碼 <span style="color:var(--ink3);font-weight:400">（不修改請留空）</span>'
+    : '密碼 <span style="color:var(--red)">*</span>';
+  document.getElementById('adm-pwd-hint').textContent = isEdit ? '留空表示不變更密碼' : '';
+  if(isEdit){
+    const a = getCachedAdmins().find(x=>x.id===id);
+    document.getElementById('adm-name').value     = a.name;
+    document.getElementById('adm-username').value = a.username;
+    document.getElementById('adm-email').value    = a.email || '';
+    document.getElementById('adm-role').value     = a.role;
+    document.getElementById('adm-pwd').value      = '';
+  } else {
+    ['adm-name','adm-username','adm-email','adm-pwd'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('adm-role').value = '超級管理員';
+  }
+  document.getElementById('modal-admin').classList.add('open');
+}
+
+function closeAdminModal(){ document.getElementById('modal-admin').classList.remove('open'); }
+
+function saveAdmin(){
+  const id       = document.getElementById('adm-id').value;
+  const name     = document.getElementById('adm-name').value.trim();
+  const username = document.getElementById('adm-username').value.trim();
+  const email    = document.getElementById('adm-email').value.trim();
+  const role     = document.getElementById('adm-role').value;
+  const pwd      = document.getElementById('adm-pwd').value;
+  const errEl    = document.getElementById('adm-err');
+  const saveBtn  = document.querySelector('#modal-admin .btn-primary');
+
+  errEl.style.display = 'none';
+  if(!name || !username){ errEl.textContent='姓名與帳號為必填'; errEl.style.display='block'; return; }
+  if(!id && !pwd){ errEl.textContent='新增管理員時密碼為必填'; errEl.style.display='block'; return; }
+
+  const list = getCachedAdmins();
+  const dup  = list.find(a=>a.username===username && a.id!==id);
+  if(dup){ errEl.textContent='此帳號已存在，請使用其他帳號'; errEl.style.display='block'; return; }
+
+  saveBtn.textContent='儲存中…'; saveBtn.disabled=true;
+
+  const payload = id
+    ? { action:'updateAdmin', id, name, username, email, role, ...(pwd?{password:pwd}:{}) }
+    : { action:'addAdmin', id:Date.now().toString(), name, username, email, role, password:pwd };
+
+  const doLocalSave = () => {
+    if(id){
+      const idx = list.findIndex(a=>a.id===id);
+      list[idx] = { ...list[idx], name, username, email, role, ...(pwd?{password:pwd}:{}) };
+    } else {
+      list.push({ id:payload.id, name, username, email, role, password:pwd });
+    }
+    setCachedAdmins(list);
+    closeAdminModal();
+    renderAdminList();
+    saveBtn.textContent='儲存'; saveBtn.disabled=false;
+  };
+
+  if(!GS_URL){ doLocalSave(); return; }
+
+  fetch(GS_URL, { method:'POST', body:JSON.stringify(payload) })
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.status==='error'){ errEl.textContent=d.message||'儲存失敗'; errEl.style.display='block'; saveBtn.textContent='儲存'; saveBtn.disabled=false; return; }
+      doLocalSave();
+      loadAdminsFromGS(); // 重新從 GS 同步
+    })
+    .catch(()=>{
+      // GS 失敗時僅更新本地快取
+      doLocalSave();
+    });
+}
+
+function deleteAdmin(id){
+  const list = getCachedAdmins();
+  if(list.length <= 1){ alert('至少須保留一位管理員'); return; }
+  const a = list.find(x=>x.id===id);
+  if(!confirm(`確定要刪除管理員「${a.name}」？`)) return;
+
+  const doLocalDelete = () => {
+    setCachedAdmins(list.filter(x=>x.id!==id));
+    renderAdminList();
+  };
+
+  if(!GS_URL){ doLocalDelete(); return; }
+
+  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'deleteAdmin', id }) })
+    .then(r=>r.json())
+    .then(()=>{ doLocalDelete(); loadAdminsFromGS(); })
+    .catch(()=>doLocalDelete());
+}
+
+document.getElementById('modal-admin').addEventListener('click', function(e){ if(e.target===this) closeAdminModal(); });
+
+// ═══════════ DESIGNATED PERSONS ═══════════
+let designatedData = [];
+
+function loadDesignated() {
+  const wrap = document.getElementById('desig-table-wrap');
+  wrap.innerHTML = '<div class="loading-wrap"><div class="spinner"></div><div>資料載入中…</div></div>';
+  if (!GS_URL) { renderDesignatedTable([]); return; }
+  fetch(`${GS_URL}?action=getDesignated`)
+    .then(r => r.json())
+    .then(d => { designatedData = d.designated || []; renderDesignatedTable(designatedData); })
+    .catch(() => { wrap.innerHTML = '<div class="table-empty">❌ 無法連線，請確認 Apps Script URL</div>'; });
+}
+
+function renderDesignatedTable(list) {
+  document.getElementById('desig-count').textContent = list.length ? `（共 ${list.length} 人）` : '';
+  const wrap = document.getElementById('desig-table-wrap');
+  if (!list.length) {
+    wrap.innerHTML = '<div class="table-empty">尚無指定人員，請點擊「新增人員」或「批次上傳」</div>';
+    return;
+  }
+  wrap.innerHTML = `<table><thead><tr>
+    <th>#</th><th>部門</th><th>工號</th><th>姓名</th><th>Email</th><th>結果</th><th></th>
+  </tr></thead><tbody>${list.map((r, i) => `<tr>
+    <td style="color:var(--ink3)">${i+1}</td>
+    <td>${r.dept}</td>
+    <td style="color:var(--ink3)">${r.empId}</td>
+    <td><strong>${r.name}</strong></td>
+    <td style="color:var(--ink3)">${r.email || '—'}</td>
+    <td>${r.result==='完成' ? `<span class="badge pass">已完成</span>` : '<span style="color:var(--ink3);font-size:.8rem">未完成</span>'}</td>
+    <td><button class="btn-sm btn-danger" data-del-empid="${r.empId}" data-del-name="${r.name}">刪除</button></td>
+  </tr>`).join('')}</tbody></table>`;
+  wrap.querySelectorAll('button[data-del-empid]').forEach(btn => {
+    btn.addEventListener('click', () => deleteDesignatedPerson(btn.dataset.delEmpid, btn.dataset.delName));
+  });
+}
+
+function deleteDesignatedPerson(empId, name) {
+  if (!confirm(`確定要從指定人員名單中移除「${name}」？`)) return;
+  designatedData = designatedData.filter(r => r.empId !== empId);
+  fetch(GS_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadDesignated', list: designatedData }) })
+    .then(r => r.json())
+    .then(() => renderDesignatedTable(designatedData))
+    .catch(() => renderDesignatedTable(designatedData));
+}
+
+// ── Add Person Modal ──
+function openAddPersonModal() {
+  ['ap-dept','ap-empid','ap-name','ap-email'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ap-err').style.display = 'none';
+  document.getElementById('modal-add-person').classList.add('open');
+}
+function closeAddPersonModal() { document.getElementById('modal-add-person').classList.remove('open'); }
+document.getElementById('modal-add-person').addEventListener('click', function(e){ if(e.target===this) closeAddPersonModal(); });
+
+function saveAddPerson() {
+  const dept  = document.getElementById('ap-dept').value.trim();
+  const empId = document.getElementById('ap-empid').value.trim();
+  const name  = document.getElementById('ap-name').value.trim();
+  const email = document.getElementById('ap-email').value.trim();
+  const errEl = document.getElementById('ap-err');
+  const btn   = document.getElementById('ap-save-btn');
+
+  errEl.style.display = 'none';
+  if (!dept || !empId || !name) { errEl.textContent = '部門、工號、姓名為必填'; errEl.style.display = 'block'; return; }
+  if (designatedData.some(r => r.empId === empId)) { errEl.textContent = '此工號已存在於名單中'; errEl.style.display = 'block'; return; }
+
+  btn.textContent = '新增中…'; btn.disabled = true;
+  const newList = [...designatedData, { dept, empId, name, email, result: '' }];
+
+  fetch(GS_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadDesignated', list: newList }) })
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === 'error') { errEl.textContent = d.message || '新增失敗'; errEl.style.display = 'block'; return; }
+      designatedData = newList;
+      renderDesignatedTable(designatedData);
+      closeAddPersonModal();
+    })
+    .catch(() => { errEl.textContent = '連線失敗，請稍後再試'; errEl.style.display = 'block'; })
+    .finally(() => { btn.textContent = '新增'; btn.disabled = false; });
+}
+
+// ── Upload Modal ──
+let parsedUploadData = [];
+
+function openUploadModal() {
+  parsedUploadData = [];
+  document.getElementById('csv-paste').value = '';
+  document.getElementById('file-name').textContent = '';
+  document.getElementById('upload-preview').textContent = '';
+  document.getElementById('upload-err').style.display = 'none';
+  document.getElementById('modal-upload').classList.add('open');
+}
+function closeUploadModal() { document.getElementById('modal-upload').classList.remove('open'); }
+document.getElementById('modal-upload').addEventListener('click', function(e){ if(e.target===this) closeUploadModal(); });
+
+// Drag & drop
+const uploadZone = document.getElementById('upload-zone');
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault(); uploadZone.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) readCsvFile(file);
+});
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) readCsvFile(file);
+}
+
+function readCsvFile(file) {
+  document.getElementById('file-name').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = evt => {
+    document.getElementById('csv-paste').value = evt.target.result;
+    previewCsv(evt.target.result);
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+document.getElementById('csv-paste').addEventListener('input', function() {
+  previewCsv(this.value);
+});
+
+function previewCsv(text) {
+  const errEl = document.getElementById('upload-err');
+  errEl.style.display = 'none';
+  parsedUploadData = [];
+  const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) { document.getElementById('upload-preview').textContent = ''; return; }
+  // Skip header row if it matches expected pattern
+  const start = /部門|dept/i.test(lines[0]) ? 1 : 0;
+  const rows = lines.slice(start);
+  const errors = [];
+  parsedUploadData = rows.map((line, idx) => {
+    const cols = line.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+    if (cols.length < 3) { errors.push(`第 ${idx + start + 1} 列欄位不足`); return null; }
+    return { dept: cols[0], empId: cols[1], name: cols[2], email: cols[3] || '' };
+  }).filter(Boolean);
+  if (errors.length) { errEl.textContent = errors.slice(0,3).join('；'); errEl.style.display = 'block'; }
+  document.getElementById('upload-preview').textContent = parsedUploadData.length
+    ? `✅ 解析成功：共 ${parsedUploadData.length} 筆資料` : '⚠️ 未解析到資料';
+}
+
+function confirmUpload() {
+  const errEl = document.getElementById('upload-err');
+  if (!parsedUploadData.length) { errEl.textContent = '請先選擇或貼上有效的 CSV 資料'; errEl.style.display = 'block'; return; }
+  if (!confirm(`確認上傳 ${parsedUploadData.length} 筆人員資料？這將取代現有名單，原有結果將被清空。`)) return;
+
+  const btn = document.getElementById('upload-confirm-btn');
+  btn.textContent = '上傳中…'; btn.disabled = true;
+
+  fetch(GS_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadDesignated', list: parsedUploadData }) })
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === 'error') { errEl.textContent = d.message || '上傳失敗'; errEl.style.display = 'block'; return; }
+      closeUploadModal();
+      loadDesignated();
+      alert(`✅ 上傳成功！共 ${d.count} 筆人員資料`);
+    })
+    .catch(() => { errEl.textContent = '連線失敗，請稍後再試'; errEl.style.display = 'block'; })
+    .finally(() => { btn.textContent = '確認上傳'; btn.disabled = false; });
+}
+
+// ═══════════ VIDEO MANAGEMENT ═══════════
+function loadVideoSettings() {
+  if (!GS_URL) return;
+  fetch(`${GS_URL}?action=getVideoSettings`)
+    .then(r => r.json())
+    .then(d => {
+      const fileId = d.fileId || '';
+      const courseName = d.courseName || '';
+      // 填入表單
+      document.getElementById('course-name-input').value = courseName;
+      if (fileId) {
+        document.getElementById('vid-link-input').value = 'https://www.youtube.com/watch?v=' + fileId;
+        document.getElementById('vid-id-display').value = fileId;
+      }
+      // 更新目前資訊
+      document.getElementById('vid-current-course').textContent = courseName || '（尚未設定）';
+      document.getElementById('vid-current-id').textContent = fileId || '（尚未設定）';
+      document.getElementById('vid-current-dur').textContent = fileId ? '影片結束後自動解鎖（YouTube 精確偵測）' : '（尚未設定）';
+      // 顯示預覽
+      if (fileId) showVideoPreview(fileId);
+    })
+    .catch(() => {});
+}
+
+// 貼上連結時自動解析 ID
+document.addEventListener('DOMContentLoaded', function () {
+  const linkInput = document.getElementById('vid-link-input');
+  if (linkInput) {
+    linkInput.addEventListener('input', function () {
+      const id = extractYouTubeId(this.value.trim());
+      document.getElementById('vid-id-display').value = id || '';
+    });
+  }
+});
+
+function extractYouTubeId(url) {
+  const patterns = [
+    /[?&]v=([a-zA-Z0-9_-]{11})/,
+    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /embed\/([a-zA-Z0-9_-]{11})/,
+    /^([a-zA-Z0-9_-]{11})$/
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return '';
+}
+
+function previewVideo() {
+  const id = document.getElementById('vid-id-display').value.trim();
+  if (!id) { alert('請先貼上 YouTube 影片連結'); return; }
+  showVideoPreview(id);
+}
+
+function showVideoPreview(videoId) {
+  const iframe = document.getElementById('vid-preview-iframe');
+  const placeholder = document.getElementById('vid-placeholder');
+  iframe.src = 'https://www.youtube.com/embed/' + videoId;
+  iframe.style.display = 'block';
+  placeholder.style.display = 'none';
+}
+
+function saveVideoSettings() {
+  const fileId = document.getElementById('vid-id-display').value.trim();
+  const courseName = document.getElementById('course-name-input').value.trim();
+  if (!fileId) { alert('請先貼上 YouTube 影片連結'); return; }
+  if (!courseName) { alert('請先填寫課程名稱'); return; }
+
+  const status = document.getElementById('vid-save-status');
+  status.className = 'vid-status loading'; status.textContent = '⏳ 儲存中…';
+
+  fetch(GS_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'saveVideoSettings', fileId, courseName, durationSeconds: 0 })
+  })
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === 'ok') {
+        status.className = 'vid-status ok'; status.textContent = '✅ 已儲存，訓練頁面將自動套用';
+        document.getElementById('vid-current-course').textContent = courseName;
+        document.getElementById('vid-current-id').textContent = fileId;
+        document.getElementById('vid-current-dur').textContent = '影片結束後自動解鎖（YouTube 精確偵測）';
+        showVideoPreview(fileId);
+      } else {
+        status.className = 'vid-status err'; status.textContent = '❌ 儲存失敗：' + (d.message || '請再試一次');
+      }
+    })
+    .catch(() => {
+      status.className = 'vid-status err'; status.textContent = '❌ 連線失敗，請確認 API 設定';
+    });
+}
+
+// ═══════════ NOTIFICATION SETTINGS ═══════════
+function loadReminderSettings() {
+  if (!GS_URL) return;
+  fetch(`${GS_URL}?action=getReminderSettings`)
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('notif-enabled').checked = d.enabled === 'true';
+      document.getElementById('notif-start-date').value = d.startDate || '';
+      document.getElementById('notif-frequency').value  = d.frequency || '7';
+      updateToggleStatus();
+      const lastEl = document.getElementById('notif-last-sent');
+      lastEl.textContent = d.lastSent ? `上次發送：${new Date(d.lastSent).toLocaleString('zh-TW')}` : '';
+    })
+    .catch(() => {});
+}
+
+document.getElementById('notif-enabled').addEventListener('change', updateToggleStatus);
+function updateToggleStatus() {
+  const on = document.getElementById('notif-enabled').checked;
+  const el = document.getElementById('notif-status-text');
+  el.innerHTML = on
+    ? '<span class="status-dot on"></span>已啟用'
+    : '<span class="status-dot off"></span>未啟用';
+}
+
+function saveReminderSettings() {
+  const enabled   = document.getElementById('notif-enabled').checked;
+  const startDate = document.getElementById('notif-start-date').value;
+  const frequency = parseInt(document.getElementById('notif-frequency').value) || 7;
+  const resEl     = document.getElementById('notif-save-result');
+
+  if (enabled && !startDate) { resEl.style.color = 'var(--red)'; resEl.textContent = '⚠️ 請設定起始日期'; return; }
+
+  resEl.style.color = 'var(--ink3)'; resEl.textContent = '儲存中…';
+  fetch(GS_URL, { method: 'POST', body: JSON.stringify({ action: 'setReminderSchedule', enabled, startDate, frequency }) })
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === 'ok') { resEl.style.color = 'var(--green)'; resEl.textContent = '✅ 設定已儲存'; }
+      else { resEl.style.color = 'var(--red)'; resEl.textContent = '❌ ' + (d.message || '儲存失敗'); }
+      setTimeout(() => resEl.textContent = '', 4000);
+    })
+    .catch(() => { resEl.style.color = 'var(--red)'; resEl.textContent = '❌ 連線失敗'; });
+}
+
+function sendInitialNotification() {
+  if (!confirm('確定要立即發送通知信給全體指定人員嗎？')) return;
+  const resEl = document.getElementById('notif-send-result');
+  resEl.style.color = 'var(--ink3)'; resEl.textContent = '發送中…';
+  fetch(GS_URL, { method: 'POST', body: JSON.stringify({ action: 'sendInitialNotification' }) })
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === 'ok') {
+        resEl.style.color = 'var(--green)';
+        resEl.textContent = `✅ 已發送 ${d.sent} 封，略過 ${d.skipped} 筆（無 Email）`;
+      } else {
+        resEl.style.color = 'var(--red)'; resEl.textContent = '❌ ' + (d.message || '發送失敗');
+      }
+      setTimeout(() => resEl.textContent = '', 6000);
+    })
+    .catch(() => { resEl.style.color = 'var(--red)'; resEl.textContent = '❌ 連線失敗'; });
+}
+
+// ═══════════ INIT ═══════════
+renderAdminList();
+</script>
+</body>
+</html>
