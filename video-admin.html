@@ -88,6 +88,7 @@ tr:hover td{background:var(--paper)}
 .badge{display:inline-flex;align-items:center;font-size:.75rem;font-weight:700;padding:.2rem .65rem;border-radius:12px}
 .badge.pass{background:var(--green-light);color:var(--green)}
 .badge.fail{background:var(--red-light);color:var(--red)}
+.badge.neutral{background:var(--paper3);color:var(--ink3)}
 .table-empty{padding:3rem;text-align:center;color:var(--ink3);font-size:.9rem}
 
 /* BUTTONS */
@@ -455,7 +456,10 @@ tr:hover td{background:var(--paper)}
             <div class="vid-hint">設定題數後，點擊「套用題數」將自動產生對應數量的題目編輯欄位；設為 0 則學員觀看影片後即直接完成學習，不需進行測驗</div>
           </div>
         </div>
-        <button class="btn-sm btn-secondary" onclick="applyQuizCount()">套用題數</button>
+        <div style="display:flex;gap:.6rem">
+          <button class="btn-sm btn-secondary" onclick="applyQuizCount()">套用題數</button>
+          <button class="btn-sm btn-danger" onclick="clearQuizBank()">🗑️ 清空題庫</button>
+        </div>
       </div>
 
       <div id="quiz-questions-wrap"></div>
@@ -717,6 +721,12 @@ function renderDashboardDemo(){
   document.getElementById('dash-updated').textContent = '⚠️ 尚未設定 Apps Script URL，請至「系統設定」完成設定';
 }
 
+function quizResultBadge(quizResult){
+  if (quizResult === '無須測驗') return `<span class="badge neutral">${quizResult}</span>`;
+  if (quizResult) return `<span class="badge ${quizResult==='通過'?'pass':'fail'}">${quizResult}</span>`;
+  return '<span style="color:var(--ink3);font-size:.8rem">尚未測驗</span>';
+}
+
 function formatWatchTime(seconds){
   const s = Number(seconds) || 0;
   const m = Math.floor(s/60), r = s%60;
@@ -736,7 +746,7 @@ function renderDashboardRecent(records){
     <td><strong>${r.name}</strong></td>
     <td><span class="badge ${r.status==='完成'?'pass':'fail'}">${r.status==='完成'?'已完成':'觀看中'}</span></td>
     <td style="color:var(--ink3)">${r.quizScore ? r.quizPct + ' 分' : '—'}</td>
-    <td>${r.quizResult ? `<span class="badge ${r.quizResult==='通過'?'pass':'fail'}">${r.quizResult}</span>` : '<span style="color:var(--ink3);font-size:.8rem">尚未測驗</span>'}</td>
+    <td>${quizResultBadge(r.quizResult)}</td>
     <td style="white-space:nowrap">${formatTimestamp(r.timestamp)}</td>
   </tr>`).join('')}</tbody></table>`;
 }
@@ -808,7 +818,7 @@ function renderTable(){
     <td><strong>${r.name}</strong></td>
     <td><span class="badge ${r.status==='完成'?'pass':'fail'}">${r.status==='完成'?'已完成':'觀看中'}</span></td>
     <td style="color:var(--ink3)">${r.quizScore ? r.quizPct + ' 分' : '—'}</td>
-    <td>${r.quizResult ? `<span class="badge ${r.quizResult==='通過'?'pass':'fail'}">${r.quizResult}</span>` : '<span style="color:var(--ink3);font-size:.8rem">尚未測驗</span>'}</td>
+    <td>${quizResultBadge(r.quizResult)}</td>
     <td style="white-space:nowrap">${formatTimestamp(r.timestamp)}</td>
     <td style="white-space:nowrap">
       <button class="btn-sm btn-secondary" data-idx="${start+i}">詳情</button>
@@ -1461,6 +1471,24 @@ function applyQuizCount() {
   quizQuestionsData = quizQuestionsData.slice(0, n);
   quizCountApplied = true;
   renderQuizQuestionBlocks();
+}
+
+function clearQuizBank() {
+  if (!confirm('確定要清空目前的題庫嗎？清空後測驗題數將設為 0 題，學員影片觀看完成後將無須進行測驗，此動作無法復原。')) return;
+  quizQuestionsData = [];
+  quizCountApplied = true;
+  document.getElementById('quiz-count-input').value = 0;
+  renderQuizQuestionBlocks();
+  const status = document.getElementById('quiz-save-status');
+  status.textContent = '⏳ 清空中…'; status.style.color = 'var(--ink3)';
+  fetch(GS_URL, { method: 'POST', body: JSON.stringify({ action: 'saveQuizSettings', questions: [] }) })
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === 'ok') { status.textContent = '✅ 題庫已清空'; status.style.color = 'var(--green)'; }
+      else { status.textContent = '❌ ' + (d.message || '清空失敗'); status.style.color = 'var(--red)'; }
+      setTimeout(() => status.textContent = '', 4000);
+    })
+    .catch(() => { status.textContent = '❌ 連線失敗，請確認 API 設定'; status.style.color = 'var(--red)'; });
 }
 
 function saveQuizSettingsToGS() {
