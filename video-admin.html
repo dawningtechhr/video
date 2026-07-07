@@ -225,7 +225,7 @@ tr:hover td{background:var(--paper)}
     </div>
     <nav class="sb-nav">
       <div class="nav-item active" onclick="showTab('dashboard')"><span class="ni">📊</span>儀表板</div>
-      <div class="nav-item" onclick="showTab('records')"><span class="ni">📋</span>觀看紀錄</div>
+      <div class="nav-item" onclick="showTab('records')"><span class="ni">📋</span>測驗紀錄</div>
       <div class="nav-item" onclick="showTab('admins');loadAdminsFromGS()"><span class="ni">👤</span>管理員設定</div>
       <div class="nav-item" onclick="showTab('designated');loadDesignated()"><span class="ni">📋</span>指定人員設定</div>
       <div class="nav-item" onclick="showTab('notification');loadReminderSettings()"><span class="ni">🔔</span>通知設定</div>
@@ -248,21 +248,21 @@ tr:hover td{background:var(--paper)}
       <div class="page-title">儀表板</div>
       <div class="page-sub" id="dash-updated">載入中…</div>
       <div class="stat-grid" id="stat-grid">
-        <div class="stat-card"><div class="sc-val ink" id="st-total">—</div><div class="sc-lbl">應觀看人數</div></div>
-        <div class="stat-card"><div class="sc-val green" id="st-passed">—</div><div class="sc-lbl">已完成人數</div></div>
+        <div class="stat-card"><div class="sc-val ink" id="st-total">—</div><div class="sc-lbl">應學習人數</div></div>
+        <div class="stat-card"><div class="sc-val green" id="st-passed">—</div><div class="sc-lbl">已通過測驗人數</div></div>
         <div class="stat-card"><div class="sc-val red" id="st-failed">—</div><div class="sc-lbl">未完成人數</div></div>
         <div class="stat-card"><div class="sc-val blue" id="st-rate">—</div><div class="sc-lbl">完成率</div></div>
       </div>
       <div class="table-wrap">
-        <div class="table-head"><h3>最近觀看紀錄</h3><button class="btn-sm btn-primary" onclick="showTab('records')">查看全部 →</button></div>
+        <div class="table-head"><h3>最近測驗紀錄</h3><button class="btn-sm btn-primary" onclick="showTab('records')">查看全部 →</button></div>
         <div id="dash-recent"></div>
       </div>
     </div>
 
     <!-- RECORDS -->
     <div class="tab-content" id="tab-records">
-      <div class="page-title">觀看紀錄</div>
-      <div class="page-sub">所有學員的影片觀看進度，可搜尋、篩選及匯出</div>
+      <div class="page-title">測驗紀錄</div>
+      <div class="page-sub">所有學員的影片觀看進度與測驗結果，可搜尋、篩選及匯出</div>
       <div class="table-wrap">
         <div class="table-head">
           <h3>紀錄列表 <span id="rec-count" style="font-size:.8rem;font-weight:400;color:var(--ink3)"></span></h3>
@@ -692,7 +692,7 @@ function showTab(name){
   document.getElementById('tab-'+name).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>{ if(n.textContent.includes(tabLabel(name))) n.classList.add('active'); });
 }
-function tabLabel(n){ return {dashboard:'儀表板',records:'觀看紀錄',admins:'管理員設定',designated:'指定人員設定',notification:'通知設定',video:'影片管理',quiz:'題庫設定',config:'系統設定'}[n]||n; }
+function tabLabel(n){ return {dashboard:'儀表板',records:'測驗紀錄',admins:'管理員設定',designated:'指定人員設定',notification:'通知設定',video:'影片管理',quiz:'題庫設定',config:'系統設定'}[n]||n; }
 
 // ═══════════ DASHBOARD ═══════════
 function loadDashboard(){
@@ -726,7 +726,7 @@ function formatWatchTime(seconds){
 function renderDashboardRecent(records){
   const recent = [...records].reverse().slice(0,10);
   const el = document.getElementById('dash-recent');
-  if(!recent.length){ el.innerHTML='<div class="table-empty">尚無觀看紀錄</div>'; return; }
+  if(!recent.length){ el.innerHTML='<div class="table-empty">尚無測驗紀錄</div>'; return; }
   el.innerHTML = `<table><thead><tr>
     <th>時間</th><th>部門</th><th>工號</th><th>姓名</th><th>觀看時長</th><th>狀態</th>
   </tr></thead><tbody>${recent.map(r=>`<tr>
@@ -781,7 +781,7 @@ function renderTable(){
   const pg   = document.getElementById('rec-pagination');
 
   if(!total){
-    wrap.innerHTML = `<div class="table-empty">${allRecords.length?'無符合條件的紀錄':'尚無觀看紀錄，等待學員開始觀看後自動同步'}</div>`;
+    wrap.innerHTML = `<div class="table-empty">${allRecords.length?'無符合條件的紀錄':'尚無測驗紀錄，等待學員完成測驗後自動同步'}</div>`;
     pg.style.display = 'none'; return;
   }
 
@@ -803,7 +803,7 @@ function renderTable(){
     <td style="color:var(--ink3)">${r.empId}</td>
     <td><strong>${r.name}</strong></td>
     <td><span class="badge ${r.status==='完成'?'pass':'fail'}">${r.status==='完成'?'已完成':'觀看中'}</span></td>
-    <td style="color:var(--ink3)">${r.quizScore || '—'}</td>
+    <td style="color:var(--ink3)">${r.quizScore ? r.quizPct + ' 分' : '—'}</td>
     <td>${r.quizResult ? `<span class="badge ${r.quizResult==='通過'?'pass':'fail'}">${r.quizResult}</span>` : '<span style="color:var(--ink3);font-size:.8rem">尚未測驗</span>'}</td>
     <td style="white-space:nowrap">${formatTimestamp(r.timestamp)}</td>
     <td style="white-space:nowrap">
@@ -844,7 +844,7 @@ function goPage(n){
 // ═══════════ DELETE RECORD ═══════════
 function deleteRecord(idx){
   const r = filteredRecords[idx];
-  if(!confirm(`確定要刪除「${r.name}（${r.dept}）」的觀看紀錄？`)) return;
+  if(!confirm(`確定要刪除「${r.name}（${r.dept}）」的測驗紀錄？`)) return;
 
   const doLocalDelete = () => {
     const empId = String(r.empId);
@@ -879,7 +879,7 @@ function showDetail(idx){
       <div class="detail-item"><div class="lbl">部門</div><div class="val">${r.dept}</div></div>
       <div class="detail-item"><div class="lbl">工號</div><div class="val">${r.empId}</div></div>
       <div class="detail-item"><div class="lbl">最後更新時間</div><div class="val">${formatTimestamp(r.timestamp)}</div></div>
-      <div class="detail-item"><div class="lbl">測驗分數</div><div class="val">${r.quizScore || '尚未測驗'}</div></div>
+      <div class="detail-item"><div class="lbl">測驗分數</div><div class="val">${r.quizScore ? r.quizPct + ' 分' : '尚未測驗'}</div></div>
       <div class="detail-item"><div class="lbl">測驗結果</div><div class="val">${r.quizResult || '—'}</div></div>
     </div>`;
   document.getElementById('modal-detail').classList.add('open');
@@ -893,13 +893,13 @@ function exportCSV(){
   const header = ['時間','姓名','部門','工號','影片狀態','觀看時長(秒)','測驗分數','測驗結果'];
   const rows   = filteredRecords.map(r=>[
     `"${r.timestamp}"`,`"${r.name}"`,`"${r.dept}"`,`"${r.empId}"`,
-    `"${r.status}"`, r.watchedSeconds, `"${r.quizScore||''}"`, `"${r.quizResult||''}"`
+    `"${r.status}"`, r.watchedSeconds, `"${r.quizScore ? r.quizPct + ' 分' : ''}"`, `"${r.quizResult||''}"`
   ].join(','));
   const csv  = '﻿' + [header.join(','), ...rows].join('\n');
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href=url; a.download=`影片觀看紀錄_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'')}.csv`;
+  a.href=url; a.download=`測驗紀錄_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'')}.csv`;
   a.click(); URL.revokeObjectURL(url);
 }
 
