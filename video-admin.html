@@ -738,9 +738,10 @@ function renderDashboardRecent(records){
   const el = document.getElementById('dash-recent');
   if(!recent.length){ el.innerHTML='<div class="table-empty">尚無測驗紀錄</div>'; return; }
   el.innerHTML = `<table><thead><tr>
-    <th>#</th><th>部門</th><th>工號</th><th>姓名</th><th>影片狀態</th><th>測驗分數</th><th>測驗結果</th><th>時間</th>
+    <th>#</th><th>課程名稱</th><th>部門</th><th>工號</th><th>姓名</th><th>影片狀態</th><th>測驗分數</th><th>測驗結果</th><th>時間</th>
   </tr></thead><tbody>${recent.map((r,i)=>`<tr>
     <td style="color:var(--ink3)">${i+1}</td>
+    <td>${r.courseName || '—'}</td>
     <td>${r.dept}</td>
     <td style="color:var(--ink3)">${r.empId}</td>
     <td><strong>${r.name}</strong></td>
@@ -806,6 +807,7 @@ function renderTable(){
   const thStyle = 'cursor:pointer;user-select:none;white-space:nowrap';
   wrap.innerHTML = `<table><thead><tr>
     <th>#</th>
+    <th>課程名稱</th>
     <th style="${thStyle}" data-col="dept">部門${sortArrow('dept')}</th>
     <th style="${thStyle}" data-col="empId">工號${sortArrow('empId')}</th>
     <th style="${thStyle}" data-col="name">姓名${sortArrow('name')}</th>
@@ -813,6 +815,7 @@ function renderTable(){
     <th>測驗分數</th><th>測驗結果</th><th>時間</th><th></th>
   </tr></thead><tbody>${rows.map((r,i)=>`<tr>
     <td style="color:var(--ink3)">${start+i+1}</td>
+    <td>${r.courseName || '—'}</td>
     <td>${r.dept}</td>
     <td style="color:var(--ink3)">${r.empId}</td>
     <td><strong>${r.name}</strong></td>

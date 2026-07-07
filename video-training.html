@@ -379,7 +379,8 @@ function recordVideo(status, seconds){
   const data = {
     action:'recordVideo', timestamp:new Date().toLocaleString('zh-TW'),
     name:userData.name, dept:userData.dept, empId:userData.empId,
-    videoStatus: status, watchedSeconds: Math.round(seconds || 0)
+    videoStatus: status, watchedSeconds: Math.round(seconds || 0),
+    courseName: COURSE_NAME
   };
   fetch(GOOGLE_SCRIPT_URL, { method:'POST', body:JSON.stringify(data) })
     .then(()=>{
