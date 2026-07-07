@@ -180,6 +180,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
       </div>
     </div>
     <p id="video-hint" style="margin-top:1rem;font-size:.85rem;color:var(--ink3)">▶ 請開始觀看影片，隨時可點擊暫停並點擊「儲存學習進度」保留進度</p>
+    <p id="video-no-quiz-hint" style="margin-top:.4rem;font-size:.95rem;color:var(--green);font-weight:600;display:none">本課程無需進行測驗，您已完成本課程學習</p>
     <div class="watch-actions">
       <button id="btn-save-progress" class="btn btn-secondary" onclick="saveWatchProgress()">💾 儲存學習進度</button>
       <button id="btn-goto-quiz" class="btn btn-primary" onclick="goQuiz()" style="display:none">📝 前往測驗 →</button>
@@ -296,6 +297,7 @@ async function goVideo(){
   document.getElementById('video-hint').style.color='var(--ink3)';
   document.getElementById('video-hint').style.fontSize='.85rem';
   document.getElementById('video-hint').style.fontWeight='400';
+  document.getElementById('video-no-quiz-hint').style.display = 'none';
   document.getElementById('btn-save-progress').style.display = '';
   document.getElementById('btn-goto-quiz').style.display = 'none';
 
@@ -359,6 +361,7 @@ function onVideoEnded(){
   document.getElementById('video-hint').style.fontWeight='700';
   document.getElementById('btn-save-progress').style.display = 'none';
   document.getElementById('btn-goto-quiz').style.display = QUIZ_QUESTIONS.length > 0 ? 'inline-block' : 'none';
+  document.getElementById('video-no-quiz-hint').style.display = QUIZ_QUESTIONS.length === 0 ? 'block' : 'none';
   var seconds = ytPlayer && typeof ytPlayer.getDuration === 'function' ? ytPlayer.getDuration() : ytMaxTime;
   recordVideo('完成', seconds);
 }
