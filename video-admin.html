@@ -451,8 +451,8 @@ tr:hover td{background:var(--paper)}
         <div class="vid-row">
           <label>測驗題數</label>
           <div class="vid-input-wrap">
-            <input type="number" id="quiz-count-input" min="1" max="100" value="10" style="max-width:120px">
-            <div class="vid-hint">設定題數後，點擊「套用題數」將自動產生對應數量的題目編輯欄位</div>
+            <input type="number" id="quiz-count-input" min="0" max="100" value="10" style="max-width:120px">
+            <div class="vid-hint">設定題數後，點擊「套用題數」將自動產生對應數量的題目編輯欄位；設為 0 則學員觀看影片後即直接完成學習，不需進行測驗</div>
           </div>
         </div>
         <button class="btn-sm btn-secondary" onclick="applyQuizCount()">套用題數</button>
@@ -1399,6 +1399,7 @@ function sendInitialNotification() {
 
 // ═══════════ 題庫設定 ═══════════
 let quizQuestionsData = [];
+let quizCountApplied = false;
 
 function loadQuizSettings() {
   if (!GS_URL) return;
@@ -1407,6 +1408,7 @@ function loadQuizSettings() {
     .then(d => {
       quizQuestionsData = d.questions || [];
       document.getElementById('quiz-count-input').value = quizQuestionsData.length || 10;
+      quizCountApplied = quizQuestionsData.length > 0;
       renderQuizQuestionBlocks();
     })
     .catch(() => {});
@@ -1419,7 +1421,9 @@ function escapeAttr(s) {
 function renderQuizQuestionBlocks() {
   const wrap = document.getElementById('quiz-questions-wrap');
   if (!quizQuestionsData.length) {
-    wrap.innerHTML = '<div class="table-wrap"><div class="table-empty">請先設定測驗題數並點擊「套用題數」</div></div>';
+    wrap.innerHTML = quizCountApplied
+      ? '<div class="table-wrap"><div class="table-empty">已設定為 0 題，學員觀看影片後將直接顯示已完成學習，不需進行測驗</div></div>'
+      : '<div class="table-wrap"><div class="table-empty">請先設定測驗題數並點擊「套用題數」</div></div>';
     return;
   }
   const labels = ['A', 'B', 'C', 'D'];
@@ -1449,17 +1453,18 @@ function syncQuizQuestionsFromDOM() {
 }
 
 function applyQuizCount() {
-  const n = parseInt(document.getElementById('quiz-count-input').value) || 0;
-  if (n < 1) { alert('請輸入至少 1 題'); return; }
+  const n = parseInt(document.getElementById('quiz-count-input').value);
+  if (isNaN(n) || n < 0) { alert('請輸入 0 以上的題數'); return; }
   if (n > 100) { alert('題數過多，請輸入 100 以內'); return; }
   syncQuizQuestionsFromDOM();
   while (quizQuestionsData.length < n) quizQuestionsData.push({ question: '', options: ['', '', '', ''], answer: 'A' });
   quizQuestionsData = quizQuestionsData.slice(0, n);
+  quizCountApplied = true;
   renderQuizQuestionBlocks();
 }
 
 function saveQuizSettingsToGS() {
-  if (!quizQuestionsData.length) { alert('請先設定測驗題數'); return; }
+  if (!quizQuestionsData.length && !quizCountApplied) { alert('請先設定測驗題數並點擊「套用題數」'); return; }
   syncQuizQuestionsFromDOM();
   for (let i = 0; i < quizQuestionsData.length; i++) {
     const q = quizQuestionsData[i];

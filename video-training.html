@@ -358,7 +358,7 @@ function onVideoEnded(){
   document.getElementById('video-hint').style.fontSize='1.7rem';
   document.getElementById('video-hint').style.fontWeight='700';
   document.getElementById('btn-save-progress').style.display = 'none';
-  document.getElementById('btn-goto-quiz').style.display = 'inline-block';
+  document.getElementById('btn-goto-quiz').style.display = QUIZ_QUESTIONS.length > 0 ? 'inline-block' : 'none';
   var seconds = ytPlayer && typeof ytPlayer.getDuration === 'function' ? ytPlayer.getDuration() : ytMaxTime;
   recordVideo('完成', seconds);
 }
@@ -415,8 +415,8 @@ async function lookupEmployee(){
     userInfo.style.display = 'none';
   }
 
-  // 查詢觀看進度
-  const progress = await fetchProgress(empId);
+  // 查詢觀看進度、測驗題庫設定
+  const [progress] = await Promise.all([ fetchProgress(empId), fetchQuizSettings() ]);
   lastProgress = progress;
   progressStatus = progress.status;
   savedWatchedSeconds = progress.watchedSeconds || 0;
@@ -445,10 +445,13 @@ function formatMinSec(seconds){
 function showLoginProgress(progress){
   const status = progress.status;
   const badge = document.getElementById('login-status-badge');
+  const noQuizDone = status === 'video_done' && QUIZ_QUESTIONS.length === 0;
   const configs = {
     none:         { cls:'none',        icon:'📋', label:'尚未開始觀看',       desc:'請點擊下方按鈕開始觀看課程影片' },
     in_progress:  { cls:'in_progress',  icon:'🎬', label:'觀看中',            desc:`已觀看至 ${formatMinSec(savedWatchedSeconds)}，可繼續接續觀看` },
-    video_done:   { cls:'in_progress',  icon:'📝', label:'影片已看完，尚未測驗', desc:'請進行測驗，測驗及格分數為 80 分' },
+    video_done:   noQuizDone
+      ? { cls:'done',        icon:'✅', label:'已完成學習',        desc:'本課程無需進行測驗，您已完成本課程學習' }
+      : { cls:'in_progress',  icon:'📝', label:'影片已看完，尚未測驗', desc:'請進行測驗，測驗及格分數為 80 分' },
     quiz_failed:  { cls:'fail',         icon:'❌', label:'測驗未通過',        desc:`上次得分 ${progress.quizScore}/${progress.quizTotal}（${progress.quizPct}%），可重新測驗` },
     quiz_passed:  { cls:'done',         icon:'✅', label:'已完成測驗',        desc:`得分 ${progress.quizScore}/${progress.quizTotal}（${progress.quizPct}%），您已完成本課程訓練` },
   };
@@ -459,6 +462,7 @@ function showLoginProgress(progress){
   const proceedBtn = document.getElementById('btn-proceed');
   if(status === 'quiz_passed')      proceedBtn.textContent = '查看結果 →';
   else if(status === 'quiz_failed') proceedBtn.textContent = '重新測驗 →';
+  else if(noQuizDone)                proceedBtn.textContent = '查看完成 →';
   else if(status === 'video_done')  proceedBtn.textContent = '前往測驗 →';
   else if(status === 'in_progress') proceedBtn.textContent = '繼續觀看 →';
   else                               proceedBtn.textContent = '開始觀看 →';
@@ -473,7 +477,8 @@ function proceedAfterLogin(){
     userData.name = name; userData.dept = dept;
   }
   if(progressStatus === 'video_done'){
-    goQuiz();
+    if(QUIZ_QUESTIONS.length === 0) showNoQuizComplete();
+    else goQuiz();
   } else if(progressStatus === 'quiz_failed' || progressStatus === 'quiz_passed'){
     showQuizResultFromProgress(lastProgress);
   } else {
@@ -546,6 +551,7 @@ function submitQuiz(){
   const pass = pct >= PASS_SCORE_PCT;
   const wrongCount = total - correct;
 
+  document.getElementById('result-score').style.display = '';
   document.getElementById('result-score').textContent = `${pct} 分`;
   document.getElementById('result-hero').className = 'result-hero ' + (pass?'pass':'fail');
   document.getElementById('result-verdict').textContent = pass
@@ -589,6 +595,7 @@ function saveQuizResult(score, total, pct, pass){
 // 登入時若已有測驗紀錄，直接顯示上次測驗結果（不重新作答）
 function showQuizResultFromProgress(progress){
   const wrongCount = (progress.quizTotal||0) - (progress.quizScore||0);
+  document.getElementById('result-score').style.display = '';
   document.getElementById('result-score').textContent = `${progress.quizPct} 分`;
   document.getElementById('result-hero').className = 'result-hero ' + (progress.status==='quiz_passed' ? 'pass' : 'fail');
   document.getElementById('result-verdict').textContent = progress.status==='quiz_passed'
@@ -601,14 +608,27 @@ function showQuizResultFromProgress(progress){
   show('quiz-result');
 }
 
+// 題庫設定為 0 題時，影片觀看完畢後直接顯示已完成學習，不需進入測驗
+function showNoQuizComplete(){
+  document.getElementById('result-hero').className = 'result-hero pass';
+  document.getElementById('result-score').style.display = 'none';
+  document.getElementById('result-verdict').textContent = '🎉 恭喜您已完成本課程學習，本課程無需進行測驗';
+  document.getElementById('btn-retake').style.display = 'none';
+  document.getElementById('wrong-list').innerHTML = '';
+  document.getElementById('quiz-save-banner').className = 'save-banner';
+  document.getElementById('quiz-save-banner').textContent = '';
+  show('quiz-result');
+}
+
 // 影片頁與測驗頁 LOGO 沿用封面頁的敦新科技 base64 圖檔
 const _coverLogoSrc = document.querySelector('#screen-cover .logo-wrap img').src;
 document.getElementById('video-logo').src = _coverLogoSrc;
 document.getElementById('quiz-logo').src = _coverLogoSrc;
 document.getElementById('quiz-result-logo').src = _coverLogoSrc;
 
-// 頁面載入時預先取得影片設定
+// 頁面載入時預先取得影片設定與題庫設定
 fetchVideoSettings();
+fetchQuizSettings();
 </script>
 </body>
 </html>
