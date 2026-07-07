@@ -208,6 +208,9 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
 <!-- QUIZ RESULT -->
 <div id="screen-quiz-result" class="screen">
   <div style="max-width:640px;width:100%;margin:0 auto">
+    <div style="text-align:center">
+      <img id="quiz-result-logo" alt="敦新" style="height:48px;width:auto;margin-bottom:1.25rem">
+    </div>
     <div class="result-hero" id="result-hero">
       <div class="result-score" id="result-score">0</div>
       <div class="result-verdict" id="result-verdict"></div>
@@ -216,7 +219,6 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
     <div class="wrong-list" id="wrong-list"></div>
     <div class="quiz-result-actions">
       <button class="btn btn-primary" id="btn-retake" onclick="goQuiz()" style="display:none">🔁 重新測驗</button>
-      <button class="btn btn-secondary" onclick="goLogin()">查詢其他工號</button>
     </div>
   </div>
 </div>
@@ -603,6 +605,7 @@ function showQuizResultFromProgress(progress){
 const _coverLogoSrc = document.querySelector('#screen-cover .logo-wrap img').src;
 document.getElementById('video-logo').src = _coverLogoSrc;
 document.getElementById('quiz-logo').src = _coverLogoSrc;
+document.getElementById('quiz-result-logo').src = _coverLogoSrc;
 
 // 頁面載入時預先取得影片設定
 fetchVideoSettings();
