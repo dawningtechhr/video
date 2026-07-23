@@ -88,7 +88,6 @@ tr:hover td{background:var(--paper)}
 .badge{display:inline-flex;align-items:center;font-size:.75rem;font-weight:700;padding:.2rem .65rem;border-radius:12px}
 .badge.pass{background:var(--green-light);color:var(--green)}
 .badge.fail{background:var(--red-light);color:var(--red)}
-.badge.neutral{background:var(--paper3);color:var(--ink3)}
 .table-empty{padding:3rem;text-align:center;color:var(--ink3);font-size:.9rem}
 
 /* BUTTONS */
@@ -226,12 +225,11 @@ tr:hover td{background:var(--paper)}
     </div>
     <nav class="sb-nav">
       <div class="nav-item active" onclick="showTab('dashboard')"><span class="ni">📊</span>儀表板</div>
-      <div class="nav-item" onclick="showTab('records')"><span class="ni">📋</span>測驗紀錄</div>
+      <div class="nav-item" onclick="showTab('records')"><span class="ni">📋</span>觀看紀錄</div>
       <div class="nav-item" onclick="showTab('admins');loadAdminsFromGS()"><span class="ni">👤</span>管理員設定</div>
       <div class="nav-item" onclick="showTab('designated');loadDesignated()"><span class="ni">📋</span>指定人員設定</div>
       <div class="nav-item" onclick="showTab('notification');loadReminderSettings()"><span class="ni">🔔</span>通知設定</div>
       <div class="nav-item" onclick="showTab('video');loadVideoSettings()"><span class="ni">🎬</span>影片管理</div>
-      <div class="nav-item" onclick="showTab('quiz');loadQuizSettings()"><span class="ni">📝</span>題庫設定</div>
     </nav>
     <div class="sb-footer">
       <div class="sb-user">
@@ -249,21 +247,21 @@ tr:hover td{background:var(--paper)}
       <div class="page-title">儀表板</div>
       <div class="page-sub" id="dash-updated">載入中…</div>
       <div class="stat-grid" id="stat-grid">
-        <div class="stat-card"><div class="sc-val ink" id="st-total">—</div><div class="sc-lbl">應學習人數</div></div>
-        <div class="stat-card"><div class="sc-val green" id="st-passed">—</div><div class="sc-lbl">已通過測驗人數</div></div>
+        <div class="stat-card"><div class="sc-val ink" id="st-total">—</div><div class="sc-lbl">應觀看人數</div></div>
+        <div class="stat-card"><div class="sc-val green" id="st-passed">—</div><div class="sc-lbl">已完成人數</div></div>
         <div class="stat-card"><div class="sc-val red" id="st-failed">—</div><div class="sc-lbl">未完成人數</div></div>
         <div class="stat-card"><div class="sc-val blue" id="st-rate">—</div><div class="sc-lbl">完成率</div></div>
       </div>
       <div class="table-wrap">
-        <div class="table-head"><h3>最近測驗紀錄</h3><button class="btn-sm btn-primary" onclick="showTab('records')">查看全部 →</button></div>
+        <div class="table-head"><h3>最近觀看紀錄</h3><button class="btn-sm btn-primary" onclick="showTab('records')">查看全部 →</button></div>
         <div id="dash-recent"></div>
       </div>
     </div>
 
     <!-- RECORDS -->
     <div class="tab-content" id="tab-records">
-      <div class="page-title">測驗紀錄</div>
-      <div class="page-sub">所有學員的影片觀看進度與測驗結果，可搜尋、篩選及匯出</div>
+      <div class="page-title">觀看紀錄</div>
+      <div class="page-sub">所有學員的影片觀看進度，可搜尋、篩選及匯出</div>
       <div class="table-wrap">
         <div class="table-head">
           <h3>紀錄列表 <span id="rec-count" style="font-size:.8rem;font-weight:400;color:var(--ink3)"></span></h3>
@@ -304,7 +302,7 @@ tr:hover td{background:var(--paper)}
     <!-- DESIGNATED PERSONS -->
     <div class="tab-content" id="tab-designated">
       <div class="page-title">指定人員設定</div>
-      <div class="page-sub">管理需完成訓練的指定人員名單，通過測驗後自動更新結果</div>
+      <div class="page-sub">管理需完成訓練的指定人員名單，影片觀看完成後自動更新結果</div>
       <div class="table-wrap">
         <div class="table-head">
           <h3>人員列表 <span id="desig-count" style="font-size:.8rem;font-weight:400;color:var(--ink3)"></span></h3>
@@ -337,7 +335,7 @@ tr:hover td{background:var(--paper)}
 
       <div class="notif-card">
         <h3>定期提醒排程</h3>
-        <p style="font-size:.85rem;color:var(--ink2);margin-bottom:1rem">自動對名單中<strong>尚未通過測驗</strong>的人員發送提醒，請他們完成影片觀看及測驗。</p>
+        <p style="font-size:.85rem;color:var(--ink2);margin-bottom:1rem">自動對名單中<strong>尚未完成觀看</strong>的人員發送提醒，請他們完成影片觀看。</p>
         <div class="notif-row">
           <label>啟用定期提醒</label>
           <div class="toggle-wrap">
@@ -439,34 +437,6 @@ tr:hover td{background:var(--paper)}
         <div style="background:var(--paper2);border-radius:var(--radius);padding:.75rem 1rem;margin-top:.75rem;font-size:.8rem;color:var(--ink3)">
           ✅ YouTube 可精確偵測影片播放完畢，員工看完後系統自動解鎖，無需設定時長。
         </div>
-      </div>
-    </div>
-
-    <!-- ══════════ 題庫設定 ══════════ -->
-    <div class="tab-content" id="tab-quiz">
-      <div class="page-title">題庫設定</div>
-      <div class="page-sub">設定測驗題數與每一題的題目、選項及正確答案，儲存後訓練頁面將自動套用</div>
-
-      <div class="notif-card">
-        <h3>測驗題數</h3>
-        <div class="vid-row">
-          <label>測驗題數</label>
-          <div class="vid-input-wrap">
-            <input type="number" id="quiz-count-input" min="0" max="100" value="10" style="max-width:120px">
-            <div class="vid-hint">設定題數後，點擊「套用題數」將自動產生對應數量的題目編輯欄位；設為 0 則學員觀看影片後即直接完成學習，不需進行測驗</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:.6rem">
-          <button class="btn-sm btn-secondary" onclick="applyQuizCount()">套用題數</button>
-          <button class="btn-sm btn-danger" onclick="clearQuizBank()">🗑️ 清空題庫</button>
-        </div>
-      </div>
-
-      <div id="quiz-questions-wrap"></div>
-
-      <div class="notif-card" style="display:flex;align-items:center;gap:.75rem">
-        <button class="btn-sm btn-primary" onclick="saveQuizSettingsToGS()">💾 儲存題庫</button>
-        <span id="quiz-save-status"></span>
       </div>
     </div>
 
@@ -696,7 +666,7 @@ function showTab(name){
   document.getElementById('tab-'+name).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>{ if(n.textContent.includes(tabLabel(name))) n.classList.add('active'); });
 }
-function tabLabel(n){ return {dashboard:'儀表板',records:'測驗紀錄',admins:'管理員設定',designated:'指定人員設定',notification:'通知設定',video:'影片管理',quiz:'題庫設定',config:'系統設定'}[n]||n; }
+function tabLabel(n){ return {dashboard:'儀表板',records:'觀看紀錄',admins:'管理員設定',designated:'指定人員設定',notification:'通知設定',config:'系統設定'}[n]||n; }
 
 // ═══════════ DASHBOARD ═══════════
 function loadDashboard(){
@@ -721,12 +691,6 @@ function renderDashboardDemo(){
   document.getElementById('dash-updated').textContent = '⚠️ 尚未設定 Apps Script URL，請至「系統設定」完成設定';
 }
 
-function quizResultBadge(quizResult){
-  if (quizResult === '無須測驗') return `<span class="badge neutral">${quizResult}</span>`;
-  if (quizResult) return `<span class="badge ${quizResult==='通過'?'pass':'fail'}">${quizResult}</span>`;
-  return '<span style="color:var(--ink3);font-size:.8rem">尚未測驗</span>';
-}
-
 function formatWatchTime(seconds){
   const s = Number(seconds) || 0;
   const m = Math.floor(s/60), r = s%60;
@@ -736,19 +700,14 @@ function formatWatchTime(seconds){
 function renderDashboardRecent(records){
   const recent = [...records].reverse().slice(0,10);
   const el = document.getElementById('dash-recent');
-  if(!recent.length){ el.innerHTML='<div class="table-empty">尚無測驗紀錄</div>'; return; }
+  if(!recent.length){ el.innerHTML='<div class="table-empty">尚無觀看紀錄</div>'; return; }
   el.innerHTML = `<table><thead><tr>
-    <th>#</th><th>課程名稱</th><th>部門</th><th>工號</th><th>姓名</th><th>影片狀態</th><th>測驗分數</th><th>測驗結果</th><th>時間</th>
-  </tr></thead><tbody>${recent.map((r,i)=>`<tr>
-    <td style="color:var(--ink3)">${i+1}</td>
-    <td>${r.courseName || '—'}</td>
-    <td>${r.dept}</td>
-    <td style="color:var(--ink3)">${r.empId}</td>
+    <th>時間</th><th>部門</th><th>工號</th><th>姓名</th><th>觀看時長</th><th>狀態</th>
+  </tr></thead><tbody>${recent.map(r=>`<tr>
+    <td style="white-space:nowrap">${formatTimestamp(r.timestamp)}</td><td>${r.dept}</td><td style="color:var(--ink3)">${r.empId}</td>
     <td><strong>${r.name}</strong></td>
+    <td>${formatWatchTime(r.watchedSeconds)}</td>
     <td><span class="badge ${r.status==='完成'?'pass':'fail'}">${r.status==='完成'?'已完成':'觀看中'}</span></td>
-    <td style="color:var(--ink3)">${r.quizScore ? r.quizPct + ' 分' : '—'}</td>
-    <td>${quizResultBadge(r.quizResult)}</td>
-    <td style="white-space:nowrap">${formatTimestamp(r.timestamp)}</td>
   </tr>`).join('')}</tbody></table>`;
 }
 
@@ -796,7 +755,7 @@ function renderTable(){
   const pg   = document.getElementById('rec-pagination');
 
   if(!total){
-    wrap.innerHTML = `<div class="table-empty">${allRecords.length?'無符合條件的紀錄':'尚無測驗紀錄，等待學員完成測驗後自動同步'}</div>`;
+    wrap.innerHTML = `<div class="table-empty">${allRecords.length?'無符合條件的紀錄':'尚無觀看紀錄，等待學員開始觀看後自動同步'}</div>`;
     pg.style.display = 'none'; return;
   }
 
@@ -807,21 +766,18 @@ function renderTable(){
   const thStyle = 'cursor:pointer;user-select:none;white-space:nowrap';
   wrap.innerHTML = `<table><thead><tr>
     <th>#</th>
-    <th>課程名稱</th>
     <th style="${thStyle}" data-col="dept">部門${sortArrow('dept')}</th>
     <th style="${thStyle}" data-col="empId">工號${sortArrow('empId')}</th>
     <th style="${thStyle}" data-col="name">姓名${sortArrow('name')}</th>
-    <th style="${thStyle}" data-col="status">影片狀態${sortArrow('status')}</th>
-    <th>測驗分數</th><th>測驗結果</th><th>時間</th><th></th>
+    <th style="${thStyle}" data-col="status">狀態${sortArrow('status')}</th>
+    <th>觀看時長</th><th>時間</th><th></th>
   </tr></thead><tbody>${rows.map((r,i)=>`<tr>
     <td style="color:var(--ink3)">${start+i+1}</td>
-    <td>${r.courseName || '—'}</td>
     <td>${r.dept}</td>
     <td style="color:var(--ink3)">${r.empId}</td>
     <td><strong>${r.name}</strong></td>
     <td><span class="badge ${r.status==='完成'?'pass':'fail'}">${r.status==='完成'?'已完成':'觀看中'}</span></td>
-    <td style="color:var(--ink3)">${r.quizScore ? r.quizPct + ' 分' : '—'}</td>
-    <td>${quizResultBadge(r.quizResult)}</td>
+    <td style="color:var(--ink3)">${formatWatchTime(r.watchedSeconds)}</td>
     <td style="white-space:nowrap">${formatTimestamp(r.timestamp)}</td>
     <td style="white-space:nowrap">
       <button class="btn-sm btn-secondary" data-idx="${start+i}">詳情</button>
@@ -861,7 +817,7 @@ function goPage(n){
 // ═══════════ DELETE RECORD ═══════════
 function deleteRecord(idx){
   const r = filteredRecords[idx];
-  if(!confirm(`確定要刪除「${r.name}（${r.dept}）」的測驗紀錄？`)) return;
+  if(!confirm(`確定要刪除「${r.name}（${r.dept}）」的觀看紀錄？`)) return;
 
   const doLocalDelete = () => {
     const empId = String(r.empId);
@@ -896,8 +852,6 @@ function showDetail(idx){
       <div class="detail-item"><div class="lbl">部門</div><div class="val">${r.dept}</div></div>
       <div class="detail-item"><div class="lbl">工號</div><div class="val">${r.empId}</div></div>
       <div class="detail-item"><div class="lbl">最後更新時間</div><div class="val">${formatTimestamp(r.timestamp)}</div></div>
-      <div class="detail-item"><div class="lbl">測驗分數</div><div class="val">${r.quizScore ? r.quizPct + ' 分' : '尚未測驗'}</div></div>
-      <div class="detail-item"><div class="lbl">測驗結果</div><div class="val">${r.quizResult || '—'}</div></div>
     </div>`;
   document.getElementById('modal-detail').classList.add('open');
 }
@@ -907,16 +861,16 @@ document.getElementById('modal-detail').addEventListener('click',function(e){ if
 // ═══════════ EXPORT CSV ═══════════
 function exportCSV(){
   if(!filteredRecords.length){ alert('沒有可匯出的資料'); return; }
-  const header = ['時間','姓名','部門','工號','影片狀態','觀看時長(秒)','測驗分數','測驗結果'];
+  const header = ['時間','姓名','部門','工號','狀態','觀看時長(秒)'];
   const rows   = filteredRecords.map(r=>[
     `"${r.timestamp}"`,`"${r.name}"`,`"${r.dept}"`,`"${r.empId}"`,
-    `"${r.status}"`, r.watchedSeconds, `"${r.quizScore ? r.quizPct + ' 分' : ''}"`, `"${r.quizResult||''}"`
+    `"${r.status}"`, r.watchedSeconds
   ].join(','));
   const csv  = '﻿' + [header.join(','), ...rows].join('\n');
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href=url; a.download=`測驗紀錄_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'')}.csv`;
+  a.href=url; a.download=`影片觀看紀錄_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'')}.csv`;
   a.click(); URL.revokeObjectURL(url);
 }
 
@@ -1129,11 +1083,14 @@ function renderDesignatedTable(list) {
 
 function deleteDesignatedPerson(empId, name) {
   if (!confirm(`確定要從指定人員名單中移除「${name}」？`)) return;
-  designatedData = designatedData.filter(r => r.empId !== empId);
-  fetch(GS_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadDesignated', list: designatedData }) })
+  fetch(GS_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteDesignated', empId }) })
     .then(r => r.json())
-    .then(() => renderDesignatedTable(designatedData))
-    .catch(() => renderDesignatedTable(designatedData));
+    .then(d => {
+      if (d.status === 'error') { alert(d.message || '刪除失敗'); return; }
+      designatedData = designatedData.filter(r => r.empId !== empId);
+      renderDesignatedTable(designatedData);
+    })
+    .catch(() => alert('連線失敗，請稍後再試'));
 }
 
 // ── Add Person Modal ──
@@ -1158,13 +1115,12 @@ function saveAddPerson() {
   if (designatedData.some(r => r.empId === empId)) { errEl.textContent = '此工號已存在於名單中'; errEl.style.display = 'block'; return; }
 
   btn.textContent = '新增中…'; btn.disabled = true;
-  const newList = [...designatedData, { dept, empId, name, email, result: '' }];
 
-  fetch(GS_URL, { method: 'POST', body: JSON.stringify({ action: 'uploadDesignated', list: newList }) })
+  fetch(GS_URL, { method: 'POST', body: JSON.stringify({ action: 'addDesignated', dept, empId, name, email }) })
     .then(r => r.json())
     .then(d => {
       if (d.status === 'error') { errEl.textContent = d.message || '新增失敗'; errEl.style.display = 'block'; return; }
-      designatedData = newList;
+      designatedData = [...designatedData, { dept, empId, name, email, result: '' }];
       renderDesignatedTable(designatedData);
       closeAddPersonModal();
     })
@@ -1408,112 +1364,6 @@ function sendInitialNotification() {
       setTimeout(() => resEl.textContent = '', 6000);
     })
     .catch(() => { resEl.style.color = 'var(--red)'; resEl.textContent = '❌ 連線失敗'; });
-}
-
-// ═══════════ 題庫設定 ═══════════
-let quizQuestionsData = [];
-let quizCountApplied = false;
-
-function loadQuizSettings() {
-  if (!GS_URL) return;
-  fetch(`${GS_URL}?action=getQuizSettings`)
-    .then(r => r.json())
-    .then(d => {
-      quizQuestionsData = d.questions || [];
-      document.getElementById('quiz-count-input').value = quizQuestionsData.length || 10;
-      quizCountApplied = quizQuestionsData.length > 0;
-      renderQuizQuestionBlocks();
-    })
-    .catch(() => {});
-}
-
-function escapeAttr(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-}
-
-function renderQuizQuestionBlocks() {
-  const wrap = document.getElementById('quiz-questions-wrap');
-  if (!quizQuestionsData.length) {
-    wrap.innerHTML = quizCountApplied
-      ? '<div class="table-wrap"><div class="table-empty">已設定為 0 題，學員觀看影片後將直接顯示已完成學習，不需進行測驗</div></div>'
-      : '<div class="table-wrap"><div class="table-empty">請先設定測驗題數並點擊「套用題數」</div></div>';
-    return;
-  }
-  const labels = ['A', 'B', 'C', 'D'];
-  wrap.innerHTML = quizQuestionsData.map((q, i) => `
-    <div class="notif-card quiz-q-block">
-      <h3>第 ${i + 1} 題</h3>
-      <div class="form-group"><label>題目</label><input type="text" class="qq-question" value="${escapeAttr(q.question)}" placeholder="請輸入題目"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem">
-        ${labels.map((l, oi) => `<div class="form-group"><label>選項 ${l}</label><input type="text" class="qq-option" value="${escapeAttr((q.options || [])[oi])}" placeholder="選項 ${l} 內容"></div>`).join('')}
-      </div>
-      <div class="form-group" style="max-width:160px;margin-bottom:0">
-        <label>正確答案</label>
-        <select class="qq-answer">
-          ${labels.map(l => `<option value="${l}" ${q.answer === l ? 'selected' : ''}>${l}</option>`).join('')}
-        </select>
-      </div>
-    </div>`).join('');
-}
-
-function syncQuizQuestionsFromDOM() {
-  document.querySelectorAll('.quiz-q-block').forEach((block, i) => {
-    if (!quizQuestionsData[i]) quizQuestionsData[i] = { question: '', options: ['', '', '', ''], answer: 'A' };
-    quizQuestionsData[i].question = block.querySelector('.qq-question').value;
-    quizQuestionsData[i].options = Array.from(block.querySelectorAll('.qq-option')).map(inp => inp.value);
-    quizQuestionsData[i].answer = block.querySelector('.qq-answer').value;
-  });
-}
-
-function applyQuizCount() {
-  const n = parseInt(document.getElementById('quiz-count-input').value);
-  if (isNaN(n) || n < 0) { alert('請輸入 0 以上的題數'); return; }
-  if (n > 100) { alert('題數過多，請輸入 100 以內'); return; }
-  syncQuizQuestionsFromDOM();
-  while (quizQuestionsData.length < n) quizQuestionsData.push({ question: '', options: ['', '', '', ''], answer: 'A' });
-  quizQuestionsData = quizQuestionsData.slice(0, n);
-  quizCountApplied = true;
-  renderQuizQuestionBlocks();
-}
-
-function clearQuizBank() {
-  if (!confirm('確定要清空目前的題庫嗎？清空後測驗題數將設為 0 題，學員影片觀看完成後將無須進行測驗，此動作無法復原。')) return;
-  quizQuestionsData = [];
-  quizCountApplied = true;
-  document.getElementById('quiz-count-input').value = 0;
-  renderQuizQuestionBlocks();
-  const status = document.getElementById('quiz-save-status');
-  status.textContent = '⏳ 清空中…'; status.style.color = 'var(--ink3)';
-  fetch(GS_URL, { method: 'POST', body: JSON.stringify({ action: 'saveQuizSettings', questions: [] }) })
-    .then(r => r.json())
-    .then(d => {
-      if (d.status === 'ok') { status.textContent = '✅ 題庫已清空'; status.style.color = 'var(--green)'; }
-      else { status.textContent = '❌ ' + (d.message || '清空失敗'); status.style.color = 'var(--red)'; }
-      setTimeout(() => status.textContent = '', 4000);
-    })
-    .catch(() => { status.textContent = '❌ 連線失敗，請確認 API 設定'; status.style.color = 'var(--red)'; });
-}
-
-function saveQuizSettingsToGS() {
-  if (!quizQuestionsData.length && !quizCountApplied) { alert('請先設定測驗題數並點擊「套用題數」'); return; }
-  syncQuizQuestionsFromDOM();
-  for (let i = 0; i < quizQuestionsData.length; i++) {
-    const q = quizQuestionsData[i];
-    if (!q.question.trim() || q.options.some(o => !o.trim())) {
-      alert(`第 ${i + 1} 題尚未填寫完整（題目或選項不可空白）`);
-      return;
-    }
-  }
-  const status = document.getElementById('quiz-save-status');
-  status.textContent = '⏳ 儲存中…'; status.style.color = 'var(--ink3)';
-  fetch(GS_URL, { method: 'POST', body: JSON.stringify({ action: 'saveQuizSettings', questions: quizQuestionsData }) })
-    .then(r => r.json())
-    .then(d => {
-      if (d.status === 'ok') { status.textContent = `✅ 題庫已儲存（共 ${d.count} 題）`; status.style.color = 'var(--green)'; }
-      else { status.textContent = '❌ ' + (d.message || '儲存失敗'); status.style.color = 'var(--red)'; }
-      setTimeout(() => status.textContent = '', 4000);
-    })
-    .catch(() => { status.textContent = '❌ 連線失敗，請確認 API 設定'; status.style.color = 'var(--red)'; });
 }
 
 // ═══════════ INIT ═══════════
