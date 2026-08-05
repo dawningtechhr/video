@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
@@ -9,7 +9,7 @@
   function onYouTubeIframeAPIReady(){ window._ytReadyFlag = true; }
 </script>
 <script src="https://www.youtube.com/iframe_api"></script>
-<title>教育訓練影片學習</title>
+<title>教育訓練系統</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -33,7 +33,6 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
 #screen-cover{background:var(--paper);align-items:center;justify-content:center;text-align:center;padding:2rem}
 #screen-cover .logo-wrap{margin-bottom:2rem;padding-bottom:1.75rem;border-bottom:1px solid var(--paper3)}
 #screen-cover .logo-wrap img{height:auto;max-height:88px;max-width:265px;width:auto}
-#screen-cover .new-law-badge{background:var(--accent-light);color:var(--accent2);border:1px solid rgba(244,121,32,.3);border-radius:20px;padding:.35rem 1.2rem;font-size:.82rem;font-weight:700;letter-spacing:.08em;display:inline-block;margin-bottom:1.25rem}
 #screen-cover h1{font-size:2rem;font-weight:700;color:var(--ink);line-height:1.35;margin-bottom:.6rem}
 #screen-cover h2{font-size:.95rem;font-weight:400;color:var(--ink2);margin-bottom:2.25rem;line-height:1.6}
 #screen-cover .meta{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.75rem}
@@ -70,47 +69,57 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
 .progress-badge .pb-text{line-height:1.6}
 .progress-badge .pb-label{font-weight:700;display:block;font-size:.8rem;letter-spacing:.04em;margin-bottom:.2rem}
 .progress-badge.none{background:#f5f5f4;border:1px solid #e0ddd6;color:var(--ink2)}
-.progress-badge.in_progress{background:#fff8e6;border:1px solid #f0d870;color:#7a5f00}
-.progress-badge.done{background:var(--green-light);border:1px solid #b7eb8f;color:#135200}
-.progress-badge.fail{background:var(--red-light);border:1px solid rgba(139,32,32,.25);color:var(--red)}
 .manual-fields{border-top:1px solid var(--paper3);padding-top:1rem;margin-top:.25rem}
 .manual-fields .mf-hint{font-size:.78rem;color:var(--ink3);margin-bottom:.85rem}
 
+/* COURSE LIST */
+#screen-courses{background:var(--paper);padding:2rem 1.5rem;align-items:center}
+.courses-wrap{width:100%;max-width:760px}
+.courses-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.5rem}
+.courses-header .hi{font-size:1.15rem;font-weight:700}
+.courses-header .hi span{color:var(--accent)}
+.courses-header .switch-link{font-size:.8rem;color:var(--ink3);cursor:pointer}
+.courses-header .switch-link:hover{color:var(--accent)}
+.courses-section-title{font-size:.95rem;font-weight:700;color:var(--ink2);margin:1.5rem 0 .85rem;display:flex;align-items:center;gap:.5rem}
+.courses-section-title .count{font-size:.75rem;font-weight:400;color:var(--ink3)}
+.course-card{background:#fff;border:1px solid var(--paper3);border-radius:var(--radius-lg);padding:1.1rem 1.3rem;margin-bottom:.9rem;box-shadow:0 2px 10px rgba(0,0,0,.03)}
+.course-card .cc-title{font-size:1.02rem;font-weight:700;color:var(--ink);cursor:pointer;margin-bottom:.55rem}
+.course-card .cc-title:hover{color:var(--accent)}
+.cc-progress-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
+.cc-bar-wrap{flex:1;height:9px;background:var(--paper3);border-radius:5px;overflow:hidden}
+.cc-bar-fill{height:100%;background:var(--accent);transition:width .3s}
+.cc-percent{font-size:.78rem;color:var(--ink3);width:38px;text-align:right;flex-shrink:0}
+.cc-quiz-status{font-size:.8rem;padding:.25rem .7rem;border-radius:12px;display:inline-flex;align-items:center;gap:.3rem}
+.cc-quiz-status.wait{background:var(--paper2);color:var(--ink3)}
+.cc-quiz-status.ready{background:var(--accent-light);color:var(--accent2)}
+.cc-quiz-status.fail{background:var(--red-light);color:var(--red)}
+.cc-meta{font-size:.78rem;color:var(--ink3);margin-top:.4rem}
+.cc-score-badge{font-size:.8rem;font-weight:700;padding:.25rem .7rem;border-radius:12px;background:var(--green-light);color:var(--green);display:inline-block}
+.courses-empty{background:#fff;border:1px dashed var(--paper3);border-radius:var(--radius-lg);padding:2rem;text-align:center;color:var(--ink3);font-size:.85rem}
+
 /* VIDEO */
 #screen-video .course-name{font-size:1.45rem;font-weight:700;color:var(--ink);margin-bottom:1.5rem}
+.back-link{display:inline-flex;align-items:center;gap:.35rem;color:var(--ink3);font-size:.85rem;cursor:pointer;margin-bottom:1rem}
+.back-link:hover{color:var(--accent)}
 .watch-actions{display:flex;justify-content:center;gap:.75rem;flex-wrap:wrap;margin-top:1rem}
 .save-banner{border-radius:var(--radius-lg);padding:.75rem 1rem;text-align:center;font-size:.83rem;margin-top:1rem;display:none}
 .save-banner.ok{background:var(--green-light);color:var(--green);display:block}
 .save-banner.err{background:var(--danger-light);color:var(--danger);display:block}
 
 /* QUIZ */
-#screen-quiz{background:var(--paper);padding:2rem}
-.quiz-progress-bar{height:6px;background:var(--paper3);border-radius:3px;overflow:hidden;margin-bottom:1.25rem;max-width:640px;width:100%;margin-left:auto;margin-right:auto}
-.quiz-progress-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .3s}
-.quiz-card{background:#fff;border:1px solid var(--paper3);border-radius:var(--radius-lg);padding:1.75rem;text-align:left;max-width:640px;width:100%;margin:0 auto}
-.q-count-badge{font-size:.78rem;font-weight:700;color:var(--accent);background:var(--accent-light);padding:.22rem .7rem;border-radius:12px;display:inline-block;margin-bottom:.9rem}
-.q-text{font-size:1.05rem;font-weight:500;color:var(--ink);line-height:1.65;margin-bottom:1.25rem}
-.q-options{display:flex;flex-direction:column;gap:.65rem}
-.q-option{display:flex;align-items:flex-start;gap:.7rem;padding:.85rem 1.05rem;background:var(--paper);border:1.5px solid var(--paper3);border-radius:var(--radius-lg);cursor:pointer;transition:all .15s;font-size:.9rem;color:var(--ink2)}
-.q-option:hover{border-color:var(--accent);background:var(--accent-light)}
-.q-option.selected{border-color:var(--accent);background:var(--accent-light);color:var(--accent);font-weight:500}
-.q-option-label{width:24px;height:24px;border-radius:50%;background:var(--paper3);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.q-option.selected .q-option-label{background:var(--accent);color:#fff}
-.quiz-nav{display:flex;justify-content:space-between;margin-top:1.5rem;max-width:640px;margin-left:auto;margin-right:auto}
-
-/* QUIZ RESULT */
-#screen-quiz-result{background:var(--paper);padding:2rem}
-.result-hero{border-radius:var(--radius-lg);padding:2rem;color:#fff;text-align:center;margin-bottom:1.5rem;max-width:640px;margin-left:auto;margin-right:auto}
-.result-hero.pass{background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%)}
-.result-hero.fail{background:linear-gradient(135deg,var(--red) 0%,#5a1010 100%)}
-.result-score{font-size:3rem;font-weight:700}
-.result-verdict{font-size:1.05rem;margin-top:.35rem}
-.wrong-list{max-width:640px;margin:0 auto 1rem;text-align:left}
-.wrong-item{background:#fff;border:1px solid var(--paper3);border-radius:var(--radius-lg);padding:1rem 1.15rem;margin-bottom:.65rem}
-.wrong-item .wi-q{font-size:.88rem;font-weight:500;color:var(--ink);margin-bottom:.4rem;line-height:1.55}
-.wrong-item .wi-your{font-size:.8rem;color:var(--red);margin-bottom:.2rem}
-.wrong-item .wi-correct{font-size:.8rem;color:var(--green);font-weight:500}
-.quiz-result-actions{display:flex;gap:.75rem;justify-content:center;margin-top:1rem;flex-wrap:wrap;max-width:640px;margin-left:auto;margin-right:auto}
+#screen-quiz{background:var(--paper);padding:2rem 1.5rem;align-items:center}
+.quiz-wrap{width:100%;max-width:680px}
+.quiz-card{background:#fff;border:1px solid var(--paper3);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+.quiz-q-title{font-size:.95rem;font-weight:700;color:var(--ink);margin-bottom:.9rem;line-height:1.6}
+.quiz-opt{display:flex;align-items:center;gap:.6rem;padding:.65rem .85rem;border:1px solid var(--paper3);border-radius:var(--radius);margin-bottom:.55rem;cursor:pointer;font-size:.88rem}
+.quiz-opt:hover{border-color:var(--accent)}
+.quiz-opt input{width:auto;flex-shrink:0}
+.quiz-result-card{background:#fff;border-radius:var(--radius-lg);padding:2rem;text-align:center}
+.quiz-result-card .qr-icon{font-size:3rem;margin-bottom:.75rem}
+.quiz-result-card .qr-score{font-size:2.2rem;font-weight:700;margin-bottom:.3rem}
+.quiz-result-card .qr-score.pass{color:var(--green)}
+.quiz-result-card .qr-score.fail{color:var(--red)}
+.quiz-result-card .qr-sub{font-size:.85rem;color:var(--ink3);margin-bottom:1.5rem}
 </style>
 </head>
 <body>
@@ -118,18 +127,20 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
 <!-- COVER -->
 <div id="screen-cover" class="screen active">
   <div class="logo-wrap"><img src="data:image/webp;base64,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" alt="敦新"></div>
-  <h1 id="cover-course-title">教育訓練影片學習</h1>
+  <h1>教育訓練系統</h1>
   <br>
   <div class="meta">
     <span>🎬 影片學習</span>
+    <span>📝 線上測驗</span>
   </div>
-  <button class="btn-start" onclick="goLogin()">開始觀看 →</button>
+  <button class="btn-start" onclick="goLogin()">開始使用 →</button>
 </div>
 
+<!-- LOGIN -->
 <div id="screen-login" class="screen">
   <div class="login-card">
     <h2>員工訓練登入</h2>
-    <p>請輸入工號查詢您的訓練進度</p>
+    <p>請輸入工號查詢您被指定的訓練課程</p>
     <div class="login-id-row">
       <input type="text" id="login-empid" placeholder="請輸入員工工號" onkeydown="if(event.key==='Enter')lookupEmployee()">
       <button class="btn btn-primary" onclick="lookupEmployee()" id="btn-lookup">查詢</button>
@@ -142,7 +153,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
       </div>
 
       <div id="login-manual-fields" class="manual-fields" style="display:none">
-        <p class="mf-hint">請填寫以下資料：</p>
+        <p class="mf-hint">查無此工號資料，請填寫以下資料：</p>
         <div class="form-group"><label>姓名 *</label><input type="text" id="login-name" placeholder="請輸入姓名"></div>
         <div class="form-group"><label>部門 *</label><input type="text" id="login-dept" placeholder="請輸入部門名稱"></div>
       </div>
@@ -152,14 +163,31 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
         &nbsp;|&nbsp;<span id="login-show-dept"></span>
       </div>
 
-      <button class="btn btn-primary" id="btn-proceed" style="width:100%;padding:.72rem;font-size:.92rem" onclick="proceedAfterLogin()">繼續 →</button>
+      <button class="btn btn-primary" id="btn-proceed" style="width:100%;padding:.72rem;font-size:.92rem" onclick="proceedAfterLogin()">查看我的課程 →</button>
     </div>
   </div>
 </div>
 
+<!-- COURSE LIST -->
+<div id="screen-courses" class="screen">
+  <div class="courses-wrap">
+    <div class="courses-header">
+      <div class="hi">您好，<span id="cl-user-name">—</span>（<span id="cl-user-dept">—</span>）</div>
+      <span class="switch-link" onclick="goLogin()">↺ 更換工號</span>
+    </div>
+
+    <div class="courses-section-title">📌 尚未完成的課程 <span class="count" id="cl-incomplete-count"></span></div>
+    <div id="cl-incomplete-list"></div>
+
+    <div class="courses-section-title">✅ 已完成的課程 <span class="count" id="cl-complete-count"></span></div>
+    <div id="cl-complete-list"></div>
+  </div>
+</div>
+
+<!-- VIDEO -->
 <div id="screen-video" class="screen" style="align-items:center;justify-content:center;flex-direction:column;background:var(--paper);padding:2rem;text-align:center">
   <div style="max-width:860px;width:100%">
-    <img id="video-logo" alt="敦新" style="height:48px;width:auto;margin-bottom:1rem">
+    <div class="back-link" onclick="goCourses()">← 返回課程清單</div>
     <h2 class="course-name" id="video-course-title">教育訓練</h2>
     <!-- YouTube 播放器容器 -->
     <div style="border-radius:8px;overflow:hidden;border:1px solid var(--paper3);background:#000;aspect-ratio:16/9;width:100%;position:relative">
@@ -180,10 +208,9 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
       </div>
     </div>
     <p id="video-hint" style="margin-top:1rem;font-size:.85rem;color:var(--ink3)">▶ 請開始觀看影片，隨時可點擊暫停並點擊「儲存學習進度」保留進度</p>
-    <p id="video-no-quiz-hint" style="margin-top:.4rem;font-size:.95rem;color:var(--green);font-weight:600;display:none">本課程無需進行測驗，您已完成本課程學習</p>
     <div class="watch-actions">
       <button id="btn-save-progress" class="btn btn-secondary" onclick="saveWatchProgress()">💾 儲存學習進度</button>
-      <button id="btn-goto-quiz" class="btn btn-primary" onclick="goQuiz()" style="display:none">📝 前往測驗 →</button>
+      <button id="btn-go-quiz" class="btn btn-primary" style="display:none" onclick="goToQuiz()">📝 前往測驗</button>
     </div>
     <div id="save-banner" class="save-banner"></div>
   </div>
@@ -191,69 +218,190 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
 
 <!-- QUIZ -->
 <div id="screen-quiz" class="screen">
-  <div style="text-align:center">
-    <img id="quiz-logo" alt="敦新" style="height:48px;width:auto;margin-bottom:1.25rem">
-  </div>
-  <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quiz-progress-fill" style="width:0%"></div></div>
-  <div class="quiz-card">
-    <div class="q-count-badge" id="q-count-badge"></div>
-    <div class="q-text" id="q-text"></div>
-    <div class="q-options" id="q-options"></div>
-  </div>
-  <div class="quiz-nav">
-    <button class="btn btn-secondary" id="btn-quiz-prev" onclick="quizPrev()">← 上一題</button>
-    <button class="btn btn-primary" id="btn-quiz-next" onclick="quizNext()">下一題 →</button>
-  </div>
-</div>
+  <div class="quiz-wrap">
+    <div class="back-link" onclick="goCourses()">← 返回課程清單</div>
 
-<!-- QUIZ RESULT -->
-<div id="screen-quiz-result" class="screen">
-  <div style="max-width:640px;width:100%;margin:0 auto">
-    <div style="text-align:center">
-      <img id="quiz-result-logo" alt="敦新" style="height:48px;width:auto;margin-bottom:1.25rem">
+    <div id="quiz-form-area">
+      <h2 class="course-name" style="font-size:1.3rem;font-weight:700;margin-bottom:1.2rem" id="quiz-course-title">課程測驗</h2>
+      <div id="quiz-questions"></div>
+      <div style="text-align:center;margin-top:1rem">
+        <button class="btn btn-primary" style="padding:.75rem 2.5rem" onclick="submitQuizAnswers()">提交測驗</button>
+      </div>
+      <div id="quiz-err" style="color:var(--red);font-size:.85rem;text-align:center;margin-top:.75rem;display:none"></div>
     </div>
-    <div class="result-hero" id="result-hero">
-      <div class="result-score" id="result-score">0</div>
-      <div class="result-verdict" id="result-verdict"></div>
-    </div>
-    <div id="quiz-save-banner" class="save-banner"></div>
-    <div class="wrong-list" id="wrong-list"></div>
-    <div class="quiz-result-actions">
-      <button class="btn btn-primary" id="btn-retake" onclick="goQuiz()" style="display:none">🔁 重新測驗</button>
+
+    <div id="quiz-result-area" style="display:none">
+      <div class="quiz-result-card">
+        <div class="qr-icon" id="qr-icon">🎉</div>
+        <div class="qr-score" id="qr-score">0分</div>
+        <div class="qr-sub" id="qr-sub">—</div>
+        <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-secondary" id="qr-retry-btn" style="display:none" onclick="retryQuiz()">重新測驗</button>
+          <button class="btn btn-primary" onclick="goCourses()">返回課程清單</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
 // ═══════════════ GOOGLE SHEETS ═══════════════
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTFLnHGVNDY5U6cCjAs6nNk0sPP0liFEc7B68WhcyR0eUFSD_Id_JzKJACcBf8rP2yvw/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx1SO_jbFMNmEF58_W46cJXkW3udfaScBzpoZnJxEDA7u86aIul39aLY9dQwIOsoUCp/exec';
 
-// ═══════════════ 員工查詢（指定人員 / 影片紀錄）═══════════════
-async function lookupEmployeeFromAPI(empId) {
-  try {
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function formatMinSec(seconds){
+  const s = Math.round(seconds || 0);
+  const m = Math.floor(s/60), r = s%60;
+  return `${m}分${r}秒`;
+}
+function formatTimestamp(ts){
+  if(!ts) return '—';
+  const d = new Date(ts);
+  if(isNaN(d.getTime())) return String(ts);
+  try{
+    const p = {};
+    new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(d).forEach(({type,value})=>{ p[type]=value; });
+    return `${p.year}/${p.month}/${p.day} ${p.hour}:${p.minute}`;
+  }catch(e){ return String(ts); }
+}
+
+// ═══════════════ NAVIGATION ═══════════════
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+function goLogin(){
+  document.getElementById('login-empid').value = '';
+  document.getElementById('login-progress-area').style.display = 'none';
+  show('login');
+}
+
+// ═══════════════ 員工登入 ═══════════════
+let userData = {};
+
+async function lookupEmployeeFromAPI(empId){
+  try{
     const r = await fetch(GOOGLE_SCRIPT_URL + '?action=lookupEmployee&empId=' + encodeURIComponent(empId));
-    return await r.json(); // { found, source, name, dept } or { found: false }
-  } catch(e) { return { found: false }; }
+    return await r.json();
+  }catch(e){ return { found:false }; }
+}
+
+async function lookupEmployee(){
+  const empId = document.getElementById('login-empid').value.trim().toUpperCase();
+  if(!empId){ alert('請輸入員工工號'); return; }
+
+  const btn = document.getElementById('btn-lookup');
+  btn.disabled = true; btn.textContent = '查詢中…';
+
+  const result = await lookupEmployeeFromAPI(empId);
+  const manualArea = document.getElementById('login-manual-fields');
+  const userInfo = document.getElementById('login-user-info');
+  const badge = document.getElementById('login-status-badge');
+
+  if(result.found){
+    userData = { empId, name: result.name, dept: result.dept, autoFilled: true };
+    document.getElementById('login-show-name').textContent = result.name;
+    document.getElementById('login-show-dept').textContent = result.dept;
+    userInfo.style.display = 'block';
+    manualArea.style.display = 'none';
+    badge.innerHTML = '<span class="pb-icon">👋</span><span class="pb-text"><span class="pb-label">歡迎回來</span>請點擊下方按鈕查看您的課程清單</span>';
+  } else {
+    userData = { empId, name:'', dept:'', autoFilled: false };
+    manualArea.style.display = 'block';
+    userInfo.style.display = 'none';
+    badge.innerHTML = '<span class="pb-icon">📋</span><span class="pb-text"><span class="pb-label">查無資料</span>請填寫姓名與部門後繼續</span>';
+  }
+
+  document.getElementById('login-progress-area').style.display = 'block';
+  btn.disabled = false; btn.textContent = '查詢';
+}
+
+function proceedAfterLogin(){
+  if(!userData.autoFilled){
+    const name = document.getElementById('login-name').value.trim();
+    const dept = document.getElementById('login-dept').value.trim();
+    if(!name || !dept){ alert('請填寫姓名與部門'); return; }
+    userData.name = name; userData.dept = dept;
+  }
+  goCourses();
+}
+
+// ═══════════════ 課程清單 ═══════════════
+let myCourses = [];
+
+async function goCourses(){
+  document.getElementById('cl-user-name').textContent = userData.name || userData.empId;
+  document.getElementById('cl-user-dept').textContent = userData.dept || '—';
+  show('courses');
+
+  const wrapIncomplete = document.getElementById('cl-incomplete-list');
+  const wrapComplete = document.getElementById('cl-complete-list');
+  wrapIncomplete.innerHTML = '<div class="courses-empty">載入中…</div>';
+  wrapComplete.innerHTML = '';
+
+  try{
+    const r = await fetch(GOOGLE_SCRIPT_URL + '?action=getMyCourses&empId=' + encodeURIComponent(userData.empId));
+    const d = await r.json();
+    myCourses = d.courses || [];
+  }catch(e){ myCourses = []; }
+
+  renderCourseLists();
+}
+
+function renderCourseLists(){
+  const incomplete = myCourses.filter(c=>!c.completed);
+  const complete = myCourses.filter(c=>c.completed);
+
+  document.getElementById('cl-incomplete-count').textContent = incomplete.length ? `（${incomplete.length}）` : '';
+  document.getElementById('cl-complete-count').textContent = complete.length ? `（${complete.length}）` : '';
+
+  const wrapIncomplete = document.getElementById('cl-incomplete-list');
+  if(!incomplete.length){
+    wrapIncomplete.innerHTML = '<div class="courses-empty">目前沒有尚未完成的課程</div>';
+  } else {
+    wrapIncomplete.innerHTML = incomplete.map(c=>{
+      let quizHtml = '';
+      if(c.hasQuiz){
+        if(!c.videoDone) quizHtml = `<span class="cc-quiz-status wait">📝 需先看完影片才能測驗</span>`;
+        else if(!c.quizAttempted) quizHtml = `<span class="cc-quiz-status ready">📝 可進行測驗</span>`;
+        else if(!c.quizPassed) quizHtml = `<span class="cc-quiz-status fail">📝 未通過（上次 ${c.quizScore}分），可重新測驗</span>`;
+      }
+      return `
+      <div class="course-card">
+        <div class="cc-title" data-open-course="${escapeHtml(c.courseId)}">${escapeHtml(c.courseName)}</div>
+        <div class="cc-progress-row">
+          <div class="cc-bar-wrap"><div class="cc-bar-fill" style="width:${c.percent}%"></div></div>
+          <div class="cc-percent">${c.percent}%</div>
+        </div>
+        <div class="cc-meta">影片觀看：${c.videoDone?'已看完':(c.watchedSeconds>0?'觀看中（'+formatMinSec(c.watchedSeconds)+'）':'尚未開始')}</div>
+        ${quizHtml ? '<div style="margin-top:.5rem">'+quizHtml+'</div>' : ''}
+      </div>`;
+    }).join('');
+  }
+
+  const wrapComplete = document.getElementById('cl-complete-list');
+  if(!complete.length){
+    wrapComplete.innerHTML = '<div class="courses-empty">尚無已完成的課程</div>';
+  } else {
+    wrapComplete.innerHTML = complete.map(c=>`
+      <div class="course-card">
+        <div class="cc-title" data-open-course="${escapeHtml(c.courseId)}">${escapeHtml(c.courseName)}</div>
+        <div class="cc-meta">完成時間：${formatTimestamp(c.completedAt)}</div>
+        ${c.hasQuiz ? `<div style="margin-top:.5rem"><span class="cc-score-badge">測驗分數：${c.quizScore}分</span></div>` : ''}
+      </div>`).join('');
+  }
+
+  document.querySelectorAll('[data-open-course]').forEach(el=>{
+    el.addEventListener('click', ()=>openCourse(el.dataset.openCourse));
+  });
 }
 
 // ═══════════════ 影片設定（YouTube iframe）═══════════════
 let YOUTUBE_VIDEO_ID = '';
-let COURSE_NAME = '';
-
-async function fetchVideoSettings(){
-  try {
-    const d = JSON.parse(await (await fetch(GOOGLE_SCRIPT_URL + '?action=getVideoSettings')).text());
-    if(d.fileId) YOUTUBE_VIDEO_ID = d.fileId;
-    COURSE_NAME = d.courseName || '教育訓練';
-    document.getElementById('cover-course-title').textContent = COURSE_NAME;
-    document.getElementById('video-course-title').textContent = COURSE_NAME;
-    document.title = COURSE_NAME;
-  } catch(e){ console.error('[VideoSettings]', e); }
-}
-
 let ytPlayer  = null;
 let ytMaxTime = 0;
 let ytWatcher = null;
+let currentCourseData = null;
 
 function startSeekWatcher(){
   clearInterval(ytWatcher);
@@ -263,43 +411,31 @@ function startSeekWatcher(){
     if(state !== 1 && state !== 2) return; // 只在播放(1)或暫停(2)時檢查
     var cur = ytPlayer.getCurrentTime();
     if(cur > ytMaxTime + 3){
-      // 跳段超前：拉回合法位置
       ytPlayer.seekTo(ytMaxTime, true);
     } else if(state === 1 && cur > ytMaxTime){
-      // 正常播放：更新最遠位置
       ytMaxTime = cur;
     }
   }, 500);
 }
 
-let userData = {};
-let progressStatus = 'none'; // none | in_progress | video_done | quiz_failed | quiz_passed
-let savedWatchedSeconds = 0;
-let lastProgress = null;
+async function openCourse(courseId){
+  let data;
+  try{
+    const r = await fetch(GOOGLE_SCRIPT_URL + '?action=getCourseForEmployee&courseId=' + encodeURIComponent(courseId) + '&empId=' + encodeURIComponent(userData.empId));
+    data = await r.json();
+  }catch(e){ alert('連線失敗，請稍後再試'); return; }
+  if(!data.found){ alert('找不到課程'); return; }
 
-// ═══════════════ NAVIGATION ═══════════════
-function show(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById('screen-'+id).classList.add('active');
-}
+  currentCourseData = data;
+  currentCourseData.courseId = courseId;
+  YOUTUBE_VIDEO_ID = data.course.videoId || '';
 
-function goLogin(){ show('login'); }
-
-async function goVideo(){
-  if(!YOUTUBE_VIDEO_ID) await fetchVideoSettings();
-
+  document.getElementById('video-course-title').textContent = data.course.name;
   document.getElementById('save-banner').className = 'save-banner';
   document.getElementById('save-banner').textContent = '';
 
   var overlay = document.getElementById('video-play-overlay');
   if(overlay){ overlay.style.display='flex'; overlay.style.opacity='1'; }
-  document.getElementById('video-hint').textContent='▶ 請開始觀看影片，隨時可點擊暫停並點擊「儲存學習進度」保留進度';
-  document.getElementById('video-hint').style.color='var(--ink3)';
-  document.getElementById('video-hint').style.fontSize='.85rem';
-  document.getElementById('video-hint').style.fontWeight='400';
-  document.getElementById('video-no-quiz-hint').style.display = 'none';
-  document.getElementById('btn-save-progress').style.display = '';
-  document.getElementById('btn-goto-quiz').style.display = 'none';
 
   if(!YOUTUBE_VIDEO_ID){
     document.getElementById('video-no-setting').style.display='flex';
@@ -307,18 +443,14 @@ async function goVideo(){
   }
   document.getElementById('video-no-setting').style.display='none';
 
-  // 清除舊播放器與計時器
   clearInterval(ytWatcher);
   if(ytPlayer){ try{ ytPlayer.destroy(); }catch(e){} ytPlayer = null; }
-  // 僅在「觀看中」時從上次進度繼續；已完成者重新觀看一律從頭開始，
-  // 避免直接跳到片尾造成黑畫面
-  ytMaxTime = (progressStatus === 'in_progress') ? (savedWatchedSeconds || 0) : 0;
+  ytMaxTime = (data.videoStatus === '進行中') ? (data.watchedSeconds || 0) : 0;
 
-  // destroy() 會移除原 div，每次重新建立
-  document.getElementById('yt-player-wrap').innerHTML =
-    '<div id="yt-player" style="width:100%;height:100%"></div>';
+  document.getElementById('yt-player-wrap').innerHTML = '<div id="yt-player" style="width:100%;height:100%"></div>';
 
   show('video');
+  renderVideoScreenState();
 
   var waitReady = function(cb){
     if(window._ytReadyFlag && typeof YT !== 'undefined' && YT.Player) cb();
@@ -330,11 +462,13 @@ async function goVideo(){
       playerVars: { rel:0, modestbranding:1, controls:1 },
       events: {
         onReady: function(){
-          // 避免存檔秒數等於或超過實際片長，導致跳到片尾出現黑畫面
           var duration = ytPlayer.getDuration() || 0;
           if(duration > 0 && ytMaxTime >= duration) ytMaxTime = Math.max(duration - 3, 0);
           if(ytMaxTime > 0) ytPlayer.seekTo(ytMaxTime, true);
           startSeekWatcher();
+          if(duration > 0){
+            fetch(GOOGLE_SCRIPT_URL, { method:'POST', body:JSON.stringify({ action:'reportVideoDuration', courseId: currentCourseData.courseId, durationSeconds: Math.round(duration) }) }).catch(()=>{});
+          }
         },
         onStateChange: function(e){
           if(e.data === YT.PlayerState.ENDED){
@@ -354,16 +488,36 @@ function overlayStartVideo(){
   if(ytPlayer && typeof ytPlayer.playVideo === 'function') ytPlayer.playVideo();
 }
 
+function renderVideoScreenState(){
+  const hint = document.getElementById('video-hint');
+  const saveBtn = document.getElementById('btn-save-progress');
+  const quizBtn = document.getElementById('btn-go-quiz');
+  const hasQuiz = currentCourseData.course.hasQuiz;
+  const videoDone = currentCourseData.videoStatus === '完成';
+  const quizPassed = currentCourseData.quizPassed;
+
+  if(!videoDone){
+    hint.textContent = '▶ 請開始觀看影片，隨時可點擊暫停並點擊「儲存學習進度」保留進度';
+    hint.style.color = 'var(--ink3)'; hint.style.fontSize='.85rem'; hint.style.fontWeight='400';
+    saveBtn.style.display = ''; quizBtn.style.display = 'none';
+  } else if(hasQuiz && !quizPassed){
+    hint.textContent = '✅ 影片已看完，請進行測驗以完成本課程';
+    hint.style.color = 'var(--green)'; hint.style.fontSize='1.1rem'; hint.style.fontWeight='700';
+    saveBtn.style.display = 'none'; quizBtn.style.display = '';
+  } else {
+    hint.textContent = hasQuiz ? `🎉 恭喜！您已完成本課程（測驗 ${currentCourseData.quizScore}分）` : '🎉 恭喜！您已完成本課程';
+    hint.style.color = 'var(--green)'; hint.style.fontSize='1.3rem'; hint.style.fontWeight='700';
+    saveBtn.style.display = 'none'; quizBtn.style.display = 'none';
+  }
+}
+
 function onVideoEnded(){
-  document.getElementById('video-hint').textContent='恭喜~您已完成本次學習';
-  document.getElementById('video-hint').style.color='var(--green)';
-  document.getElementById('video-hint').style.fontSize='1.7rem';
-  document.getElementById('video-hint').style.fontWeight='700';
-  document.getElementById('btn-save-progress').style.display = 'none';
-  document.getElementById('btn-goto-quiz').style.display = QUIZ_QUESTIONS.length > 0 ? 'inline-block' : 'none';
-  document.getElementById('video-no-quiz-hint').style.display = QUIZ_QUESTIONS.length === 0 ? 'block' : 'none';
   var seconds = ytPlayer && typeof ytPlayer.getDuration === 'function' ? ytPlayer.getDuration() : ytMaxTime;
-  recordVideo('完成', seconds);
+  recordVideo('完成', seconds, function(){
+    currentCourseData.videoStatus = '完成';
+    currentCourseData.watchedSeconds = Math.round(seconds || 0);
+    renderVideoScreenState();
+  });
 }
 
 function saveWatchProgress(){
@@ -372,267 +526,97 @@ function saveWatchProgress(){
   recordVideo('進行中', seconds);
 }
 
-function recordVideo(status, seconds){
+function recordVideo(status, seconds, onDone){
   const banner = document.getElementById('save-banner');
   banner.className = 'save-banner';
   banner.textContent = '⏳ 儲存中…';
   const data = {
-    action:'recordVideo', timestamp:new Date().toLocaleString('zh-TW'),
+    action:'recordVideo', courseId: currentCourseData.courseId, timestamp:new Date().toLocaleString('zh-TW'),
     name:userData.name, dept:userData.dept, empId:userData.empId,
-    videoStatus: status, watchedSeconds: Math.round(seconds || 0),
-    courseName: COURSE_NAME
+    videoStatus: status, watchedSeconds: Math.round(seconds || 0)
   };
   fetch(GOOGLE_SCRIPT_URL, { method:'POST', body:JSON.stringify(data) })
     .then(()=>{
       banner.className = 'save-banner ok';
-      banner.textContent = status === '完成' ? '✅ 已完成觀看，紀錄已儲存' : '✅ 觀看紀錄已儲存，下次登入可從此進度繼續觀看';
-      savedWatchedSeconds = Math.round(seconds || 0);
+      banner.textContent = status === '完成' ? '✅ 已完成影片觀看，紀錄已儲存' : '✅ 觀看紀錄已儲存，下次登入可從此進度繼續觀看';
+      if(onDone) onDone();
     })
     .catch(()=>{
       banner.className = 'save-banner err';
       banner.textContent = '⚠️ 儲存失敗，請確認網路連線後再試一次';
     });
-}
-
-// ═══════════════ 員工登入 ═══════════════
-async function lookupEmployee(){
-  const empId = document.getElementById('login-empid').value.trim().toUpperCase();
-  if(!empId){ alert('請輸入員工工號'); return; }
-
-  const btn = document.getElementById('btn-lookup');
-  btn.disabled = true; btn.textContent = '查詢中…';
-
-  // 依序查：指定人員 → 影片紀錄
-  const result = await lookupEmployeeFromAPI(empId);
-  const manualArea = document.getElementById('login-manual-fields');
-  const userInfo = document.getElementById('login-user-info');
-
-  if(result.found){
-    userData = { empId, name: result.name, dept: result.dept, autoFilled: true };
-    document.getElementById('login-show-name').textContent = result.name;
-    document.getElementById('login-show-dept').textContent = result.dept;
-    userInfo.style.display = 'block';
-    manualArea.style.display = 'none';
-  } else {
-    userData = { empId, name:'', dept:'', autoFilled: false };
-    manualArea.style.display = 'block';
-    userInfo.style.display = 'none';
-  }
-
-  // 查詢觀看進度、測驗題庫設定
-  const [progress] = await Promise.all([ fetchProgress(empId), fetchQuizSettings() ]);
-  lastProgress = progress;
-  progressStatus = progress.status;
-  savedWatchedSeconds = progress.watchedSeconds || 0;
-  showLoginProgress(progress);
-
-  document.getElementById('login-progress-area').style.display = 'block';
-  btn.disabled = false; btn.textContent = '查詢';
-}
-
-async function fetchProgress(empId){
-  try{
-    const url = GOOGLE_SCRIPT_URL + '?action=getProgress&empId=' + encodeURIComponent(empId);
-    const res = await fetch(url, { redirect:'follow' });
-    return await res.json();
-  } catch(e){
-    return { status: 'none', watchedSeconds: 0 };
-  }
-}
-
-function formatMinSec(seconds){
-  const s = Math.round(seconds || 0);
-  const m = Math.floor(s/60), r = s%60;
-  return `${m}分${r}秒`;
-}
-
-function showLoginProgress(progress){
-  const status = progress.status;
-  const badge = document.getElementById('login-status-badge');
-  const noQuizDone = status === 'video_done' && QUIZ_QUESTIONS.length === 0;
-  const configs = {
-    none:         { cls:'none',        icon:'📋', label:'尚未開始觀看',       desc:'請點擊下方按鈕開始觀看課程影片' },
-    in_progress:  { cls:'in_progress',  icon:'🎬', label:'觀看中',            desc:`已觀看至 ${formatMinSec(savedWatchedSeconds)}，可繼續接續觀看` },
-    video_done:   noQuizDone
-      ? { cls:'done',        icon:'✅', label:'已完成學習',        desc:'本課程無需進行測驗，您已完成本課程學習' }
-      : { cls:'in_progress',  icon:'📝', label:'影片已看完，尚未測驗', desc:'請進行測驗，測驗及格分數為 80 分' },
-    quiz_failed:  { cls:'fail',         icon:'❌', label:'測驗未通過',        desc:`上次得分 ${progress.quizScore}/${progress.quizTotal}（${progress.quizPct}%），可重新測驗` },
-    quiz_passed:  { cls:'done',         icon:'✅', label:'已完成測驗',        desc:`得分 ${progress.quizScore}/${progress.quizTotal}（${progress.quizPct}%），您已完成本課程訓練` },
-  };
-  const cfg = configs[status] || configs.none;
-  badge.className = 'progress-badge ' + cfg.cls;
-  badge.innerHTML = `<span class="pb-icon">${cfg.icon}</span><span class="pb-text"><span class="pb-label">${cfg.label}</span>${cfg.desc}</span>`;
-
-  const proceedBtn = document.getElementById('btn-proceed');
-  if(status === 'quiz_passed')      proceedBtn.textContent = '查看結果 →';
-  else if(status === 'quiz_failed') proceedBtn.textContent = '重新測驗 →';
-  else if(noQuizDone)                proceedBtn.textContent = '查看完成 →';
-  else if(status === 'video_done')  proceedBtn.textContent = '前往測驗 →';
-  else if(status === 'in_progress') proceedBtn.textContent = '繼續觀看 →';
-  else                               proceedBtn.textContent = '開始觀看 →';
-}
-
-function proceedAfterLogin(){
-  // 若查無資料，先驗證手動填寫欄位
-  if(!userData.autoFilled){
-    const name = document.getElementById('login-name').value.trim();
-    const dept = document.getElementById('login-dept').value.trim();
-    if(!name || !dept){ alert('請填寫姓名與部門'); return; }
-    userData.name = name; userData.dept = dept;
-  }
-  if(progressStatus === 'video_done'){
-    if(QUIZ_QUESTIONS.length === 0) showNoQuizComplete();
-    else goQuiz();
-  } else if(progressStatus === 'quiz_failed' || progressStatus === 'quiz_passed'){
-    showQuizResultFromProgress(lastProgress);
-  } else {
-    goVideo();
-  }
 }
 
 // ═══════════════ 測驗 ═══════════════
-const PASS_SCORE_PCT = 80;
-let QUIZ_QUESTIONS = [];
-let quizAnswers = {};
-let quizCurrentQ = 0;
-
-async function fetchQuizSettings(){
-  try{
-    const d = JSON.parse(await (await fetch(GOOGLE_SCRIPT_URL + '?action=getQuizSettings')).text());
-    QUIZ_QUESTIONS = d.questions || [];
-  }catch(e){ QUIZ_QUESTIONS = []; }
-}
-
-async function goQuiz(){
-  if(!QUIZ_QUESTIONS.length) await fetchQuizSettings();
-  if(!QUIZ_QUESTIONS.length){ alert('尚未設定測驗題目，請聯絡管理員'); return; }
-  quizAnswers = {}; quizCurrentQ = 0;
+function goToQuiz(){
+  if(!currentCourseData || !currentCourseData.course.hasQuiz) return;
+  document.getElementById('quiz-course-title').textContent = currentCourseData.course.name + ' — 課程測驗';
+  document.getElementById('quiz-form-area').style.display = 'block';
+  document.getElementById('quiz-result-area').style.display = 'none';
+  document.getElementById('quiz-err').style.display = 'none';
+  renderQuizForm();
   show('quiz');
-  renderQuizQuestion();
 }
 
-function renderQuizQuestion(){
-  const total = QUIZ_QUESTIONS.length;
-  const q = QUIZ_QUESTIONS[quizCurrentQ];
-  const labels = ['A','B','C','D'];
-  document.getElementById('quiz-progress-fill').style.width = `${((quizCurrentQ+1)/total)*100}%`;
-  document.getElementById('q-count-badge').textContent = `第 ${quizCurrentQ+1} 題 ／ 共 ${total} 題`;
-  document.getElementById('q-text').textContent = q.question;
-  document.getElementById('q-options').innerHTML = q.options.map((opt,i)=>{
-    const cls = 'q-option' + (quizAnswers[quizCurrentQ]===labels[i] ? ' selected' : '');
-    return `<div class="${cls}" onclick="selectQuizAnswer('${labels[i]}')"><div class="q-option-label">${labels[i]}</div><span>${opt}</span></div>`;
-  }).join('');
-
-  document.getElementById('btn-quiz-prev').disabled = quizCurrentQ===0;
-  const isLast = quizCurrentQ === total-1;
-  const nextBtn = document.getElementById('btn-quiz-next');
-  nextBtn.textContent = isLast ? '提交測驗' : '下一題 →';
-  nextBtn.onclick = isLast ? submitQuiz : quizNext;
+function renderQuizForm(){
+  const questions = currentCourseData.questions || [];
+  const wrap = document.getElementById('quiz-questions');
+  wrap.innerHTML = questions.map((q,i)=>`
+    <div class="quiz-card">
+      <div class="quiz-q-title">${i+1}. ${escapeHtml(q.question)}</div>
+      ${['A','B','C','D'].filter(letter=>q['opt'+letter]).map(letter=>`
+        <label class="quiz-opt"><input type="radio" name="q-${escapeHtml(q.id)}" value="${letter}">${letter}. ${escapeHtml(q['opt'+letter])}</label>
+      `).join('')}
+    </div>`).join('');
 }
 
-function selectQuizAnswer(letter){
-  quizAnswers[quizCurrentQ] = letter;
-  renderQuizQuestion();
+function retryQuiz(){
+  document.getElementById('quiz-form-area').style.display = 'block';
+  document.getElementById('quiz-result-area').style.display = 'none';
+  document.getElementById('quiz-err').style.display = 'none';
 }
 
-function quizNext(){
-  if(quizAnswers[quizCurrentQ]===undefined){ alert('請先作答本題，再進入下一題'); return; }
-  if(quizCurrentQ < QUIZ_QUESTIONS.length-1){ quizCurrentQ++; renderQuizQuestion(); }
-}
-
-function quizPrev(){ if(quizCurrentQ>0){ quizCurrentQ--; renderQuizQuestion(); } }
-
-function submitQuiz(){
-  if(quizAnswers[quizCurrentQ]===undefined){ alert('請先作答本題，再提交測驗'); return; }
-  const labels = ['A','B','C','D'];
-  let correct = 0; const wrong = [];
-  QUIZ_QUESTIONS.forEach((q,i)=>{
-    if(quizAnswers[i] === q.answer) correct++;
-    else wrong.push({ q, yourAnswer: quizAnswers[i] });
+function submitQuizAnswers(){
+  const questions = currentCourseData.questions || [];
+  const answers = {};
+  let unanswered = 0;
+  questions.forEach(q=>{
+    const checked = document.querySelector(`input[name="q-${CSS.escape(q.id)}"]:checked`);
+    if(checked) answers[q.id] = checked.value; else unanswered++;
   });
-  const total = QUIZ_QUESTIONS.length;
-  const pct  = Math.round((correct/total)*100);
-  const pass = pct >= PASS_SCORE_PCT;
-  const wrongCount = total - correct;
+  const errEl = document.getElementById('quiz-err');
+  if(unanswered > 0){ errEl.textContent = `尚有 ${unanswered} 題未作答，請完成所有題目後再提交`; errEl.style.display='block'; return; }
+  errEl.style.display = 'none';
 
-  document.getElementById('result-score').style.display = '';
-  document.getElementById('result-score').textContent = `${pct} 分`;
-  document.getElementById('result-hero').className = 'result-hero ' + (pass?'pass':'fail');
-  document.getElementById('result-verdict').textContent = pass
-    ? `✅ 答對題數 ${correct}，答錯題數 ${wrongCount}，正確率 ${pct}%，恭喜通過測驗！`
-    : `❌ 答對題數 ${correct}，答錯題數 ${wrongCount}，正確率 ${pct}%，未達 80 分及格標準，請重新測驗`;
-  document.getElementById('btn-retake').style.display = pass ? 'none' : 'inline-block';
-
-  document.getElementById('wrong-list').innerHTML = wrong.length===0
-    ? '<div style="text-align:center;color:var(--green);font-weight:500">🎉 全部答對！</div>'
-    : '<h3 style="font-size:.95rem;font-weight:700;color:var(--ink);margin-bottom:.75rem">📋 答錯題目解析</h3>' + wrong.map(({q,yourAnswer})=>`
-      <div class="wrong-item">
-        <div class="wi-q">${q.question}</div>
-        <div class="wi-your">您的答案：${yourAnswer ? yourAnswer + '、' + q.options[labels.indexOf(yourAnswer)] : '未作答'}</div>
-        <div class="wi-correct">正確答案：${q.answer}、${q.options[labels.indexOf(q.answer)]}</div>
-      </div>`).join('');
-
-  show('quiz-result');
-  saveQuizResult(correct, total, pct, pass);
-}
-
-function saveQuizResult(score, total, pct, pass){
-  const banner = document.getElementById('quiz-save-banner');
-  banner.className = 'save-banner';
-  banner.textContent = '⏳ 儲存中…';
-  const data = {
-    action:'recordQuiz', timestamp:new Date().toLocaleString('zh-TW'),
-    name:userData.name, dept:userData.dept, empId:userData.empId,
-    score, total, pct
-  };
-  fetch(GOOGLE_SCRIPT_URL, { method:'POST', body:JSON.stringify(data) })
-    .then(()=>{
-      banner.className = 'save-banner ok';
-      banner.textContent = '✅ 測驗紀錄已儲存';
+  fetch(GOOGLE_SCRIPT_URL, {
+    method:'POST',
+    body:JSON.stringify({ action:'submitQuiz', courseId: currentCourseData.courseId, empId:userData.empId, name:userData.name, dept:userData.dept, answers })
+  })
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.status === 'error'){ errEl.textContent = d.message || '提交失敗，請稍後再試'; errEl.style.display='block'; return; }
+      currentCourseData.quizAttempted = true;
+      currentCourseData.quizPassed = d.passed;
+      currentCourseData.quizScore = d.score;
+      showQuizResult(d);
     })
-    .catch(()=>{
-      banner.className = 'save-banner err';
-      banner.textContent = '⚠️ 儲存失敗，請確認網路連線後再試一次';
-    });
+    .catch(()=>{ errEl.textContent = '連線失敗，請稍後再試'; errEl.style.display='block'; });
 }
 
-// 登入時若已有測驗紀錄，直接顯示上次測驗結果（不重新作答）
-function showQuizResultFromProgress(progress){
-  const wrongCount = (progress.quizTotal||0) - (progress.quizScore||0);
-  document.getElementById('result-score').style.display = '';
-  document.getElementById('result-score').textContent = `${progress.quizPct} 分`;
-  document.getElementById('result-hero').className = 'result-hero ' + (progress.status==='quiz_passed' ? 'pass' : 'fail');
-  document.getElementById('result-verdict').textContent = progress.status==='quiz_passed'
-    ? `✅ 答對題數 ${progress.quizScore}，答錯題數 ${wrongCount}，正確率 ${progress.quizPct}%，您已通過測驗！`
-    : `❌ 答對題數 ${progress.quizScore}，答錯題數 ${wrongCount}，正確率 ${progress.quizPct}%，未達 80 分及格標準，請重新測驗`;
-  document.getElementById('btn-retake').style.display = progress.status==='quiz_failed' ? 'inline-block' : 'none';
-  document.getElementById('wrong-list').innerHTML = '';
-  document.getElementById('quiz-save-banner').className = 'save-banner';
-  document.getElementById('quiz-save-banner').textContent = '';
-  show('quiz-result');
+function showQuizResult(d){
+  document.getElementById('quiz-form-area').style.display = 'none';
+  document.getElementById('quiz-result-area').style.display = 'block';
+  document.getElementById('qr-icon').textContent = d.passed ? '🎉' : '😕';
+  const scoreEl = document.getElementById('qr-score');
+  scoreEl.textContent = d.score + '分';
+  scoreEl.className = 'qr-score ' + (d.passed ? 'pass' : 'fail');
+  document.getElementById('qr-sub').textContent = d.passed
+    ? `恭喜您通過測驗！答對 ${d.correctCount}／${d.totalCount} 題，本課程已完成。`
+    : `答對 ${d.correctCount}／${d.totalCount} 題，未達及格分數 ${d.passScore}%，請重新測驗。`;
+  document.getElementById('qr-retry-btn').style.display = d.passed ? 'none' : '';
 }
 
-// 題庫設定為 0 題時，影片觀看完畢後直接顯示已完成學習，不需進入測驗
-function showNoQuizComplete(){
-  document.getElementById('result-hero').className = 'result-hero pass';
-  document.getElementById('result-score').style.display = 'none';
-  document.getElementById('result-verdict').textContent = '🎉 恭喜您已完成本課程學習，本課程無需進行測驗';
-  document.getElementById('btn-retake').style.display = 'none';
-  document.getElementById('wrong-list').innerHTML = '';
-  document.getElementById('quiz-save-banner').className = 'save-banner';
-  document.getElementById('quiz-save-banner').textContent = '';
-  show('quiz-result');
-}
-
-// 影片頁與測驗頁 LOGO 沿用封面頁的敦新科技 base64 圖檔
-const _coverLogoSrc = document.querySelector('#screen-cover .logo-wrap img').src;
-document.getElementById('video-logo').src = _coverLogoSrc;
-document.getElementById('quiz-logo').src = _coverLogoSrc;
-document.getElementById('quiz-result-logo').src = _coverLogoSrc;
-
-// 頁面載入時預先取得影片設定與題庫設定
-fetchVideoSettings();
-fetchQuizSettings();
+// 頁面載入時將封面 LOGO 沿用至頁面其他位置（目前僅封面使用）
 </script>
 </body>
 </html>
