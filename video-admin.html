@@ -615,6 +615,21 @@ tr.clickable{cursor:pointer}
   </div>
 </div>
 
+<!-- EMPLOYEE COURSE MANAGEMENT MODAL -->
+<div class="modal-overlay" id="modal-emp-courses">
+  <div class="modal">
+    <div class="modal-head"><h3 id="emp-courses-modal-title">課程管理</h3><button class="btn-close" onclick="closeEmployeeCourseModal()">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:.82rem;color:var(--ink2);margin-bottom:.75rem">勾選此員工必須完成的課程：</p>
+      <div class="candidate-list" id="emp-courses-list" style="max-height:340px"></div>
+      <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">
+        <button class="btn-sm btn-secondary" onclick="closeEmployeeCourseModal()">取消</button>
+        <button class="btn-sm btn-primary" id="emp-courses-save-btn" onclick="saveEmployeeCourses()">儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- DETAIL MODAL -->
 <div class="modal-overlay" id="modal-detail">
   <div class="modal">
@@ -1222,13 +1237,26 @@ function renderEmployeeTable(){
   document.getElementById('emp-count').textContent = filteredEmployees.length ? `（共 ${filteredEmployees.length} 人）` : '';
   const wrap = document.getElementById('emp-table-wrap');
   if(!filteredEmployees.length){ wrap.innerHTML = '<div class="table-empty">尚無員工資料，請點擊「新增員工」或「批次上傳」</div>'; return; }
-  wrap.innerHTML = `<table><thead><tr><th>#</th><th>工號</th><th>姓名</th><th>部門</th><th>職類</th><th>Email</th><th></th></tr></thead><tbody>
+  wrap.innerHTML = `<table><thead><tr>
+    <th>#</th><th>工號</th><th>姓名</th><th>部門</th><th>職類</th><th>應上課程</th><th>已完成</th><th>未完成</th><th>Email</th><th></th>
+  </tr></thead><tbody>
     ${filteredEmployees.map((e,i)=>`<tr>
       <td style="color:var(--ink3)">${i+1}</td><td>${escapeHtml(e.empId)}</td><td><strong>${escapeHtml(e.name)}</strong></td>
-      <td>${escapeHtml(e.dept||'—')}</td><td>${escapeHtml(e.jobType||'—')}</td><td style="color:var(--ink3)">${escapeHtml(e.email||'—')}</td>
-      <td><button class="btn-sm btn-danger" data-del-emp="${escapeHtml(e.empId)}" data-del-emp-name="${escapeHtml(e.name)}">刪除</button></td>
+      <td>${escapeHtml(e.dept||'—')}</td><td>${escapeHtml(e.jobType||'—')}</td>
+      <td>${e.requiredCourses||0}</td>
+      <td>${e.completedCourses ? `<span class="badge pass">${e.completedCourses}</span>` : '0'}</td>
+      <td>${e.incompleteCourses ? `<span class="badge fail">${e.incompleteCourses}</span>` : '0'}</td>
+      <td style="color:var(--ink3)">${escapeHtml(e.email||'—')}</td>
+      <td style="white-space:nowrap">
+        <button class="btn-sm btn-secondary" data-mgr-emp="${escapeHtml(e.empId)}">課程管理</button>
+        <button class="btn-sm btn-danger" data-del-emp="${escapeHtml(e.empId)}" data-del-emp-name="${escapeHtml(e.name)}" style="margin-left:.35rem">刪除</button>
+      </td>
     </tr>`).join('')}</tbody></table>`;
   wrap.querySelectorAll('[data-del-emp]').forEach(btn=>btn.addEventListener('click', ()=>deleteEmployee(btn.dataset.delEmp, btn.dataset.delEmpName)));
+  wrap.querySelectorAll('[data-mgr-emp]').forEach(btn=>btn.addEventListener('click', ()=>{
+    const emp = filteredEmployees.find(x=>x.empId===btn.dataset.mgrEmp);
+    if(emp) openEmployeeCourseModal(emp);
+  }));
 }
 function deleteEmployee(empId, name){
   if(!confirm(`確定要從員工總表中刪除「${name}」？（不會影響已加入各課程的指定人員紀錄）`)) return;
@@ -1236,6 +1264,55 @@ function deleteEmployee(empId, name){
     .then(r=>r.json())
     .then(d=>{ if(d.status==='error'){ alert(d.message||'刪除失敗'); return; } loadEmployeeMaster(); })
     .catch(()=>alert('連線失敗，請稍後再試'));
+}
+
+// ── 員工「課程管理」：指定該員工需上哪些課程 ──
+let empCourseTarget = null;
+let empCourseAllCourses = [];
+
+function openEmployeeCourseModal(emp){
+  empCourseTarget = emp;
+  document.getElementById('emp-courses-modal-title').textContent = `課程管理－${emp.name}（${emp.empId}）`;
+  document.getElementById('emp-courses-list').innerHTML = '<div class="loading-wrap"><div class="spinner"></div><div>資料載入中…</div></div>';
+  document.getElementById('modal-emp-courses').classList.add('open');
+
+  Promise.all([
+    fetch(`${GS_URL}?action=getCourses`).then(r=>r.json()).catch(()=>({courses:[]})),
+    fetch(`${GS_URL}?action=getEmployeeCourses&empId=${encodeURIComponent(emp.empId)}`).then(r=>r.json()).catch(()=>({courseIds:[]}))
+  ]).then(([coursesRes, assignedRes])=>{
+    empCourseAllCourses = coursesRes.courses || [];
+    const assignedIds = new Set((assignedRes.courseIds||[]).map(String));
+    renderEmpCoursesList(assignedIds);
+  });
+}
+function closeEmployeeCourseModal(){ document.getElementById('modal-emp-courses').classList.remove('open'); }
+document.getElementById('modal-emp-courses').addEventListener('click', function(e){ if(e.target===this) closeEmployeeCourseModal(); });
+
+function renderEmpCoursesList(assignedIds){
+  const wrap = document.getElementById('emp-courses-list');
+  if(!empCourseAllCourses.length){ wrap.innerHTML = '<div class="table-empty">尚無課程，請先至「課程管理」新增課程</div>'; return; }
+  wrap.innerHTML = empCourseAllCourses.map(c=>`
+    <label class="cand-row" style="cursor:pointer">
+      <input type="checkbox" class="emp-course-check" value="${escapeHtml(c.id)}" ${assignedIds.has(String(c.id))?'checked':''}>
+      <span style="flex:1"><strong>${escapeHtml(c.name)}</strong></span>
+      <span class="cand-meta">${c.hasQuiz?'需測驗':'無測驗'}</span>
+    </label>`).join('');
+}
+
+function saveEmployeeCourses(){
+  const courseIds = Array.from(document.querySelectorAll('.emp-course-check:checked')).map(el=>el.value);
+  const t = empCourseTarget;
+  const btn = document.getElementById('emp-courses-save-btn');
+  btn.textContent = '儲存中…'; btn.disabled = true;
+  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'setEmployeeCourses', empId:t.empId, name:t.name, dept:t.dept, jobType:t.jobType, email:t.email, courseIds }) })
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.status==='error'){ alert(d.message||'儲存失敗'); return; }
+      closeEmployeeCourseModal();
+      loadEmployeeMaster();
+    })
+    .catch(()=>alert('連線失敗，請稍後再試'))
+    .finally(()=>{ btn.textContent='儲存'; btn.disabled=false; });
 }
 
 function openAddEmployeeModal(){
