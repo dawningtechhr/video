@@ -286,6 +286,7 @@ tr.clickable{cursor:pointer}
           <div class="table-head">
             <h3>課程列表</h3>
             <div class="table-actions">
+              <select class="filter-select" id="course-type-filter" style="width:140px" onchange="renderCourseTable()"><option value="">所有類型</option></select>
               <button class="btn-sm btn-secondary" onclick="loadCourseList()">🔄 重新整理</button>
               <button class="btn-sm btn-primary" onclick="openCourseCreateModal()">＋ 新增課程</button>
             </div>
@@ -321,6 +322,12 @@ tr.clickable{cursor:pointer}
               <label>課程名稱</label>
               <div class="vid-input-wrap">
                 <input type="text" id="course-name-input" placeholder="請輸入課程名稱，例如：職場霸凌防治教育訓練">
+              </div>
+            </div>
+            <div class="vid-row">
+              <label>課程類型</label>
+              <div class="vid-input-wrap">
+                <input type="text" id="course-type-input" placeholder="例如：法定教育訓練、職能訓練（選填）" list="course-type-datalist">
               </div>
             </div>
             <div class="vid-row">
@@ -470,6 +477,8 @@ tr.clickable{cursor:pointer}
           <h3>員工列表 <span id="emp-count" style="font-size:.8rem;font-weight:400;color:var(--ink3)"></span></h3>
           <div class="table-actions">
             <div class="search-box"><span class="si">🔍</span><input type="text" id="emp-search" placeholder="搜尋姓名、工號、部門…" oninput="filterEmployeeTable()"></div>
+            <select class="filter-select" id="emp-dept-filter" onchange="filterEmployeeTable()"><option value="">所有部門</option></select>
+            <select class="filter-select" id="emp-job-filter" onchange="filterEmployeeTable()"><option value="">所有職類</option></select>
             <button class="btn-sm btn-secondary" onclick="loadEmployeeMaster()">🔄 重新整理</button>
             <button class="btn-sm btn-secondary" onclick="openEmpUploadModal()">⬆ 批次上傳</button>
             <button class="btn-sm btn-primary" onclick="openAddEmployeeModal()">＋ 新增員工</button>
@@ -529,6 +538,8 @@ tr.clickable{cursor:pointer}
   </div>
 </div>
 
+<datalist id="course-type-datalist"></datalist>
+
 <!-- COURSE CREATE MODAL -->
 <div class="modal-overlay" id="modal-course-create">
   <div class="modal">
@@ -536,6 +547,7 @@ tr.clickable{cursor:pointer}
     <div class="modal-body">
       <div class="modal-form">
         <div class="form-group"><label>課程名稱 <span style="color:var(--red)">*</span></label><input type="text" id="cc-name" placeholder="例如：職場霸凌防治教育訓練"></div>
+        <div class="form-group"><label>課程類型</label><input type="text" id="cc-type" placeholder="例如：法定教育訓練、職能訓練（選填）" list="course-type-datalist"></div>
         <div id="cc-err" style="color:var(--red);font-size:.8rem;margin-bottom:.5rem;display:none"></div>
         <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">
           <button class="btn-sm btn-secondary" onclick="closeCourseCreateModal()">取消</button>
@@ -726,38 +738,90 @@ function loadDashboard(){
     .catch(()=>{ document.getElementById('dash-updated').textContent = '⚠️ 無法連線至 Google 試算表'; });
 }
 
+// ═══════════ 共用排序工具 ═══════════
+function sortIndicator(state, col){
+  if(state.col !== col) return '<span style="color:var(--paper3);font-size:.7rem;margin-left:3px">⇅</span>';
+  return `<span style="font-size:.7rem;margin-left:3px">${state.asc?'▲':'▼'}</span>`;
+}
+function toggleSort(state, col){
+  if(state.col === col) state.asc = !state.asc;
+  else { state.col = col; state.asc = true; }
+}
+function compareVals(a, b, numeric){
+  if(numeric) return (Number(a)||0) - (Number(b)||0);
+  return String(a??'').localeCompare(String(b??''), 'zh-TW', {numeric:true, sensitivity:'base'});
+}
+function sortableTh(label, col, state){
+  return `<th style="cursor:pointer;user-select:none;white-space:nowrap" data-sort-col="${col}">${label}${sortIndicator(state, col)}</th>`;
+}
+
 // ═══════════ COURSES：列表 ═══════════
 let allCourses = [];
 let currentCourseId = null;
 let currentCourse = null;
+let courseSortState = { col:'', asc:true };
 
 function loadCourseList(){
   const wrap = document.getElementById('course-table-wrap');
   wrap.innerHTML = '<div class="loading-wrap"><div class="spinner"></div><div>資料載入中…</div></div>';
   fetch(`${GS_URL}?action=getCourses`)
     .then(r=>r.json())
-    .then(d=>{ allCourses = d.courses || []; renderCourseTable(); })
+    .then(d=>{ allCourses = d.courses || []; populateCourseTypeFilter(); renderCourseTable(); })
     .catch(()=>{ wrap.innerHTML = '<div class="table-empty">❌ 無法連線至 Google 試算表，請確認 Apps Script URL 設定</div>'; });
 }
 
+function populateCourseTypeFilter(){
+  const types = Array.from(new Set(allCourses.map(c=>c.courseType).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'zh-TW'));
+  const sel = document.getElementById('course-type-filter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">所有類型</option>' + types.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+  if(types.includes(cur)) sel.value = cur;
+  const datalist = document.getElementById('course-type-datalist');
+  if(datalist) datalist.innerHTML = types.map(t=>`<option value="${escapeHtml(t)}">`).join('');
+}
+
+const COURSE_COL_GETTERS = {
+  name: c=>c.name||'', courseType: c=>c.courseType||'',
+  hasQuiz: c=>c.hasQuiz?1:0, passScore: c=>c.hasQuiz?c.passScore:-1,
+  total: c=>c.total, completed: c=>c.completed,
+  rate: c=>c.total?c.completed/c.total:-1, createdAt: c=>c.createdAt||''
+};
+const COURSE_COL_NUMERIC = new Set(['hasQuiz','passScore','total','completed','rate']);
+
+function sortCourseTable(col){ toggleSort(courseSortState, col); renderCourseTable(); }
+
 function renderCourseTable(){
   const wrap = document.getElementById('course-table-wrap');
+  const typeFilter = document.getElementById('course-type-filter').value;
+  let list = typeFilter ? allCourses.filter(c=>c.courseType===typeFilter) : allCourses.slice();
+
+  if(courseSortState.col){
+    const getter = COURSE_COL_GETTERS[courseSortState.col];
+    const numeric = COURSE_COL_NUMERIC.has(courseSortState.col);
+    const dir = courseSortState.asc ? 1 : -1;
+    list.sort((a,b)=>compareVals(getter(a), getter(b), numeric) * dir);
+  }
+
   if(!allCourses.length){ wrap.innerHTML = '<div class="table-empty">尚無課程，請點擊「＋ 新增課程」建立</div>'; return; }
+  if(!list.length){ wrap.innerHTML = '<div class="table-empty">無符合條件的課程</div>'; return; }
+
   wrap.innerHTML = `<table><thead><tr>
-    <th>課程名稱</th><th>是否測驗</th><th>及格分數</th><th>指定人數</th><th>已完成</th><th>完成率</th><th>建立時間</th><th></th>
-  </tr></thead><tbody>${allCourses.map(c=>`<tr>
-    <td class="clickable" data-open-id="${c.id}"><strong>${c.name}</strong></td>
+    ${sortableTh('課程名稱','name',courseSortState)}${sortableTh('課程類型','courseType',courseSortState)}${sortableTh('是否測驗','hasQuiz',courseSortState)}${sortableTh('及格分數','passScore',courseSortState)}${sortableTh('指定人數','total',courseSortState)}${sortableTh('已完成','completed',courseSortState)}${sortableTh('完成率','rate',courseSortState)}${sortableTh('建立時間','createdAt',courseSortState)}<th></th>
+  </tr></thead><tbody>${list.map(c=>`<tr>
+    <td class="clickable" data-open-id="${c.id}"><strong>${escapeHtml(c.name)}</strong></td>
+    <td>${escapeHtml(c.courseType||'—')}</td>
     <td>${c.hasQuiz?'<span class="badge pass">需測驗</span>':'<span class="badge neutral">無測驗</span>'}</td>
     <td>${c.hasQuiz ? c.passScore+'%' : '—'}</td>
     <td>${c.total}</td><td>${c.completed}</td><td>${c.total?Math.round(c.completed/c.total*100):0}%</td>
     <td style="white-space:nowrap;color:var(--ink3)">${formatTimestamp(c.createdAt)}</td>
     <td style="white-space:nowrap">
       <button class="btn-sm btn-secondary" data-open-id="${c.id}">管理</button>
-      <button class="btn-sm btn-danger" data-del-id="${c.id}" data-del-name="${c.name}" style="margin-left:.35rem">刪除</button>
+      <button class="btn-sm btn-danger" data-del-id="${c.id}" data-del-name="${escapeHtml(c.name)}" style="margin-left:.35rem">刪除</button>
     </td>
   </tr>`).join('')}</tbody></table>`;
   wrap.querySelectorAll('[data-open-id]').forEach(el=>el.addEventListener('click', ()=>openCourseDetail(el.dataset.openId)));
   wrap.querySelectorAll('[data-del-id]').forEach(el=>el.addEventListener('click', (e)=>{ e.stopPropagation(); deleteCourseFromList(el.dataset.delId, el.dataset.delName); }));
+  wrap.querySelectorAll('th[data-sort-col]').forEach(th=>th.addEventListener('click', ()=>sortCourseTable(th.dataset.sortCol)));
 }
 
 function deleteCourseFromList(id, name){
@@ -770,6 +834,7 @@ function deleteCourseFromList(id, name){
 
 function openCourseCreateModal(){
   document.getElementById('cc-name').value = '';
+  document.getElementById('cc-type').value = '';
   document.getElementById('cc-err').style.display = 'none';
   document.getElementById('modal-course-create').classList.add('open');
 }
@@ -778,10 +843,11 @@ document.getElementById('modal-course-create').addEventListener('click', functio
 
 function saveCourseCreate(){
   const name = document.getElementById('cc-name').value.trim();
+  const courseType = document.getElementById('cc-type').value.trim();
   const errEl = document.getElementById('cc-err');
   if(!name){ errEl.textContent='請輸入課程名稱'; errEl.style.display='block'; return; }
   const id = Date.now().toString();
-  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'addCourse', id, name }) })
+  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'addCourse', id, name, courseType }) })
     .then(r=>r.json())
     .then(d=>{
       if(d.status==='error'){ errEl.textContent=d.message||'建立失敗'; errEl.style.display='block'; return; }
@@ -809,6 +875,7 @@ function openCourseDetail(courseId){
       document.getElementById('cd-sub').textContent = currentCourse.hasQuiz ? `含測驗・及格分數 ${currentCourse.passScore}%` : '不含測驗';
 
       document.getElementById('course-name-input').value = currentCourse.name;
+      document.getElementById('course-type-input').value = currentCourse.courseType || '';
       if(currentCourse.videoId){
         document.getElementById('vid-link-input').value = 'https://www.youtube.com/watch?v=' + currentCourse.videoId;
         document.getElementById('vid-id-display').value = currentCourse.videoId;
@@ -881,16 +948,17 @@ function hideVideoPreview(){
 }
 function saveCourseVideo(){
   const name = document.getElementById('course-name-input').value.trim();
+  const courseType = document.getElementById('course-type-input').value.trim();
   const videoId = document.getElementById('vid-id-display').value.trim();
   if(!name){ alert('請先填寫課程名稱'); return; }
   const status = document.getElementById('vid-save-status');
   status.className = 'vid-status loading'; status.textContent = '⏳ 儲存中…';
-  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'saveCourseVideoSettings', courseId:currentCourseId, name, videoId }) })
+  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'saveCourseVideoSettings', courseId:currentCourseId, name, videoId, courseType }) })
     .then(r=>r.json())
     .then(d=>{
       if(d.status==='ok'){
         status.className = 'vid-status ok'; status.textContent = '✅ 已儲存';
-        currentCourse.name = name; currentCourse.videoId = videoId;
+        currentCourse.name = name; currentCourse.videoId = videoId; currentCourse.courseType = courseType;
         document.getElementById('cd-title').textContent = name;
       } else { status.className = 'vid-status err'; status.textContent = '❌ ' + (d.message||'儲存失敗'); }
     })
@@ -1220,27 +1288,66 @@ function resetRecord(idx){
 let allEmployees = [];
 let filteredEmployees = [];
 
+let empSortState = { col:'', asc:true };
+
 function loadEmployeeMaster(){
   const wrap = document.getElementById('emp-table-wrap');
   wrap.innerHTML = '<div class="loading-wrap"><div class="spinner"></div><div>資料載入中…</div></div>';
   fetch(`${GS_URL}?action=getEmployeeMaster`)
     .then(r=>r.json())
-    .then(d=>{ allEmployees = d.employees || []; filterEmployeeTable(); })
+    .then(d=>{ allEmployees = d.employees || []; populateEmployeeFilters(); filterEmployeeTable(); })
     .catch(()=>{ wrap.innerHTML = '<div class="table-empty">❌ 無法連線至 Google 試算表</div>'; });
+}
+function populateEmployeeFilters(){
+  const depts = Array.from(new Set(allEmployees.map(e=>e.dept).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'zh-TW'));
+  const jobs  = Array.from(new Set(allEmployees.map(e=>e.jobType).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'zh-TW'));
+  const deptSel = document.getElementById('emp-dept-filter');
+  const jobSel  = document.getElementById('emp-job-filter');
+  const curDept = deptSel.value, curJob = jobSel.value;
+  deptSel.innerHTML = '<option value="">所有部門</option>' + depts.map(d=>`<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+  jobSel.innerHTML  = '<option value="">所有職類</option>' + jobs.map(j=>`<option value="${escapeHtml(j)}">${escapeHtml(j)}</option>`).join('');
+  if(depts.includes(curDept)) deptSel.value = curDept;
+  if(jobs.includes(curJob)) jobSel.value = curJob;
 }
 function filterEmployeeTable(){
   const q = (document.getElementById('emp-search').value||'').toLowerCase();
-  filteredEmployees = allEmployees.filter(e=>!q || (e.name+e.empId+e.dept+e.jobType).toLowerCase().includes(q));
+  const dept = document.getElementById('emp-dept-filter').value;
+  const job  = document.getElementById('emp-job-filter').value;
+  filteredEmployees = allEmployees.filter(e=>{
+    if(dept && e.dept !== dept) return false;
+    if(job && e.jobType !== job) return false;
+    return !q || (e.name+e.empId+e.dept+e.jobType).toLowerCase().includes(q);
+  });
   renderEmployeeTable();
 }
+
+const EMP_COL_GETTERS = {
+  empId: e=>e.empId||'', name: e=>e.name||'', dept: e=>e.dept||'', jobType: e=>e.jobType||'',
+  requiredCourses: e=>e.requiredCourses||0, completedCourses: e=>e.completedCourses||0,
+  incompleteCourses: e=>e.incompleteCourses||0, email: e=>e.email||''
+};
+const EMP_COL_NUMERIC = new Set(['requiredCourses','completedCourses','incompleteCourses']);
+
+function sortEmployeeTable(col){ toggleSort(empSortState, col); renderEmployeeTable(); }
+
 function renderEmployeeTable(){
   document.getElementById('emp-count').textContent = filteredEmployees.length ? `（共 ${filteredEmployees.length} 人）` : '';
   const wrap = document.getElementById('emp-table-wrap');
-  if(!filteredEmployees.length){ wrap.innerHTML = '<div class="table-empty">尚無員工資料，請點擊「新增員工」或「批次上傳」</div>'; return; }
+  if(!allEmployees.length){ wrap.innerHTML = '<div class="table-empty">尚無員工資料，請點擊「新增員工」或「批次上傳」</div>'; return; }
+  if(!filteredEmployees.length){ wrap.innerHTML = '<div class="table-empty">無符合條件的員工</div>'; return; }
+
+  let list = filteredEmployees.slice();
+  if(empSortState.col){
+    const getter = EMP_COL_GETTERS[empSortState.col];
+    const numeric = EMP_COL_NUMERIC.has(empSortState.col);
+    const dir = empSortState.asc ? 1 : -1;
+    list.sort((a,b)=>compareVals(getter(a), getter(b), numeric) * dir);
+  }
+
   wrap.innerHTML = `<table><thead><tr>
-    <th>#</th><th>工號</th><th>姓名</th><th>部門</th><th>職類</th><th>應上課程</th><th>已完成</th><th>未完成</th><th>Email</th><th></th>
+    <th>#</th>${sortableTh('工號','empId',empSortState)}${sortableTh('姓名','name',empSortState)}${sortableTh('部門','dept',empSortState)}${sortableTh('職類','jobType',empSortState)}${sortableTh('應上課程','requiredCourses',empSortState)}${sortableTh('已完成','completedCourses',empSortState)}${sortableTh('未完成','incompleteCourses',empSortState)}${sortableTh('Email','email',empSortState)}<th></th>
   </tr></thead><tbody>
-    ${filteredEmployees.map((e,i)=>`<tr>
+    ${list.map((e,i)=>`<tr>
       <td style="color:var(--ink3)">${i+1}</td><td>${escapeHtml(e.empId)}</td><td><strong>${escapeHtml(e.name)}</strong></td>
       <td>${escapeHtml(e.dept||'—')}</td><td>${escapeHtml(e.jobType||'—')}</td>
       <td>${e.requiredCourses||0}</td>
@@ -1257,6 +1364,7 @@ function renderEmployeeTable(){
     const emp = filteredEmployees.find(x=>x.empId===btn.dataset.mgrEmp);
     if(emp) openEmployeeCourseModal(emp);
   }));
+  wrap.querySelectorAll('th[data-sort-col]').forEach(th=>th.addEventListener('click', ()=>sortEmployeeTable(th.dataset.sortCol)));
 }
 function deleteEmployee(empId, name){
   if(!confirm(`確定要從員工總表中刪除「${name}」？（不會影響已加入各課程的指定人員紀錄）`)) return;
