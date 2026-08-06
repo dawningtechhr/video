@@ -22,6 +22,7 @@
   --red:#8b2020;--red-light:#fde8e8;
   --purple:#5a3a9a;--purple-light:#f0ebfa;
   --navy:#1a3a6a;
+  --blue:#1a5fa8;--blue-light:#e8f0fb;
   --radius:4px;--radius-lg:8px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -60,26 +61,38 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
 .login-card{background:#fff;border-radius:12px;border:1px solid var(--paper3);padding:2.25rem;width:100%;max-width:460px;box-shadow:0 4px 20px rgba(0,0,0,.06)}
 .login-card h2{font-size:1.3rem;font-weight:700;color:var(--ink);margin-bottom:.35rem}
 .login-card>p{font-size:.85rem;color:var(--ink3);margin-bottom:1.75rem}
-.login-id-row{display:flex;gap:.6rem}
-.login-id-row input{flex:1}
-.login-id-row button{white-space:nowrap}
-#login-progress-area{margin-top:1.25rem}
-.progress-badge{border-radius:var(--radius-lg);padding:.85rem 1.1rem;font-size:.85rem;font-weight:500;display:flex;align-items:flex-start;gap:.65rem;margin-bottom:1rem}
-.progress-badge .pb-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px}
-.progress-badge .pb-text{line-height:1.6}
-.progress-badge .pb-label{font-weight:700;display:block;font-size:.8rem;letter-spacing:.04em;margin-bottom:.2rem}
-.progress-badge.none{background:#f5f5f4;border:1px solid #e0ddd6;color:var(--ink2)}
-.manual-fields{border-top:1px solid var(--paper3);padding-top:1rem;margin-top:.25rem}
-.manual-fields .mf-hint{font-size:.78rem;color:var(--ink3);margin-bottom:.85rem}
 
-/* COURSE LIST */
-#screen-courses{background:var(--paper);padding:2rem 1.5rem;align-items:center}
-.courses-wrap{width:100%;max-width:760px}
-.courses-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.5rem}
-.courses-header .hi{font-size:1.15rem;font-weight:700}
-.courses-header .hi span{color:var(--accent)}
-.courses-header .switch-link{font-size:.8rem;color:var(--ink3);cursor:pointer}
-.courses-header .switch-link:hover{color:var(--accent)}
+/* PORTAL LAYOUT（登入後與管理後台一致的側邊欄版型）*/
+#screen-courses{flex-direction:row}
+.sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid var(--paper3);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{padding:1.2rem 1.4rem;border-bottom:1px solid var(--paper3)}
+.sb-logo img{height:34px}
+.sb-logo p{font-size:.72rem;color:var(--ink3);margin-top:.25rem}
+.sb-nav{flex:1;padding:.6rem 0}
+.nav-item{display:flex;align-items:center;gap:.6rem;padding:.65rem 1.4rem;font-size:.85rem;color:var(--ink3);cursor:pointer;transition:all .12s;border-left:3px solid transparent}
+.nav-item:hover{background:var(--paper);color:var(--ink)}
+.nav-item.active{background:var(--accent-light);color:var(--accent);border-left-color:var(--accent);font-weight:500}
+.nav-item .ni{font-size:1rem;width:18px;text-align:center}
+.sb-footer{padding:1rem 1.4rem;border-top:1px solid var(--paper3)}
+.sb-user{display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem}
+.su-av{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#fff;font-weight:700;flex-shrink:0}
+.su-name{font-size:.82rem;font-weight:500;color:var(--ink)}
+.su-role{font-size:.7rem;color:var(--ink3)}
+.btn-logout{width:100%;background:var(--paper2);color:var(--ink2);padding:.55rem;border-radius:var(--radius);font-size:.8rem;cursor:pointer;border:none;font-family:inherit}
+.btn-logout:hover{background:var(--paper3)}
+.admin-main{flex:1;overflow-y:auto;background:var(--paper)}
+.tab-content{display:none;padding:2rem 2.25rem;max-width:900px}
+.tab-content.active{display:block}
+.page-title{font-size:1.4rem;font-weight:700;margin-bottom:.25rem}
+.page-sub{font-size:.85rem;color:var(--ink3);margin-bottom:1.75rem}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.75rem}
+.stat-card{background:#fff;border:1px solid var(--paper3);border-radius:var(--radius-lg);padding:1.1rem 1.25rem}
+.sc-val{font-size:1.75rem;font-weight:700;margin-bottom:.2rem}
+.sc-val.red{color:var(--red)}.sc-val.green{color:var(--green)}.sc-val.blue{color:var(--blue)}.sc-val.ink{color:var(--ink)}
+.sc-lbl{font-size:.75rem;color:var(--ink3)}
+.switch-link{font-size:.8rem;color:var(--ink3);cursor:pointer}
+.switch-link:hover{color:var(--accent)}
+
 .courses-section-title{font-size:.95rem;font-weight:700;color:var(--ink2);margin:1.5rem 0 .85rem;display:flex;align-items:center;gap:.5rem}
 .courses-section-title .count{font-size:.75rem;font-weight:400;color:var(--ink3)}
 .course-card{background:#fff;border:1px solid var(--paper3);border-radius:var(--radius-lg);padding:1.1rem 1.3rem;margin-bottom:.9rem;box-shadow:0 2px 10px rgba(0,0,0,.03)}
@@ -107,7 +120,8 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
 .save-banner.err{background:var(--danger-light);color:var(--danger);display:block}
 
 /* QUIZ */
-#screen-quiz{background:var(--paper);padding:2rem 1.5rem;align-items:center}
+#screen-quiz{flex-direction:row}
+#screen-video{flex-direction:row}
 .quiz-wrap{width:100%;max-width:680px}
 .quiz-card{background:#fff;border:1px solid var(--paper3);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
 .quiz-q-title{font-size:.95rem;font-weight:700;color:var(--ink);margin-bottom:.9rem;line-height:1.6}
@@ -140,104 +154,178 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
 <div id="screen-login" class="screen">
   <div class="login-card">
     <h2>員工訓練登入</h2>
-    <p>請輸入工號查詢您被指定的訓練課程</p>
-    <div class="login-id-row">
-      <input type="text" id="login-empid" placeholder="請輸入員工工號" onkeydown="if(event.key==='Enter')lookupEmployee()">
-      <button class="btn btn-primary" onclick="lookupEmployee()" id="btn-lookup">查詢</button>
-    </div>
-
-    <div id="login-progress-area" style="display:none">
-      <div id="login-status-badge" class="progress-badge none" style="margin-top:1rem">
-        <span class="pb-icon">⏳</span>
-        <span class="pb-text"><span class="pb-label">查詢中…</span></span>
-      </div>
-
-      <div id="login-manual-fields" class="manual-fields" style="display:none">
-        <p class="mf-hint">查無此工號資料，請填寫以下資料：</p>
-        <div class="form-group"><label>姓名 *</label><input type="text" id="login-name" placeholder="請輸入姓名"></div>
-        <div class="form-group"><label>部門 *</label><input type="text" id="login-dept" placeholder="請輸入部門名稱"></div>
-      </div>
-
-      <div id="login-user-info" style="display:none;background:var(--paper2);border-radius:var(--radius-lg);padding:.75rem 1rem;margin-bottom:.9rem;font-size:.85rem;color:var(--ink2)">
-        <strong id="login-show-name" style="color:var(--ink)"></strong>
-        &nbsp;|&nbsp;<span id="login-show-dept"></span>
-      </div>
-
-      <button class="btn btn-primary" id="btn-proceed" style="width:100%;padding:.72rem;font-size:.92rem" onclick="proceedAfterLogin()">查看我的課程 →</button>
-    </div>
+    <p>請輸入工號與密碼登入查看您被指定的訓練課程</p>
+    <div class="form-group"><label>工號</label><input type="text" id="login-empid" placeholder="請輸入員工工號" onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()"></div>
+    <div class="form-group"><label>密碼</label><input type="password" id="login-pwd" placeholder="請輸入密碼（預設為身分證號）" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div id="login-err" style="color:var(--red);font-size:.82rem;margin-bottom:.9rem;display:none"></div>
+    <button class="btn btn-primary" style="width:100%;padding:.72rem;font-size:.92rem" onclick="doLogin()" id="btn-lookup">登入</button>
   </div>
 </div>
 
-<!-- COURSE LIST -->
+<!-- COURSE PORTAL（與管理後台一致的側邊欄版型） -->
 <div id="screen-courses" class="screen">
-  <div class="courses-wrap">
-    <div class="courses-header">
-      <div class="hi">您好，<span id="cl-user-name">—</span>（<span id="cl-user-dept">—</span>）</div>
-      <span class="switch-link" onclick="goLogin()">↺ 更換工號</span>
+  <div class="sidebar">
+    <div class="sb-logo">
+      <img class="emp-sb-logo" alt="敦新">
+      <p>教育訓練系統</p>
+    </div>
+    <nav class="sb-nav">
+      <div class="nav-item active" data-emptab="dashboard" onclick="goToEmpTab('dashboard')"><span class="ni">📊</span>儀表板</div>
+      <div class="nav-item" data-emptab="pending" onclick="goToEmpTab('pending')"><span class="ni">📌</span>待完成課程</div>
+      <div class="nav-item" data-emptab="completed" onclick="goToEmpTab('completed')"><span class="ni">✅</span>已完成課程</div>
+      <div class="nav-item" data-emptab="password" onclick="goToEmpTab('password')"><span class="ni">🔒</span>修改密碼</div>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="su-av emp-avatar">?</div>
+        <div><div class="su-name emp-sb-name">—</div><div class="su-role emp-sb-dept">—</div></div>
+      </div>
+      <button class="btn-logout" onclick="goLogin()">登出</button>
+    </div>
+  </div>
+
+  <div class="admin-main">
+
+    <!-- 儀表板 -->
+    <div class="tab-content active" id="etab-dashboard">
+      <div class="page-title">儀表板</div>
+      <div class="page-sub">您好，<span id="db-user-name">—</span>（<span id="db-user-dept">—</span>）</div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="sc-val ink" id="db-total">—</div><div class="sc-lbl">應完成課程</div></div>
+        <div class="stat-card"><div class="sc-val green" id="db-completed">—</div><div class="sc-lbl">已完成</div></div>
+        <div class="stat-card"><div class="sc-val red" id="db-pending">—</div><div class="sc-lbl">待完成</div></div>
+        <div class="stat-card"><div class="sc-val blue" id="db-rate">—</div><div class="sc-lbl">完成率</div></div>
+      </div>
+      <div class="courses-section-title">📌 待完成課程 <span class="count" id="db-pending-count"></span></div>
+      <div id="db-pending-preview"></div>
     </div>
 
-    <div class="courses-section-title">📌 尚未完成的課程 <span class="count" id="cl-incomplete-count"></span></div>
-    <div id="cl-incomplete-list"></div>
+    <!-- 待完成課程 -->
+    <div class="tab-content" id="etab-pending">
+      <div class="page-title">待完成課程</div>
+      <div class="page-sub" id="pending-page-sub">—</div>
+      <div id="cl-incomplete-list"></div>
+    </div>
 
-    <div class="courses-section-title">✅ 已完成的課程 <span class="count" id="cl-complete-count"></span></div>
-    <div id="cl-complete-list"></div>
+    <!-- 已完成課程 -->
+    <div class="tab-content" id="etab-completed">
+      <div class="page-title">已完成課程</div>
+      <div class="page-sub" id="completed-page-sub">—</div>
+      <div id="cl-complete-list"></div>
+    </div>
+
+    <!-- 修改密碼 -->
+    <div class="tab-content" id="etab-password">
+      <div class="page-title">修改密碼</div>
+      <div class="page-sub">變更您登入訓練頁使用的密碼</div>
+      <div style="max-width:420px">
+        <div class="form-group"><label>目前密碼</label><input type="password" id="pwd-old" placeholder="請輸入目前密碼"></div>
+        <div class="form-group"><label>新密碼</label><input type="password" id="pwd-new" placeholder="請輸入新密碼"></div>
+        <div class="form-group"><label>確認新密碼</label><input type="password" id="pwd-confirm" placeholder="請再次輸入新密碼"></div>
+        <div id="pwd-msg" style="font-size:.82rem;margin-bottom:.9rem;display:none"></div>
+        <button class="btn btn-primary" onclick="changePasswordClick()">儲存新密碼</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <!-- VIDEO -->
-<div id="screen-video" class="screen" style="align-items:center;justify-content:center;flex-direction:column;background:var(--paper);padding:2rem;text-align:center">
-  <div style="max-width:860px;width:100%">
-    <div class="back-link" onclick="goCourses()">← 返回課程清單</div>
-    <h2 class="course-name" id="video-course-title">教育訓練</h2>
-    <!-- YouTube 播放器容器 -->
-    <div style="border-radius:8px;overflow:hidden;border:1px solid var(--paper3);background:#000;aspect-ratio:16/9;width:100%;position:relative">
-      <div id="video-no-setting" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:.75rem;color:#aaa;font-size:.9rem">
-        <span style="font-size:2.5rem">🎬</span>
-        <span>影片尚未設定，請通知管理員至後台設定影片連結</span>
+<div id="screen-video" class="screen">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <img class="emp-sb-logo" alt="敦新">
+      <p>教育訓練系統</p>
+    </div>
+    <nav class="sb-nav">
+      <div class="nav-item" data-emptab="dashboard" onclick="goToEmpTab('dashboard')"><span class="ni">📊</span>儀表板</div>
+      <div class="nav-item" data-emptab="pending" onclick="goToEmpTab('pending')"><span class="ni">📌</span>待完成課程</div>
+      <div class="nav-item" data-emptab="completed" onclick="goToEmpTab('completed')"><span class="ni">✅</span>已完成課程</div>
+      <div class="nav-item" data-emptab="password" onclick="goToEmpTab('password')"><span class="ni">🔒</span>修改密碼</div>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="su-av emp-avatar">?</div>
+        <div><div class="su-name emp-sb-name">—</div><div class="su-role emp-sb-dept">—</div></div>
       </div>
-      <!-- YouTube IFrame API 播放器容器 -->
-      <div id="yt-player-wrap" style="position:absolute;inset:0;width:100%;height:100%">
-        <div id="yt-player" style="width:100%;height:100%"></div>
-      </div>
-      <!-- 點擊遮罩：啟動播放 -->
-      <div id="video-play-overlay" onclick="overlayStartVideo()" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,.5);transition:opacity .3s;z-index:10">
-        <div style="width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;margin-bottom:.9rem;box-shadow:0 4px 20px rgba(0,0,0,.4)">
-          <span style="font-size:2rem;margin-left:4px">▶</span>
+      <button class="btn-logout" onclick="goLogin()">登出</button>
+    </div>
+  </div>
+  <div class="admin-main" style="display:flex;justify-content:center;padding:2rem 1.5rem">
+    <div style="max-width:860px;width:100%;text-align:center">
+      <div class="back-link" onclick="goCourses()">← 返回課程清單</div>
+      <h2 class="course-name" id="video-course-title">教育訓練</h2>
+      <!-- YouTube 播放器容器 -->
+      <div style="border-radius:8px;overflow:hidden;border:1px solid var(--paper3);background:#000;aspect-ratio:16/9;width:100%;position:relative">
+        <div id="video-no-setting" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:.75rem;color:#aaa;font-size:.9rem">
+          <span style="font-size:2.5rem">🎬</span>
+          <span>影片尚未設定，請通知管理員至後台設定影片連結</span>
         </div>
-        <span style="color:#fff;font-size:.9rem;font-weight:500;text-shadow:0 1px 4px rgba(0,0,0,.6)">點此開始播放</span>
+        <!-- YouTube IFrame API 播放器容器 -->
+        <div id="yt-player-wrap" style="position:absolute;inset:0;width:100%;height:100%">
+          <div id="yt-player" style="width:100%;height:100%"></div>
+        </div>
+        <!-- 點擊遮罩：啟動播放 -->
+        <div id="video-play-overlay" onclick="overlayStartVideo()" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,.5);transition:opacity .3s;z-index:10">
+          <div style="width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;margin-bottom:.9rem;box-shadow:0 4px 20px rgba(0,0,0,.4)">
+            <span style="font-size:2rem;margin-left:4px">▶</span>
+          </div>
+          <span style="color:#fff;font-size:.9rem;font-weight:500;text-shadow:0 1px 4px rgba(0,0,0,.6)">點此開始播放</span>
+        </div>
       </div>
+      <p id="video-hint" style="margin-top:1rem;font-size:.85rem;color:var(--ink3)">▶ 請開始觀看影片，隨時可點擊暫停並點擊「儲存學習進度」保留進度</p>
+      <div class="watch-actions">
+        <button id="btn-save-progress" class="btn btn-secondary" onclick="saveWatchProgress()">💾 儲存學習進度</button>
+        <button id="btn-go-quiz" class="btn btn-primary" style="display:none" onclick="goToQuiz()">📝 前往測驗</button>
+      </div>
+      <div id="save-banner" class="save-banner"></div>
     </div>
-    <p id="video-hint" style="margin-top:1rem;font-size:.85rem;color:var(--ink3)">▶ 請開始觀看影片，隨時可點擊暫停並點擊「儲存學習進度」保留進度</p>
-    <div class="watch-actions">
-      <button id="btn-save-progress" class="btn btn-secondary" onclick="saveWatchProgress()">💾 儲存學習進度</button>
-      <button id="btn-go-quiz" class="btn btn-primary" style="display:none" onclick="goToQuiz()">📝 前往測驗</button>
-    </div>
-    <div id="save-banner" class="save-banner"></div>
   </div>
 </div>
 
 <!-- QUIZ -->
 <div id="screen-quiz" class="screen">
-  <div class="quiz-wrap">
-    <div class="back-link" onclick="goCourses()">← 返回課程清單</div>
-
-    <div id="quiz-form-area">
-      <h2 class="course-name" style="font-size:1.3rem;font-weight:700;margin-bottom:1.2rem" id="quiz-course-title">課程測驗</h2>
-      <div id="quiz-questions"></div>
-      <div style="text-align:center;margin-top:1rem">
-        <button class="btn btn-primary" style="padding:.75rem 2.5rem" onclick="submitQuizAnswers()">提交測驗</button>
-      </div>
-      <div id="quiz-err" style="color:var(--red);font-size:.85rem;text-align:center;margin-top:.75rem;display:none"></div>
+  <div class="sidebar">
+    <div class="sb-logo">
+      <img class="emp-sb-logo" alt="敦新">
+      <p>教育訓練系統</p>
     </div>
+    <nav class="sb-nav">
+      <div class="nav-item" data-emptab="dashboard" onclick="goToEmpTab('dashboard')"><span class="ni">📊</span>儀表板</div>
+      <div class="nav-item" data-emptab="pending" onclick="goToEmpTab('pending')"><span class="ni">📌</span>待完成課程</div>
+      <div class="nav-item" data-emptab="completed" onclick="goToEmpTab('completed')"><span class="ni">✅</span>已完成課程</div>
+      <div class="nav-item" data-emptab="password" onclick="goToEmpTab('password')"><span class="ni">🔒</span>修改密碼</div>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="su-av emp-avatar">?</div>
+        <div><div class="su-name emp-sb-name">—</div><div class="su-role emp-sb-dept">—</div></div>
+      </div>
+      <button class="btn-logout" onclick="goLogin()">登出</button>
+    </div>
+  </div>
+  <div class="admin-main" style="display:flex;justify-content:center;padding:2rem 1.5rem">
+    <div class="quiz-wrap">
+      <div class="back-link" onclick="goCourses()">← 返回課程清單</div>
 
-    <div id="quiz-result-area" style="display:none">
-      <div class="quiz-result-card">
-        <div class="qr-icon" id="qr-icon">🎉</div>
-        <div class="qr-score" id="qr-score">0分</div>
-        <div class="qr-sub" id="qr-sub">—</div>
-        <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
-          <button class="btn btn-secondary" id="qr-retry-btn" style="display:none" onclick="retryQuiz()">重新測驗</button>
-          <button class="btn btn-primary" onclick="goCourses()">返回課程清單</button>
+      <div id="quiz-form-area">
+        <h2 class="course-name" style="font-size:1.3rem;font-weight:700;margin-bottom:1.2rem" id="quiz-course-title">課程測驗</h2>
+        <div id="quiz-questions"></div>
+        <div style="text-align:center;margin-top:1rem">
+          <button class="btn btn-primary" style="padding:.75rem 2.5rem" onclick="submitQuizAnswers()">提交測驗</button>
+        </div>
+        <div id="quiz-err" style="color:var(--red);font-size:.85rem;text-align:center;margin-top:.75rem;display:none"></div>
+      </div>
+
+      <div id="quiz-result-area" style="display:none">
+        <div class="quiz-result-card">
+          <div class="qr-icon" id="qr-icon">🎉</div>
+          <div class="qr-score" id="qr-score">0分</div>
+          <div class="qr-sub" id="qr-sub">—</div>
+          <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
+            <button class="btn btn-secondary" id="qr-retry-btn" style="display:none" onclick="retryQuiz()">重新測驗</button>
+            <button class="btn btn-primary" onclick="goCourses()">返回課程清單</button>
+          </div>
         </div>
       </div>
     </div>
@@ -272,72 +360,81 @@ function show(id){
 }
 function goLogin(){
   document.getElementById('login-empid').value = '';
-  document.getElementById('login-progress-area').style.display = 'none';
+  document.getElementById('login-pwd').value = '';
+  document.getElementById('login-err').style.display = 'none';
   show('login');
 }
 
 // ═══════════════ 員工登入 ═══════════════
 let userData = {};
 
-async function lookupEmployeeFromAPI(empId){
+async function authEmployeeFromAPI(empId, pwd){
   try{
-    const r = await fetch(GOOGLE_SCRIPT_URL + '?action=lookupEmployee&empId=' + encodeURIComponent(empId));
+    const r = await fetch(GOOGLE_SCRIPT_URL + '?action=authEmployeeLogin&empId=' + encodeURIComponent(empId) + '&pwd=' + encodeURIComponent(pwd));
     return await r.json();
-  }catch(e){ return { found:false }; }
+  }catch(e){ return { found:false, ok:false }; }
 }
 
-async function lookupEmployee(){
+async function doLogin(){
   const empId = document.getElementById('login-empid').value.trim().toUpperCase();
-  if(!empId){ alert('請輸入員工工號'); return; }
+  const pwd = document.getElementById('login-pwd').value;
+  const errEl = document.getElementById('login-err');
+  errEl.style.display = 'none';
+  if(!empId){ errEl.textContent = '請輸入員工工號'; errEl.style.display = 'block'; return; }
+  if(!pwd){ errEl.textContent = '請輸入密碼'; errEl.style.display = 'block'; return; }
 
   const btn = document.getElementById('btn-lookup');
-  btn.disabled = true; btn.textContent = '查詢中…';
+  btn.disabled = true; btn.textContent = '登入中…';
 
-  const result = await lookupEmployeeFromAPI(empId);
-  const manualArea = document.getElementById('login-manual-fields');
-  const userInfo = document.getElementById('login-user-info');
-  const badge = document.getElementById('login-status-badge');
+  const result = await authEmployeeFromAPI(empId, pwd);
+  btn.disabled = false; btn.textContent = '登入';
 
-  if(result.found){
-    userData = { empId, name: result.name, dept: result.dept, autoFilled: true };
-    document.getElementById('login-show-name').textContent = result.name;
-    document.getElementById('login-show-dept').textContent = result.dept;
-    userInfo.style.display = 'block';
-    manualArea.style.display = 'none';
-    badge.innerHTML = '<span class="pb-icon">👋</span><span class="pb-text"><span class="pb-label">歡迎回來</span>請點擊下方按鈕查看您的課程清單</span>';
-  } else {
-    userData = { empId, name:'', dept:'', autoFilled: false };
-    manualArea.style.display = 'block';
-    userInfo.style.display = 'none';
-    badge.innerHTML = '<span class="pb-icon">📋</span><span class="pb-text"><span class="pb-label">查無資料</span>請填寫姓名與部門後繼續</span>';
+  if(!result.ok){
+    errEl.textContent = result.message || '工號或密碼錯誤，請重新輸入';
+    errEl.style.display = 'block';
+    return;
   }
 
-  document.getElementById('login-progress-area').style.display = 'block';
-  btn.disabled = false; btn.textContent = '查詢';
-}
-
-function proceedAfterLogin(){
-  if(!userData.autoFilled){
-    const name = document.getElementById('login-name').value.trim();
-    const dept = document.getElementById('login-dept').value.trim();
-    if(!name || !dept){ alert('請填寫姓名與部門'); return; }
-    userData.name = name; userData.dept = dept;
-  }
+  userData = { empId, name: result.name, dept: result.dept };
+  updateSidebarUserInfo();
   goCourses();
 }
 
-// ═══════════════ 課程清單 ═══════════════
+// ═══════════════ 員工入口（側邊欄分頁） ═══════════════
+// 影片／測驗畫面各自有一份側邊欄副本（class 而非 id，因此用 querySelectorAll 統一更新）
 let myCourses = [];
 
-async function goCourses(){
-  document.getElementById('cl-user-name').textContent = userData.name || userData.empId;
-  document.getElementById('cl-user-dept').textContent = userData.dept || '—';
+function updateSidebarUserInfo(){
+  const displayName = userData.name || userData.empId || '?';
+  const displayDept = userData.dept || '—';
+  document.querySelectorAll('.emp-sb-name').forEach(el=>el.textContent = displayName);
+  document.querySelectorAll('.emp-sb-dept').forEach(el=>el.textContent = displayDept);
+  document.querySelectorAll('.emp-avatar').forEach(el=>el.textContent = displayName.charAt(0).toUpperCase());
+}
+
+function showEmpTab(name){
+  document.querySelectorAll('#screen-courses .nav-item').forEach(n=>n.classList.toggle('active', n.dataset.emptab===name));
+  document.querySelectorAll('#screen-courses .tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById('etab-'+name).classList.add('active');
+}
+
+// 供影片／測驗畫面的側邊欄呼叫：切回課程列表畫面並直接跳到指定分頁
+function goToEmpTab(name){
+  goCourses(name);
+}
+
+async function goCourses(targetTab){
+  updateSidebarUserInfo();
+  const displayName = userData.name || userData.empId;
+  const displayDept = userData.dept || '—';
+  document.getElementById('db-user-name').textContent = displayName;
+  document.getElementById('db-user-dept').textContent = displayDept;
+  showEmpTab(targetTab || 'dashboard');
   show('courses');
 
-  const wrapIncomplete = document.getElementById('cl-incomplete-list');
-  const wrapComplete = document.getElementById('cl-complete-list');
-  wrapIncomplete.innerHTML = '<div class="courses-empty">載入中…</div>';
-  wrapComplete.innerHTML = '';
+  document.getElementById('cl-incomplete-list').innerHTML = '<div class="courses-empty">載入中…</div>';
+  document.getElementById('cl-complete-list').innerHTML = '';
+  document.getElementById('db-pending-preview').innerHTML = '';
 
   try{
     const r = await fetch(GOOGLE_SCRIPT_URL + '?action=getMyCourses&empId=' + encodeURIComponent(userData.empId));
@@ -348,52 +445,99 @@ async function goCourses(){
   renderCourseLists();
 }
 
+function pendingCardHtml(c){
+  let quizHtml = '';
+  if(c.hasQuiz){
+    if(!c.videoDone) quizHtml = `<span class="cc-quiz-status wait">📝 需先看完影片才能測驗</span>`;
+    else if(!c.quizAttempted) quizHtml = `<span class="cc-quiz-status ready">📝 可進行測驗</span>`;
+    else if(!c.quizPassed) quizHtml = `<span class="cc-quiz-status fail">📝 未通過（上次 ${c.quizScore}分），可重新測驗</span>`;
+  }
+  return `
+  <div class="course-card">
+    <div class="cc-title" data-open-course="${escapeHtml(c.courseId)}">${escapeHtml(c.courseName)}</div>
+    <div class="cc-progress-row">
+      <div class="cc-bar-wrap"><div class="cc-bar-fill" style="width:${c.percent}%"></div></div>
+      <div class="cc-percent">${c.percent}%</div>
+    </div>
+    <div class="cc-meta">影片觀看：${c.videoDone?'已看完':(c.watchedSeconds>0?'觀看中（'+formatMinSec(c.watchedSeconds)+'）':'尚未開始')}</div>
+    ${quizHtml ? '<div style="margin-top:.5rem">'+quizHtml+'</div>' : ''}
+  </div>`;
+}
+function completedCardHtml(c){
+  return `
+  <div class="course-card">
+    <div class="cc-title" data-open-course="${escapeHtml(c.courseId)}">${escapeHtml(c.courseName)}</div>
+    <div class="cc-meta">完成時間：${formatTimestamp(c.completedAt)}</div>
+    ${c.hasQuiz ? `<div style="margin-top:.5rem"><span class="cc-score-badge">測驗分數：${c.quizScore}分</span></div>` : ''}
+  </div>`;
+}
+function bindCourseOpenHandlers(container){
+  container.querySelectorAll('[data-open-course]').forEach(el=>{
+    el.addEventListener('click', ()=>openCourse(el.dataset.openCourse));
+  });
+}
+
 function renderCourseLists(){
   const incomplete = myCourses.filter(c=>!c.completed);
   const complete = myCourses.filter(c=>c.completed);
+  const total = myCourses.length;
 
-  document.getElementById('cl-incomplete-count').textContent = incomplete.length ? `（${incomplete.length}）` : '';
-  document.getElementById('cl-complete-count').textContent = complete.length ? `（${complete.length}）` : '';
+  // 儀表板統計
+  document.getElementById('db-total').textContent = total;
+  document.getElementById('db-completed').textContent = complete.length;
+  document.getElementById('db-pending').textContent = incomplete.length;
+  document.getElementById('db-rate').textContent = total ? Math.round(complete.length/total*100)+'%' : '0%';
 
-  const wrapIncomplete = document.getElementById('cl-incomplete-list');
+  const dbPreview = document.getElementById('db-pending-preview');
+  document.getElementById('db-pending-count').textContent = incomplete.length ? `（${incomplete.length}）` : '';
   if(!incomplete.length){
-    wrapIncomplete.innerHTML = '<div class="courses-empty">目前沒有尚未完成的課程</div>';
+    dbPreview.innerHTML = '<div class="courses-empty">目前沒有尚未完成的課程，太棒了！</div>';
   } else {
-    wrapIncomplete.innerHTML = incomplete.map(c=>{
-      let quizHtml = '';
-      if(c.hasQuiz){
-        if(!c.videoDone) quizHtml = `<span class="cc-quiz-status wait">📝 需先看完影片才能測驗</span>`;
-        else if(!c.quizAttempted) quizHtml = `<span class="cc-quiz-status ready">📝 可進行測驗</span>`;
-        else if(!c.quizPassed) quizHtml = `<span class="cc-quiz-status fail">📝 未通過（上次 ${c.quizScore}分），可重新測驗</span>`;
-      }
-      return `
-      <div class="course-card">
-        <div class="cc-title" data-open-course="${escapeHtml(c.courseId)}">${escapeHtml(c.courseName)}</div>
-        <div class="cc-progress-row">
-          <div class="cc-bar-wrap"><div class="cc-bar-fill" style="width:${c.percent}%"></div></div>
-          <div class="cc-percent">${c.percent}%</div>
-        </div>
-        <div class="cc-meta">影片觀看：${c.videoDone?'已看完':(c.watchedSeconds>0?'觀看中（'+formatMinSec(c.watchedSeconds)+'）':'尚未開始')}</div>
-        ${quizHtml ? '<div style="margin-top:.5rem">'+quizHtml+'</div>' : ''}
-      </div>`;
-    }).join('');
+    dbPreview.innerHTML = incomplete.slice(0,3).map(pendingCardHtml).join('')
+      + (incomplete.length > 3 ? `<div style="text-align:center;margin-top:.5rem"><span class="switch-link" onclick="showEmpTab('pending')">查看全部 ${incomplete.length} 門待完成課程 →</span></div>` : '');
   }
+  bindCourseOpenHandlers(dbPreview);
 
+  // 待完成課程分頁
+  document.getElementById('pending-page-sub').textContent = incomplete.length ? `您目前有 ${incomplete.length} 門課程尚未完成` : '目前沒有尚未完成的課程';
+  const wrapIncomplete = document.getElementById('cl-incomplete-list');
+  wrapIncomplete.innerHTML = incomplete.length ? incomplete.map(pendingCardHtml).join('') : '<div class="courses-empty">目前沒有尚未完成的課程</div>';
+  bindCourseOpenHandlers(wrapIncomplete);
+
+  // 已完成課程分頁
+  document.getElementById('completed-page-sub').textContent = complete.length ? `您已完成 ${complete.length} 門課程` : '尚無已完成的課程';
   const wrapComplete = document.getElementById('cl-complete-list');
-  if(!complete.length){
-    wrapComplete.innerHTML = '<div class="courses-empty">尚無已完成的課程</div>';
-  } else {
-    wrapComplete.innerHTML = complete.map(c=>`
-      <div class="course-card">
-        <div class="cc-title" data-open-course="${escapeHtml(c.courseId)}">${escapeHtml(c.courseName)}</div>
-        <div class="cc-meta">完成時間：${formatTimestamp(c.completedAt)}</div>
-        ${c.hasQuiz ? `<div style="margin-top:.5rem"><span class="cc-score-badge">測驗分數：${c.quizScore}分</span></div>` : ''}
-      </div>`).join('');
-  }
+  wrapComplete.innerHTML = complete.length ? complete.map(completedCardHtml).join('') : '<div class="courses-empty">尚無已完成的課程</div>';
+  bindCourseOpenHandlers(wrapComplete);
+}
 
-  document.querySelectorAll('[data-open-course]').forEach(el=>{
-    el.addEventListener('click', ()=>openCourse(el.dataset.openCourse));
-  });
+// ═══════════════ 修改密碼 ═══════════════
+async function changePasswordClick(){
+  const oldPwd = document.getElementById('pwd-old').value;
+  const newPwd = document.getElementById('pwd-new').value;
+  const confirmPwd = document.getElementById('pwd-confirm').value;
+  const msgEl = document.getElementById('pwd-msg');
+  msgEl.style.display = 'none';
+
+  if(!oldPwd || !newPwd || !confirmPwd){ msgEl.style.color='var(--red)'; msgEl.textContent='請完整填寫所有欄位'; msgEl.style.display='block'; return; }
+  if(newPwd !== confirmPwd){ msgEl.style.color='var(--red)'; msgEl.textContent='兩次輸入的新密碼不一致'; msgEl.style.display='block'; return; }
+  if(newPwd === oldPwd){ msgEl.style.color='var(--red)'; msgEl.textContent='新密碼不可與目前密碼相同'; msgEl.style.display='block'; return; }
+
+  msgEl.style.color='var(--ink3)'; msgEl.textContent='處理中…'; msgEl.style.display='block';
+  try{
+    const r = await fetch(GOOGLE_SCRIPT_URL, { method:'POST', body:JSON.stringify({ action:'changeEmployeePassword', empId:userData.empId, oldPassword:oldPwd, newPassword:newPwd }) });
+    const d = await r.json();
+    if(d.status === 'ok'){
+      msgEl.style.color='var(--green)'; msgEl.textContent='✅ 密碼已更新';
+      document.getElementById('pwd-old').value = '';
+      document.getElementById('pwd-new').value = '';
+      document.getElementById('pwd-confirm').value = '';
+    } else {
+      msgEl.style.color='var(--red)'; msgEl.textContent = d.message || '密碼更新失敗';
+    }
+  }catch(e){
+    msgEl.style.color='var(--red)'; msgEl.textContent = '連線失敗，請稍後再試';
+  }
 }
 
 // ═══════════════ 影片設定（YouTube iframe）═══════════════
@@ -616,7 +760,8 @@ function showQuizResult(d){
   document.getElementById('qr-retry-btn').style.display = d.passed ? 'none' : '';
 }
 
-// 頁面載入時將封面 LOGO 沿用至頁面其他位置（目前僅封面使用）
+// 頁面載入時將封面 LOGO 沿用至所有側邊欄副本（課程清單／影片／測驗畫面各一份）
+document.querySelectorAll('.emp-sb-logo').forEach(img=>{ img.src = document.querySelector('#screen-cover .logo-wrap img').src; });
 </script>
 </body>
 </html>

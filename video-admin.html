@@ -402,6 +402,7 @@ tr.clickable{cursor:pointer}
               <div class="form-group"><label>部門</label><select id="asg-dept-filter" onchange="renderCandidateList()"><option value="">全部部門</option></select></div>
               <div class="form-group"><label>職類</label><select id="asg-job-filter" onchange="renderCandidateList()"><option value="">全部職類</option></select></div>
               <div class="form-group" style="flex:1"><label>搜尋姓名／工號</label><input type="text" id="asg-search" placeholder="輸入姓名或工號" oninput="renderCandidateList()"></div>
+              <div class="form-group"><label>完成期限</label><input type="date" id="asg-default-deadline" title="套用到所有勾選人員的預設完成期限，個別人員可再自訂覆蓋"></div>
             </div>
             <div style="margin-bottom:.6rem"><label style="font-size:.82rem;color:var(--ink2)"><input type="checkbox" id="asg-select-all" style="width:auto;margin-right:.4rem" onchange="toggleSelectAllCandidates(this)">全選目前篩選結果</label></div>
             <div class="candidate-list" id="asg-candidate-list"></div>
@@ -448,11 +449,27 @@ tr.clickable{cursor:pointer}
                 <span id="notif-status-text" style="font-size:.82rem;color:var(--ink3)"><span class="status-dot off"></span>未啟用</span>
               </div>
             </div>
-            <div class="notif-row"><label>起始通知日期</label><input type="date" id="notif-start-date"></div>
+            <div class="notif-row" style="align-items:flex-start">
+              <label style="padding-top:.5rem">啟動時機</label>
+              <div style="flex:1">
+                <label style="display:flex;align-items:center;gap:.5rem;margin-bottom:.65rem;font-size:.85rem;color:var(--ink2);cursor:pointer">
+                  <input type="radio" name="notif-start-mode" id="notif-mode-fixed" value="fixedDate" style="width:auto;flex-shrink:0" onchange="updateNotifStartModeUI()">
+                  <span style="white-space:nowrap">起始通知日期</span>
+                  <input type="date" id="notif-start-date" style="width:180px;flex-shrink:0">
+                </label>
+                <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:var(--ink2);cursor:pointer">
+                  <input type="radio" name="notif-start-mode" id="notif-mode-deadline" value="beforeDeadline" style="width:auto;flex-shrink:0" onchange="updateNotifStartModeUI()">
+                  <span style="white-space:nowrap">於完成期限前</span>
+                  <input type="number" id="notif-days-before" min="1" max="365" value="7" style="width:70px;flex-shrink:0">
+                  <span style="white-space:nowrap">天啟動通知</span>
+                </label>
+                <div class="form-hint" style="margin-top:.4rem">兩者擇一：「起始通知日期」為全課程統一的起算日；「完成期限前 X 天」則依每位人員各自的完成期限起算，未設定完成期限者此模式下不會收到提醒。</div>
+              </div>
+            </div>
             <div class="notif-row">
               <label>提醒頻率（天）</label>
               <input type="number" id="notif-frequency" min="1" max="365" value="7" style="max-width:100px">
-              <span style="font-size:.82rem;color:var(--ink3)">天發送一次</span>
+              <span style="font-size:.82rem;color:var(--ink3);white-space:nowrap">天發送一次</span>
             </div>
             <div id="notif-last-sent" style="font-size:.78rem;color:var(--ink3);margin-bottom:.75rem"></div>
             <button class="btn-sm btn-primary" onclick="saveReminderSettingsClick()">💾 儲存排程設定</button>
@@ -599,6 +616,7 @@ tr.clickable{cursor:pointer}
         <div class="form-group"><label>部門</label><input type="text" id="emp-dept" placeholder="請輸入部門"></div>
         <div class="form-group"><label>職類</label><input type="text" id="emp-job" placeholder="請輸入職類"></div>
         <div class="form-group"><label>Email</label><input type="email" id="emp-email" placeholder="選填"></div>
+        <div class="form-group"><label>密碼</label><input type="text" id="emp-password" placeholder="選填，訓練頁登入密碼，預設請填身分證號"></div>
         <div id="emp-add-err" style="color:var(--red);font-size:.8rem;margin-bottom:.5rem;display:none"></div>
         <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">
           <button class="btn-sm btn-secondary" onclick="closeAddEmployeeModal()">取消</button>
@@ -614,9 +632,9 @@ tr.clickable{cursor:pointer}
   <div class="modal">
     <div class="modal-head"><h3>批次上傳員工總表</h3><button class="btn-close" onclick="closeEmpUploadModal()">✕</button></div>
     <div class="modal-body">
-      <p style="font-size:.82rem;color:var(--ink2);margin-bottom:.75rem">上傳 CSV 檔案或貼上資料（格式：工號,姓名,部門,職類,email，第一列為標題）。<br>上傳後將<strong>取代</strong>現有員工總表。</p>
+      <p style="font-size:.82rem;color:var(--ink2);margin-bottom:.75rem">上傳 CSV 檔案或貼上資料（格式：工號,姓名,部門,職類,email,密碼，第一列為標題）。密碼為選填，為員工登入訓練頁用的密碼，預設請填身分證號。<br>上傳後將<strong>取代</strong>現有員工總表。</p>
       <div style="background:var(--paper2);border-radius:var(--radius);padding:.6rem .9rem;font-family:monospace;font-size:.78rem;color:var(--ink2);margin-bottom:.9rem">
-        工號,姓名,部門,職類,email<br>A001,王小明,人資部,專員,wang@example.com<br>A002,李小華,業務部,經理,lee@example.com
+        工號,姓名,部門,職類,email,密碼<br>A001,王小明,人資部,專員,wang@example.com,A123456789<br>A002,李小華,業務部,經理,lee@example.com,B123456789
       </div>
       <div class="upload-zone" id="emp-upload-zone" onclick="document.getElementById('emp-csv-file').click()">
         <input type="file" id="emp-csv-file" accept=".csv,text/csv" onchange="handleEmpFileSelect(event)">
@@ -642,6 +660,11 @@ tr.clickable{cursor:pointer}
     <div class="modal-head"><h3 id="emp-courses-modal-title">課程管理</h3><button class="btn-close" onclick="closeEmployeeCourseModal()">✕</button></div>
     <div class="modal-body">
       <p style="font-size:.82rem;color:var(--ink2);margin-bottom:.75rem">勾選此員工必須完成的課程：</p>
+      <div class="filter-row">
+        <div class="form-group"><label>課程類型</label><select id="ec-type-filter" onchange="renderEmpCoursesList()"><option value="">全部類型</option></select></div>
+        <div class="form-group"><label>完成期限</label><input type="date" id="ec-default-deadline" title="套用到所有勾選課程的預設完成期限，個別課程可再自訂覆蓋"></div>
+      </div>
+      <div style="margin-bottom:.6rem"><label style="font-size:.82rem;color:var(--ink2)"><input type="checkbox" id="ec-select-all" style="width:auto;margin-right:.4rem" onchange="toggleSelectAllEmpCourses(this)">全選目前篩選結果</label></div>
       <div class="candidate-list" id="emp-courses-list" style="max-height:340px"></div>
       <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">
         <button class="btn-sm btn-secondary" onclick="closeEmployeeCourseModal()">取消</button>
@@ -1109,6 +1132,7 @@ function renderCandidateList(){
       <input type="checkbox" class="cand-check" value="${escapeHtml(e.empId)}">
       <span><strong>${escapeHtml(e.name)}</strong></span>
       <span class="cand-meta">${escapeHtml(e.empId)} · ${escapeHtml(e.dept||'—')} · ${escapeHtml(e.jobType||'—')}</span>
+      <input type="date" class="cand-deadline" data-empid="${escapeHtml(e.empId)}" style="margin-left:auto;width:150px" title="此人員的完成期限（優先於上方預設完成期限）">
     </div>`).join('');
 }
 function toggleSelectAllCandidates(cb){
@@ -1117,7 +1141,12 @@ function toggleSelectAllCandidates(cb){
 function addSelectedAssignees(){
   const ids = Array.from(document.querySelectorAll('#asg-candidate-list .cand-check:checked')).map(el=>el.value);
   if(!ids.length){ alert('請先勾選要加入的人員'); return; }
-  const list = employeeMasterList.filter(e=>ids.includes(e.empId)).map(e=>({ empId:e.empId, name:e.name, dept:e.dept, jobType:e.jobType, email:e.email }));
+  const defaultDeadline = document.getElementById('asg-default-deadline').value || '';
+  const list = employeeMasterList.filter(e=>ids.includes(e.empId)).map(e=>{
+    const rowInput = document.querySelector(`#asg-candidate-list .cand-deadline[data-empid="${CSS.escape(e.empId)}"]`);
+    const deadline = (rowInput && rowInput.value) ? rowInput.value : defaultDeadline;
+    return { empId:e.empId, name:e.name, dept:e.dept, jobType:e.jobType, email:e.email, deadline };
+  });
   fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'addCourseAssignees', courseId:currentCourseId, list }) })
     .then(r=>r.json())
     .then(d=>{
@@ -1166,10 +1195,10 @@ function renderAssigneeTable(){
   });
   if(!list.length){ wrap.innerHTML = '<div class="table-empty">無符合條件的指定人員</div>'; return; }
 
-  wrap.innerHTML = `<table><thead><tr><th>#</th><th>工號</th><th>姓名</th><th>部門</th><th>職類</th><th>Email</th><th>狀態</th><th></th></tr></thead><tbody>
+  wrap.innerHTML = `<table><thead><tr><th>#</th><th>工號</th><th>姓名</th><th>部門</th><th>職類</th><th>完成期限</th><th>狀態</th><th></th></tr></thead><tbody>
     ${list.map((a,i)=>`<tr>
       <td style="color:var(--ink3)">${i+1}</td><td>${escapeHtml(a.empId)}</td><td><strong>${escapeHtml(a.name)}</strong></td>
-      <td>${escapeHtml(a.dept||'—')}</td><td>${escapeHtml(a.jobType||'—')}</td><td style="color:var(--ink3)">${escapeHtml(a.email||'—')}</td>
+      <td>${escapeHtml(a.dept||'—')}</td><td>${escapeHtml(a.jobType||'—')}</td><td style="color:var(--ink3)">${escapeHtml(a.deadline||'無期限')}</td>
       <td>${a.completed ? '<span class="badge pass">已完成</span>' : '<span class="badge fail">未完成</span>'}</td>
       <td><button class="btn-sm btn-danger" data-remove-empid="${escapeHtml(a.empId)}" data-remove-name="${escapeHtml(a.name)}">移除</button></td>
     </tr>`).join('')}</tbody></table>`;
@@ -1190,8 +1219,12 @@ function loadCourseReminderSettings(){
     .then(d=>{
       document.getElementById('notif-enabled').checked = d.enabled === 'true';
       document.getElementById('notif-start-date').value = d.startDate || '';
+      document.getElementById('notif-days-before').value = d.daysBeforeDeadline || '7';
       document.getElementById('notif-frequency').value = d.frequency || '7';
+      const mode = d.startMode === 'beforeDeadline' ? 'notif-mode-deadline' : 'notif-mode-fixed';
+      document.getElementById(mode).checked = true;
       updateNotifToggleStatus();
+      updateNotifStartModeUI();
       const lastEl = document.getElementById('notif-last-sent');
       lastEl.textContent = d.lastSent ? `上次發送：${new Date(d.lastSent).toLocaleString('zh-TW')}` : '';
     })
@@ -1202,14 +1235,22 @@ function updateNotifToggleStatus(){
   const on = document.getElementById('notif-enabled').checked;
   document.getElementById('notif-status-text').innerHTML = on ? '<span class="status-dot on"></span>已啟用' : '<span class="status-dot off"></span>未啟用';
 }
+function updateNotifStartModeUI(){
+  const isFixed = document.getElementById('notif-mode-fixed').checked;
+  document.getElementById('notif-start-date').disabled = !isFixed;
+  document.getElementById('notif-days-before').disabled = isFixed;
+}
 function saveReminderSettingsClick(){
   const enabled = document.getElementById('notif-enabled').checked;
+  const startMode = document.getElementById('notif-mode-deadline').checked ? 'beforeDeadline' : 'fixedDate';
   const startDate = document.getElementById('notif-start-date').value;
+  const daysBeforeDeadline = parseInt(document.getElementById('notif-days-before').value) || 0;
   const frequency = parseInt(document.getElementById('notif-frequency').value) || 7;
   const resEl = document.getElementById('notif-save-result');
-  if(enabled && !startDate){ resEl.style.color='var(--red)'; resEl.textContent='⚠️ 請設定起始日期'; return; }
+  if(enabled && startMode === 'fixedDate' && !startDate){ resEl.style.color='var(--red)'; resEl.textContent='⚠️ 請設定起始通知日期'; return; }
+  if(enabled && startMode === 'beforeDeadline' && daysBeforeDeadline <= 0){ resEl.style.color='var(--red)'; resEl.textContent='⚠️ 請設定完成期限前幾天啟動通知'; return; }
   resEl.style.color='var(--ink3)'; resEl.textContent='儲存中…';
-  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'setReminderSchedule', courseId:currentCourseId, enabled, startDate, frequency }) })
+  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'setReminderSchedule', courseId:currentCourseId, enabled, startMode, startDate, daysBeforeDeadline, frequency }) })
     .then(r=>r.json())
     .then(d=>{
       if(d.status==='ok'){ resEl.style.color='var(--green)'; resEl.textContent='✅ 設定已儲存'; }
@@ -1394,44 +1435,82 @@ function deleteEmployee(empId, name){
 }
 
 // ── 員工「課程管理」：指定該員工需上哪些課程 ──
+// empCourseSelectionState 是勾選狀態的唯一資料來源，即使切換「課程類型」篩選重繪列表，已勾選/已填的期限也不會遺失
 let empCourseTarget = null;
 let empCourseAllCourses = [];
+let empCourseSelectionState = {}; // courseId -> { checked, deadline }
 
 function openEmployeeCourseModal(emp){
   empCourseTarget = emp;
   document.getElementById('emp-courses-modal-title').textContent = `課程管理－${emp.name}（${emp.empId}）`;
   document.getElementById('emp-courses-list').innerHTML = '<div class="loading-wrap"><div class="spinner"></div><div>資料載入中…</div></div>';
+  document.getElementById('ec-default-deadline').value = '';
   document.getElementById('modal-emp-courses').classList.add('open');
 
   Promise.all([
     fetch(`${GS_URL}?action=getCourses`).then(r=>r.json()).catch(()=>({courses:[]})),
-    fetch(`${GS_URL}?action=getEmployeeCourses&empId=${encodeURIComponent(emp.empId)}`).then(r=>r.json()).catch(()=>({courseIds:[]}))
+    fetch(`${GS_URL}?action=getEmployeeCourses&empId=${encodeURIComponent(emp.empId)}`).then(r=>r.json()).catch(()=>({courses:[]}))
   ]).then(([coursesRes, assignedRes])=>{
     empCourseAllCourses = coursesRes.courses || [];
-    const assignedIds = new Set((assignedRes.courseIds||[]).map(String));
-    renderEmpCoursesList(assignedIds);
+    empCourseSelectionState = {};
+    (assignedRes.courses||[]).forEach(a=>{ empCourseSelectionState[String(a.courseId)] = { checked:true, deadline:a.deadline||'' }; });
+    populateEmpCourseTypeFilter();
+    renderEmpCoursesList();
   });
 }
 function closeEmployeeCourseModal(){ document.getElementById('modal-emp-courses').classList.remove('open'); }
 document.getElementById('modal-emp-courses').addEventListener('click', function(e){ if(e.target===this) closeEmployeeCourseModal(); });
 
-function renderEmpCoursesList(assignedIds){
+function populateEmpCourseTypeFilter(){
+  const types = Array.from(new Set(empCourseAllCourses.map(c=>c.courseType).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'zh-TW'));
+  const sel = document.getElementById('ec-type-filter');
+  sel.innerHTML = '<option value="">全部類型</option>' + types.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+}
+
+function renderEmpCoursesList(){
   const wrap = document.getElementById('emp-courses-list');
+  document.getElementById('ec-select-all').checked = false;
   if(!empCourseAllCourses.length){ wrap.innerHTML = '<div class="table-empty">尚無課程，請先至「課程管理」新增課程</div>'; return; }
-  wrap.innerHTML = empCourseAllCourses.map(c=>`
+  const typeFilter = document.getElementById('ec-type-filter').value;
+  const list = typeFilter ? empCourseAllCourses.filter(c=>c.courseType===typeFilter) : empCourseAllCourses;
+  if(!list.length){ wrap.innerHTML = '<div class="table-empty">無符合條件的課程</div>'; return; }
+  wrap.innerHTML = list.map(c=>{
+    const state = empCourseSelectionState[String(c.id)] || { checked:false, deadline:'' };
+    return `
     <label class="cand-row" style="cursor:pointer">
-      <input type="checkbox" class="emp-course-check" value="${escapeHtml(c.id)}" ${assignedIds.has(String(c.id))?'checked':''}>
+      <input type="checkbox" class="emp-course-check" data-course-id="${escapeHtml(c.id)}" ${state.checked?'checked':''}>
       <span style="flex:1"><strong>${escapeHtml(c.name)}</strong></span>
       <span class="cand-meta">${c.hasQuiz?'需測驗':'無測驗'}</span>
-    </label>`).join('');
+      <input type="date" class="ec-course-deadline" data-course-id="${escapeHtml(c.id)}" value="${state.deadline||''}" style="width:150px" onclick="event.stopPropagation()" title="此課程的完成期限（優先於上方預設完成期限）">
+    </label>`;
+  }).join('');
+  wrap.querySelectorAll('.emp-course-check').forEach(cb=>cb.addEventListener('change', function(){
+    const cid = this.dataset.courseId;
+    const prev = empCourseSelectionState[cid] || { deadline:'' };
+    empCourseSelectionState[cid] = { checked: this.checked, deadline: prev.deadline };
+  }));
+  wrap.querySelectorAll('.ec-course-deadline').forEach(inp=>inp.addEventListener('input', function(){
+    const cid = this.dataset.courseId;
+    const prev = empCourseSelectionState[cid] || { checked:false };
+    empCourseSelectionState[cid] = { checked: prev.checked, deadline: this.value };
+  }));
+}
+function toggleSelectAllEmpCourses(cb){
+  document.querySelectorAll('#emp-courses-list .emp-course-check').forEach(el=>{
+    el.checked = cb.checked;
+    el.dispatchEvent(new Event('change'));
+  });
 }
 
 function saveEmployeeCourses(){
-  const courseIds = Array.from(document.querySelectorAll('.emp-course-check:checked')).map(el=>el.value);
+  const defaultDeadline = document.getElementById('ec-default-deadline').value || '';
+  const courses = Object.keys(empCourseSelectionState)
+    .filter(cid => empCourseSelectionState[cid].checked)
+    .map(cid => ({ courseId: cid, deadline: empCourseSelectionState[cid].deadline || defaultDeadline }));
   const t = empCourseTarget;
   const btn = document.getElementById('emp-courses-save-btn');
   btn.textContent = '儲存中…'; btn.disabled = true;
-  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'setEmployeeCourses', empId:t.empId, name:t.name, dept:t.dept, jobType:t.jobType, email:t.email, courseIds }) })
+  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'setEmployeeCourses', empId:t.empId, name:t.name, dept:t.dept, jobType:t.jobType, email:t.email, courses }) })
     .then(r=>r.json())
     .then(d=>{
       if(d.status==='error'){ alert(d.message||'儲存失敗'); return; }
@@ -1443,7 +1522,7 @@ function saveEmployeeCourses(){
 }
 
 function openAddEmployeeModal(){
-  ['emp-empid','emp-name','emp-dept','emp-job','emp-email'].forEach(id=>document.getElementById(id).value='');
+  ['emp-empid','emp-name','emp-dept','emp-job','emp-email','emp-password'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('emp-add-err').style.display='none';
   document.getElementById('modal-emp-add').classList.add('open');
 }
@@ -1455,9 +1534,10 @@ function saveAddEmployee(){
   const dept  = document.getElementById('emp-dept').value.trim();
   const job   = document.getElementById('emp-job').value.trim();
   const email = document.getElementById('emp-email').value.trim();
+  const password = document.getElementById('emp-password').value.trim();
   const errEl = document.getElementById('emp-add-err');
   if(!empId || !name){ errEl.textContent='工號與姓名為必填'; errEl.style.display='block'; return; }
-  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'addEmployee', empId, name, dept, jobType:job, email }) })
+  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'addEmployee', empId, name, dept, jobType:job, email, password }) })
     .then(r=>r.json())
     .then(d=>{
       if(d.status==='error'){ errEl.textContent=d.message||'新增失敗'; errEl.style.display='block'; return; }
@@ -1508,7 +1588,7 @@ function previewEmpCsv(text){
   parsedEmpUploadData = rows.map((line,idx)=>{
     const cols = line.split(',').map(c=>c.trim().replace(/^"|"$/g,''));
     if(cols.length < 2){ errors.push(`第 ${idx+start+1} 列欄位不足`); return null; }
-    return { empId:cols[0], name:cols[1], dept:cols[2]||'', jobType:cols[3]||'', email:cols[4]||'' };
+    return { empId:cols[0], name:cols[1], dept:cols[2]||'', jobType:cols[3]||'', email:cols[4]||'', password:cols[5]||'' };
   }).filter(Boolean);
   if(errors.length){ errEl.textContent = errors.slice(0,3).join('；'); errEl.style.display='block'; }
   document.getElementById('emp-upload-preview').textContent = parsedEmpUploadData.length ? `✅ 解析成功：共 ${parsedEmpUploadData.length} 筆資料` : '⚠️ 未解析到資料';
