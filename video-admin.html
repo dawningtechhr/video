@@ -412,7 +412,16 @@ tr.clickable{cursor:pointer}
           </div>
 
           <div class="table-wrap">
-            <div class="table-head"><h3>已指定人員 <span id="asg-count" style="font-size:.8rem;font-weight:400;color:var(--ink3)"></span></h3></div>
+            <div class="table-head">
+              <h3>已指定人員 <span id="asg-count" style="font-size:.8rem;font-weight:400;color:var(--ink3)"></span></h3>
+              <div class="table-actions">
+                <select class="filter-select" id="asg-status-filter" onchange="renderAssigneeTable()">
+                  <option value="">全部狀態</option>
+                  <option value="done">已完成</option>
+                  <option value="pending">未完成</option>
+                </select>
+              </div>
+            </div>
             <div id="asg-table-wrap"><div class="table-empty">尚無指定人員</div></div>
           </div>
         </div>
@@ -1148,10 +1157,20 @@ function renderAssigneeTable(){
   document.getElementById('asg-count').textContent = courseAssignees.length ? `（共 ${courseAssignees.length} 人）` : '';
   const wrap = document.getElementById('asg-table-wrap');
   if(!courseAssignees.length){ wrap.innerHTML = '<div class="table-empty">尚無指定人員，請於上方篩選加入或新增單一人員</div>'; return; }
-  wrap.innerHTML = `<table><thead><tr><th>#</th><th>工號</th><th>姓名</th><th>部門</th><th>職類</th><th>Email</th><th></th></tr></thead><tbody>
-    ${courseAssignees.map((a,i)=>`<tr>
+
+  const statusFilter = document.getElementById('asg-status-filter').value;
+  const list = courseAssignees.filter(a=>{
+    if(statusFilter === 'done') return !!a.completed;
+    if(statusFilter === 'pending') return !a.completed;
+    return true;
+  });
+  if(!list.length){ wrap.innerHTML = '<div class="table-empty">無符合條件的指定人員</div>'; return; }
+
+  wrap.innerHTML = `<table><thead><tr><th>#</th><th>工號</th><th>姓名</th><th>部門</th><th>職類</th><th>Email</th><th>狀態</th><th></th></tr></thead><tbody>
+    ${list.map((a,i)=>`<tr>
       <td style="color:var(--ink3)">${i+1}</td><td>${escapeHtml(a.empId)}</td><td><strong>${escapeHtml(a.name)}</strong></td>
       <td>${escapeHtml(a.dept||'—')}</td><td>${escapeHtml(a.jobType||'—')}</td><td style="color:var(--ink3)">${escapeHtml(a.email||'—')}</td>
+      <td>${a.completed ? '<span class="badge pass">已完成</span>' : '<span class="badge fail">未完成</span>'}</td>
       <td><button class="btn-sm btn-danger" data-remove-empid="${escapeHtml(a.empId)}" data-remove-name="${escapeHtml(a.name)}">移除</button></td>
     </tr>`).join('')}</tbody></table>`;
   wrap.querySelectorAll('[data-remove-empid]').forEach(btn=>btn.addEventListener('click', ()=>removeAssignee(btn.dataset.removeEmpid, btn.dataset.removeName)));
