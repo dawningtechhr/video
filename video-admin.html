@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>教育訓練系統管理後台</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
 :root{
   --ink:#1a1814;--ink2:#3d3a34;--ink3:#7a7570;
@@ -66,6 +67,8 @@ button{font-family:'Noto Sans TC',sans-serif;cursor:pointer;border:none;border-r
 
 /* STAT CARDS */
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.75rem}
+#stat-grid{grid-template-columns:repeat(5,1fr)}
+#course-stat-grid{grid-template-columns:repeat(3,1fr)}
 .stat-card{background:#fff;border:1px solid var(--paper3);border-radius:var(--radius-lg);padding:1.1rem 1.25rem}
 .sc-val{font-size:1.75rem;font-weight:700;margin-bottom:.2rem}
 .sc-val.red{color:var(--red)}.sc-val.green{color:var(--green)}.sc-val.blue{color:var(--blue)}.sc-val.ink{color:var(--ink)}
@@ -91,6 +94,7 @@ tr.clickable{cursor:pointer}
 .badge.fail{background:var(--red-light);color:var(--red)}
 .badge.neutral{background:var(--paper2);color:var(--ink3)}
 .table-empty{padding:3rem;text-align:center;color:var(--ink3);font-size:.9rem}
+#dash-course-table table th, #dash-course-table table td, #course-table-wrap table th, #course-table-wrap table td{text-align:center}
 
 /* BUTTONS */
 .btn-sm{padding:.45rem .9rem;font-size:.78rem}
@@ -112,6 +116,7 @@ tr.clickable{cursor:pointer}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center;padding:1.5rem}
 .modal-overlay.open{display:flex}
 .modal{background:#fff;border-radius:var(--radius-lg);width:100%;max-width:560px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column}
+#modal-emp-courses .modal{max-width:780px}
 .modal.wide{max-width:720px}
 .modal-head{padding:1.1rem 1.4rem;border-bottom:1px solid var(--paper3);display:flex;align-items:center;justify-content:space-between}
 .modal-head h3{font-size:1rem;font-weight:700}
@@ -246,6 +251,7 @@ tr.clickable{cursor:pointer}
       <div class="nav-item active" onclick="showTab('dashboard')"><span class="ni">📊</span>儀表板</div>
       <div class="nav-item" onclick="showTab('courses')"><span class="ni">📚</span>課程管理</div>
       <div class="nav-item" onclick="showTab('employees');loadEmployeeMaster()"><span class="ni">🧑‍🤝‍🧑</span>員工總表</div>
+      <div class="nav-item" onclick="showTab('export');loadExportTab()"><span class="ni">📥</span>檔案下載</div>
       <div class="nav-item" onclick="showTab('admins');loadAdminsFromGS()"><span class="ni">👤</span>管理員設定</div>
     </nav>
     <div class="sb-footer">
@@ -264,6 +270,7 @@ tr.clickable{cursor:pointer}
       <div class="page-title">儀表板</div>
       <div class="page-sub" id="dash-updated">載入中…</div>
       <div class="stat-grid" id="stat-grid">
+        <div class="stat-card"><div class="sc-val ink" id="st-active-courses">—</div><div class="sc-lbl">進行中課程總數</div></div>
         <div class="stat-card"><div class="sc-val ink" id="st-total">—</div><div class="sc-lbl">應完成人次</div></div>
         <div class="stat-card"><div class="sc-val green" id="st-passed">—</div><div class="sc-lbl">已完成人次</div></div>
         <div class="stat-card"><div class="sc-val red" id="st-failed">—</div><div class="sc-lbl">未完成人次</div></div>
@@ -282,11 +289,21 @@ tr.clickable{cursor:pointer}
       <div id="course-list-view">
         <div class="page-title">課程管理</div>
         <div class="page-sub">建立與管理教育訓練課程，每個課程包含影片與選擇性的測驗</div>
+        <div class="stat-grid" id="course-stat-grid">
+          <div class="stat-card"><div class="sc-val ink" id="cst-total">—</div><div class="sc-lbl">課程總數</div></div>
+          <div class="stat-card"><div class="sc-val green" id="cst-active">—</div><div class="sc-lbl">進行中課程總數</div></div>
+          <div class="stat-card"><div class="sc-val red" id="cst-inactive">—</div><div class="sc-lbl">已關閉課程總數</div></div>
+        </div>
         <div class="table-wrap">
           <div class="table-head">
             <h3>課程列表</h3>
             <div class="table-actions">
               <select class="filter-select" id="course-type-filter" style="width:140px" onchange="renderCourseTable()"><option value="">所有類型</option></select>
+              <select class="filter-select" id="course-status-filter" style="width:120px" onchange="renderCourseTable()">
+                <option value="active">進行中</option>
+                <option value="">所有狀態</option>
+                <option value="inactive">關閉</option>
+              </select>
               <button class="btn-sm btn-secondary" onclick="loadCourseList()">🔄 重新整理</button>
               <button class="btn-sm btn-primary" onclick="openCourseCreateModal()">＋ 新增課程</button>
             </div>
@@ -307,29 +324,73 @@ tr.clickable{cursor:pointer}
         </div>
 
         <div class="subtab-bar">
-          <div class="subtab-item active" data-subtab="video" onclick="showCourseSubtab('video')">🎬 影片設定</div>
+          <div class="subtab-item active" data-subtab="basic" onclick="showCourseSubtab('basic')">📋 課程基本資訊</div>
+          <div class="subtab-item" data-subtab="video" onclick="showCourseSubtab('video')">🎬 影片設定</div>
           <div class="subtab-item" data-subtab="quiz" onclick="showCourseSubtab('quiz')">📝 測驗設定</div>
           <div class="subtab-item" data-subtab="assignees" onclick="showCourseSubtab('assignees')">👥 指定人員</div>
           <div class="subtab-item" data-subtab="notify" onclick="showCourseSubtab('notify')">🔔 通知設定</div>
           <div class="subtab-item" data-subtab="records" onclick="showCourseSubtab('records')">📋 觀看／測驗紀錄</div>
         </div>
 
-        <!-- 影片設定 -->
-        <div class="subtab-pane active" id="sub-video">
+        <!-- 課程基本資訊 -->
+        <div class="subtab-pane active" id="sub-basic">
           <div class="notif-card">
-            <h3>課程名稱與影片</h3>
+            <h3>課程基本資訊</h3>
             <div class="vid-row">
               <label>課程名稱</label>
               <div class="vid-input-wrap">
-                <input type="text" id="course-name-input" placeholder="請輸入課程名稱，例如：職場霸凌防治教育訓練">
+                <input type="text" id="basic-name-input" placeholder="請輸入課程名稱，例如：職場霸凌防治教育訓練">
               </div>
             </div>
             <div class="vid-row">
               <label>課程類型</label>
               <div class="vid-input-wrap">
-                <input type="text" id="course-type-input" placeholder="例如：法定教育訓練、職能訓練（選填）" list="course-type-datalist">
+                <input type="text" id="basic-type-input" placeholder="例如：法定教育訓練、職能訓練（選填）" list="course-type-datalist">
               </div>
             </div>
+            <div class="vid-row">
+              <label>起始日期</label>
+              <div class="vid-input-wrap">
+                <input type="date" id="basic-start-date" style="max-width:200px">
+                <div class="vid-hint">選填，記錄本課程開始適用／開課的日期。</div>
+              </div>
+            </div>
+            <div class="vid-row">
+              <label>課程狀態</label>
+              <div class="vid-input-wrap">
+                <div class="toggle-wrap">
+                  <label class="toggle"><input type="checkbox" id="course-active-toggle" checked onchange="updateCourseActiveStatus()"><span class="toggle-slider"></span></label>
+                  <span id="course-active-text" style="font-size:.82rem;color:var(--ink3)"><span class="status-dot on"></span>進行中</span>
+                </div>
+                <div class="vid-hint">關閉後，課程列表狀態將顯示為「關閉」，僅供人工識別課程是否仍在使用。</div>
+              </div>
+            </div>
+            <div class="vid-row">
+              <label>備註說明</label>
+              <div class="vid-input-wrap">
+                <textarea id="basic-remarks" rows="3" placeholder="選填，課程相關備註"></textarea>
+              </div>
+            </div>
+            <button class="btn-sm btn-primary" onclick="saveCourseBasicInfoClick()">💾 儲存基本資訊</button>
+            <span id="basic-save-status" style="margin-left:.6rem;font-size:.82rem"></span>
+          </div>
+        </div>
+
+        <!-- 影片設定 -->
+        <div class="subtab-pane" id="sub-video">
+          <div class="notif-card">
+            <h3>影片開關</h3>
+            <div class="notif-row">
+              <label>本課程是否需要觀看影片</label>
+              <div class="toggle-wrap">
+                <label class="toggle"><input type="checkbox" id="video-required-toggle" checked onchange="updateVideoRequiredStatus()"><span class="toggle-slider"></span></label>
+                <span id="video-required-text" style="font-size:.82rem;color:var(--ink3)"><span class="status-dot on"></span>需要</span>
+              </div>
+            </div>
+            <div class="form-hint">關閉後，員工不需要看完影片即可進行測驗；若本課程未啟用測驗，關閉後此課程將永遠不會被標記為完成，除非之後加入測驗。</div>
+          </div>
+          <div class="notif-card">
+            <h3>YouTube 影片設定</h3>
             <div class="vid-row">
               <label>YouTube 影片連結</label>
               <div class="vid-input-wrap">
@@ -514,6 +575,53 @@ tr.clickable{cursor:pointer}
       </div>
     </div>
 
+    <!-- 檔案下載 -->
+    <div class="tab-content" id="tab-export">
+      <div class="page-title">檔案下載</div>
+      <div class="page-sub">依條件篩選課程指定人員名單，匯出 Excel 檔案</div>
+      <div class="notif-card">
+        <h3>篩選條件</h3>
+        <div class="filter-row">
+          <div class="form-group">
+            <label>課程起始日期（起）</label>
+            <input type="date" id="exp-start-from" onchange="updateExportCoursePreview()">
+          </div>
+          <div class="form-group">
+            <label>課程起始日期（迄）</label>
+            <input type="date" id="exp-start-to" onchange="updateExportCoursePreview()">
+          </div>
+          <div class="form-group">
+            <label>課程類型</label>
+            <select class="filter-select" id="exp-course-type" style="width:160px" onchange="updateExportCoursePreview()"><option value="">所有類型</option></select>
+          </div>
+          <div class="form-group">
+            <label>狀態</label>
+            <select class="filter-select" id="exp-status" style="width:120px" onchange="updateExportCoursePreview()">
+              <option value="">所有狀態</option>
+              <option value="active">進行中</option>
+              <option value="inactive">關閉</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>部門</label>
+            <select class="filter-select" id="exp-dept" style="width:140px"><option value="">所有部門</option></select>
+          </div>
+          <div class="form-group">
+            <label>職類</label>
+            <select class="filter-select" id="exp-jobtype" style="width:140px"><option value="">所有職類</option></select>
+          </div>
+        </div>
+        <button class="btn-sm btn-primary" onclick="exportCourseAssigneesExcel()">📥 匯出 Excel</button>
+        <span id="exp-status-msg" style="margin-left:.6rem;font-size:.82rem"></span>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head">
+          <h3>符合篩選條件的課程 <span id="exp-course-count" style="font-size:.8rem;font-weight:400;color:var(--ink3)"></span></h3>
+        </div>
+        <div id="exp-course-preview-wrap"><div class="table-empty">載入中…</div></div>
+      </div>
+    </div>
+
     <!-- ADMINS -->
     <div class="tab-content" id="tab-admins">
       <div class="page-title">管理員設定</div>
@@ -661,8 +769,9 @@ tr.clickable{cursor:pointer}
     <div class="modal-body">
       <p style="font-size:.82rem;color:var(--ink2);margin-bottom:.75rem">勾選此員工必須完成的課程：</p>
       <div class="filter-row">
+        <div class="form-group"><label>課程起始日期</label><input type="date" id="ec-start-date-filter" onchange="renderEmpCoursesList()"></div>
         <div class="form-group"><label>課程類型</label><select id="ec-type-filter" onchange="renderEmpCoursesList()"><option value="">全部類型</option></select></div>
-        <div class="form-group"><label>完成期限</label><input type="date" id="ec-default-deadline" title="套用到所有勾選課程的預設完成期限，個別課程可再自訂覆蓋"></div>
+        <div class="form-group" style="margin-left:auto;margin-right:.95rem;text-align:right"><label>設定所有勾選課程完成期限</label><input type="date" id="ec-default-deadline" style="width:150px" title="套用到所有勾選課程的預設完成期限，個別課程可再自訂覆蓋"></div>
       </div>
       <div style="margin-bottom:.6rem"><label style="font-size:.82rem;color:var(--ink2)"><input type="checkbox" id="ec-select-all" style="width:auto;margin-right:.4rem" onchange="toggleSelectAllEmpCourses(this)">全選目前篩選結果</label></div>
       <div class="candidate-list" id="emp-courses-list" style="max-height:340px"></div>
@@ -740,9 +849,12 @@ function showTab(name){
   if(name === 'dashboard') loadDashboard();
   if(name === 'courses' && !currentCourseId) loadCourseList();
 }
-function tabLabel(n){ return {dashboard:'儀表板',courses:'課程管理',employees:'員工總表',admins:'管理員設定'}[n]||n; }
+function tabLabel(n){ return {dashboard:'儀表板',courses:'課程管理',employees:'員工總表',export:'檔案下載',admins:'管理員設定'}[n]||n; }
 
 // ═══════════ DASHBOARD ═══════════
+let dashCourses = [];
+let dashSortState = { col:'startDate', asc:false };
+
 function loadDashboard(){
   document.getElementById('dash-updated').textContent = '載入中…';
   fetch(`${GS_URL}?action=getCourses`)
@@ -751,23 +863,45 @@ function loadDashboard(){
       const courses = d.courses || [];
       let total=0, completed=0;
       courses.forEach(c=>{ total += c.total; completed += c.completed; });
+      document.getElementById('st-active-courses').textContent = courses.filter(c=>c.active!==false).length;
       document.getElementById('st-total').textContent  = total;
       document.getElementById('st-passed').textContent = completed;
       document.getElementById('st-failed').textContent = total - completed;
       document.getElementById('st-rate').textContent   = total ? Math.round(completed/total*100)+'%' : '0%';
       document.getElementById('dash-updated').textContent = '資料更新時間：' + new Date().toLocaleString('zh-TW');
 
-      const wrap = document.getElementById('dash-course-table');
-      if(!courses.length){ wrap.innerHTML = '<div class="table-empty">尚無課程，請至「課程管理」新增</div>'; return; }
-      wrap.innerHTML = `<table><thead><tr><th>課程名稱</th><th>是否測驗</th><th>指定人數</th><th>已完成</th><th>完成率</th></tr></thead><tbody>
-        ${courses.map(c=>`<tr class="clickable" data-course-id="${c.id}"><td><strong>${c.name}</strong></td><td>${c.hasQuiz?'<span class="badge pass">需測驗</span>':'<span class="badge neutral">無測驗</span>'}</td>
-        <td>${c.total}</td><td>${c.completed}</td><td>${c.total?Math.round(c.completed/c.total*100):0}%</td></tr>`).join('')}
-        </tbody></table>`;
-      wrap.querySelectorAll('tr[data-course-id]').forEach(tr=>{
-        tr.addEventListener('click', ()=>{ showTab('courses'); openCourseDetail(tr.dataset.courseId); });
-      });
+      dashCourses = courses;
+      renderDashboardCourseTable();
     })
     .catch(()=>{ document.getElementById('dash-updated').textContent = '⚠️ 無法連線至 Google 試算表'; });
+}
+
+function sortDashCourseTable(col){ toggleSort(dashSortState, col); renderDashboardCourseTable(); }
+
+function renderDashboardCourseTable(){
+  const wrap = document.getElementById('dash-course-table');
+  if(!dashCourses.length){ wrap.innerHTML = '<div class="table-empty">尚無課程，請至「課程管理」新增</div>'; return; }
+
+  let list = dashCourses.filter(c=>c.active!==false);
+  if(!list.length){ wrap.innerHTML = '<div class="table-empty">目前無進行中的課程</div>'; return; }
+
+  if(dashSortState.col){
+    const getter = COURSE_COL_GETTERS[dashSortState.col];
+    const numeric = COURSE_COL_NUMERIC.has(dashSortState.col);
+    const dir = dashSortState.asc ? 1 : -1;
+    list.sort((a,b)=>compareVals(getter(a), getter(b), numeric) * dir);
+  }
+
+  wrap.innerHTML = `<table><thead><tr>
+    ${sortableTh('課程名稱','name',dashSortState)}${sortableTh('課程類型','courseType',dashSortState)}${sortableTh('起始日期','startDate',dashSortState)}${sortableTh('觀看影片','videoRequired',dashSortState)}${sortableTh('是否測驗','hasQuiz',dashSortState)}${sortableTh('指定人數','total',dashSortState)}${sortableTh('已完成','completed',dashSortState)}${sortableTh('完成率','rate',dashSortState)}
+  </tr></thead><tbody>
+    ${list.map(c=>`<tr class="clickable" data-course-id="${c.id}"><td><strong>${escapeHtml(c.name)}</strong></td><td>${escapeHtml(c.courseType||'—')}</td><td>${escapeHtml(c.startDate||'—')}</td><td>${c.videoRequired!==false?'<span class="badge pass">需要</span>':'<span class="badge neutral">不需要</span>'}</td><td>${c.hasQuiz?'<span class="badge pass">需測驗</span>':'<span class="badge neutral">無測驗</span>'}</td>
+    <td>${c.total}</td><td>${c.completed}</td><td>${c.total?Math.round(c.completed/c.total*100):0}%</td></tr>`).join('')}
+    </tbody></table>`;
+  wrap.querySelectorAll('tr[data-course-id]').forEach(tr=>{
+    tr.addEventListener('click', ()=>{ showTab('courses'); openCourseDetail(tr.dataset.courseId); });
+  });
+  wrap.querySelectorAll('th[data-sort-col]').forEach(th=>th.addEventListener('click', ()=>sortDashCourseTable(th.dataset.sortCol)));
 }
 
 // ═══════════ 共用排序工具 ═══════════
@@ -791,15 +925,22 @@ function sortableTh(label, col, state){
 let allCourses = [];
 let currentCourseId = null;
 let currentCourse = null;
-let courseSortState = { col:'', asc:true };
+let courseSortState = { col:'startDate', asc:false };
 
 function loadCourseList(){
   const wrap = document.getElementById('course-table-wrap');
   wrap.innerHTML = '<div class="loading-wrap"><div class="spinner"></div><div>資料載入中…</div></div>';
   fetch(`${GS_URL}?action=getCourses`)
     .then(r=>r.json())
-    .then(d=>{ allCourses = d.courses || []; populateCourseTypeFilter(); renderCourseTable(); })
+    .then(d=>{ allCourses = d.courses || []; populateCourseTypeFilter(); renderCourseStats(); renderCourseTable(); })
     .catch(()=>{ wrap.innerHTML = '<div class="table-empty">❌ 無法連線至 Google 試算表，請確認 Apps Script URL 設定</div>'; });
+}
+
+function renderCourseStats(){
+  const activeCount = allCourses.filter(c=>c.active!==false).length;
+  document.getElementById('cst-total').textContent = allCourses.length;
+  document.getElementById('cst-active').textContent = activeCount;
+  document.getElementById('cst-inactive').textContent = allCourses.length - activeCount;
 }
 
 function populateCourseTypeFilter(){
@@ -814,18 +955,23 @@ function populateCourseTypeFilter(){
 
 const COURSE_COL_GETTERS = {
   name: c=>c.name||'', courseType: c=>c.courseType||'',
+  startDate: c=>c.startDate||'', active: c=>c.active!==false?1:0, videoRequired: c=>c.videoRequired!==false?1:0,
   hasQuiz: c=>c.hasQuiz?1:0, passScore: c=>c.hasQuiz?c.passScore:-1,
   total: c=>c.total, completed: c=>c.completed,
-  rate: c=>c.total?c.completed/c.total:-1, createdAt: c=>c.createdAt||''
+  rate: c=>c.total?c.completed/c.total:-1
 };
-const COURSE_COL_NUMERIC = new Set(['hasQuiz','passScore','total','completed','rate']);
+const COURSE_COL_NUMERIC = new Set(['hasQuiz','passScore','total','completed','rate','videoRequired','active']);
 
 function sortCourseTable(col){ toggleSort(courseSortState, col); renderCourseTable(); }
 
 function renderCourseTable(){
   const wrap = document.getElementById('course-table-wrap');
   const typeFilter = document.getElementById('course-type-filter').value;
-  let list = typeFilter ? allCourses.filter(c=>c.courseType===typeFilter) : allCourses.slice();
+  const statusFilter = document.getElementById('course-status-filter').value;
+  let list = allCourses.slice();
+  if(typeFilter) list = list.filter(c=>c.courseType===typeFilter);
+  if(statusFilter === 'active') list = list.filter(c=>c.active!==false);
+  else if(statusFilter === 'inactive') list = list.filter(c=>c.active===false);
 
   if(courseSortState.col){
     const getter = COURSE_COL_GETTERS[courseSortState.col];
@@ -838,21 +984,21 @@ function renderCourseTable(){
   if(!list.length){ wrap.innerHTML = '<div class="table-empty">無符合條件的課程</div>'; return; }
 
   wrap.innerHTML = `<table><thead><tr>
-    ${sortableTh('課程名稱','name',courseSortState)}${sortableTh('課程類型','courseType',courseSortState)}${sortableTh('是否測驗','hasQuiz',courseSortState)}${sortableTh('及格分數','passScore',courseSortState)}${sortableTh('指定人數','total',courseSortState)}${sortableTh('已完成','completed',courseSortState)}${sortableTh('完成率','rate',courseSortState)}${sortableTh('建立時間','createdAt',courseSortState)}<th></th>
+    ${sortableTh('課程名稱','name',courseSortState)}${sortableTh('課程類型','courseType',courseSortState)}${sortableTh('起始日期','startDate',courseSortState)}${sortableTh('狀態','active',courseSortState)}${sortableTh('觀看影片','videoRequired',courseSortState)}${sortableTh('是否測驗','hasQuiz',courseSortState)}${sortableTh('及格分數','passScore',courseSortState)}${sortableTh('指定人數','total',courseSortState)}${sortableTh('已完成','completed',courseSortState)}${sortableTh('完成率','rate',courseSortState)}<th></th>
   </tr></thead><tbody>${list.map(c=>`<tr>
     <td class="clickable" data-open-id="${c.id}"><strong>${escapeHtml(c.name)}</strong></td>
     <td>${escapeHtml(c.courseType||'—')}</td>
+    <td>${escapeHtml(c.startDate||'—')}</td>
+    <td>${c.active!==false?'<span class="badge pass">進行中</span>':'<span class="badge neutral">關閉</span>'}</td>
+    <td>${c.videoRequired!==false?'<span class="badge pass">需要</span>':'<span class="badge neutral">不需要</span>'}</td>
     <td>${c.hasQuiz?'<span class="badge pass">需測驗</span>':'<span class="badge neutral">無測驗</span>'}</td>
     <td>${c.hasQuiz ? c.passScore+'%' : '—'}</td>
     <td>${c.total}</td><td>${c.completed}</td><td>${c.total?Math.round(c.completed/c.total*100):0}%</td>
-    <td style="white-space:nowrap;color:var(--ink3)">${formatTimestamp(c.createdAt)}</td>
     <td style="white-space:nowrap">
-      <button class="btn-sm btn-secondary" data-open-id="${c.id}">管理</button>
-      <button class="btn-sm btn-danger" data-del-id="${c.id}" data-del-name="${escapeHtml(c.name)}" style="margin-left:.35rem">刪除</button>
+      <button class="btn-sm btn-secondary" data-open-id="${c.id}">編輯</button>
     </td>
   </tr>`).join('')}</tbody></table>`;
   wrap.querySelectorAll('[data-open-id]').forEach(el=>el.addEventListener('click', ()=>openCourseDetail(el.dataset.openId)));
-  wrap.querySelectorAll('[data-del-id]').forEach(el=>el.addEventListener('click', (e)=>{ e.stopPropagation(); deleteCourseFromList(el.dataset.delId, el.dataset.delName); }));
   wrap.querySelectorAll('th[data-sort-col]').forEach(th=>th.addEventListener('click', ()=>sortCourseTable(th.dataset.sortCol)));
 }
 
@@ -896,7 +1042,7 @@ function openCourseDetail(courseId){
   document.getElementById('course-detail-view').style.display = 'block';
   document.getElementById('cd-title').textContent = '載入中…';
   document.getElementById('cd-sub').textContent = '';
-  showCourseSubtab('video');
+  showCourseSubtab('basic');
 
   fetch(`${GS_URL}?action=getCourse&courseId=${encodeURIComponent(currentCourseId)}`)
     .then(r=>r.json())
@@ -906,8 +1052,17 @@ function openCourseDetail(courseId){
       document.getElementById('cd-title').textContent = currentCourse.name;
       document.getElementById('cd-sub').textContent = currentCourse.hasQuiz ? `含測驗・及格分數 ${currentCourse.passScore}%` : '不含測驗';
 
-      document.getElementById('course-name-input').value = currentCourse.name;
-      document.getElementById('course-type-input').value = currentCourse.courseType || '';
+      document.getElementById('basic-name-input').value = currentCourse.name;
+      document.getElementById('basic-type-input').value = currentCourse.courseType || '';
+      document.getElementById('basic-start-date').value = currentCourse.startDate || '';
+      document.getElementById('basic-remarks').value = currentCourse.remarks || '';
+      document.getElementById('basic-save-status').textContent = '';
+      document.getElementById('course-active-toggle').checked = currentCourse.active !== false;
+      updateCourseActiveStatus();
+
+      document.getElementById('video-required-toggle').checked = currentCourse.videoRequired !== false;
+      updateVideoRequiredStatus();
+
       if(currentCourse.videoId){
         document.getElementById('vid-link-input').value = 'https://www.youtube.com/watch?v=' + currentCourse.videoId;
         document.getElementById('vid-id-display').value = currentCourse.videoId;
@@ -978,23 +1133,53 @@ function hideVideoPreview(){
   const ph = document.getElementById('vid-placeholder');
   iframe.style.display = 'none'; iframe.src=''; ph.style.display = 'flex';
 }
+function updateVideoRequiredStatus(){
+  const on = document.getElementById('video-required-toggle').checked;
+  document.getElementById('video-required-text').innerHTML = on ? '<span class="status-dot on"></span>需要' : '<span class="status-dot off"></span>不需要';
+}
+
+function updateCourseActiveStatus(){
+  const on = document.getElementById('course-active-toggle').checked;
+  document.getElementById('course-active-text').innerHTML = on ? '<span class="status-dot on"></span>進行中' : '<span class="status-dot off"></span>關閉';
+}
+
 function saveCourseVideo(){
-  const name = document.getElementById('course-name-input').value.trim();
-  const courseType = document.getElementById('course-type-input').value.trim();
   const videoId = document.getElementById('vid-id-display').value.trim();
-  if(!name){ alert('請先填寫課程名稱'); return; }
+  const videoRequired = document.getElementById('video-required-toggle').checked;
   const status = document.getElementById('vid-save-status');
   status.className = 'vid-status loading'; status.textContent = '⏳ 儲存中…';
-  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'saveCourseVideoSettings', courseId:currentCourseId, name, videoId, courseType }) })
+  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'saveCourseVideoSettings', courseId:currentCourseId, videoId, videoRequired }) })
     .then(r=>r.json())
     .then(d=>{
       if(d.status==='ok'){
         status.className = 'vid-status ok'; status.textContent = '✅ 已儲存';
-        currentCourse.name = name; currentCourse.videoId = videoId; currentCourse.courseType = courseType;
-        document.getElementById('cd-title').textContent = name;
+        currentCourse.videoId = videoId; currentCourse.videoRequired = videoRequired;
       } else { status.className = 'vid-status err'; status.textContent = '❌ ' + (d.message||'儲存失敗'); }
     })
     .catch(()=>{ status.className = 'vid-status err'; status.textContent = '❌ 連線失敗'; });
+}
+
+// ── 課程基本資訊 ──
+function saveCourseBasicInfoClick(){
+  const name = document.getElementById('basic-name-input').value.trim();
+  const courseType = document.getElementById('basic-type-input').value.trim();
+  const startDate = document.getElementById('basic-start-date').value;
+  const remarks = document.getElementById('basic-remarks').value.trim();
+  const active = document.getElementById('course-active-toggle').checked;
+  const status = document.getElementById('basic-save-status');
+  if(!name){ status.style.color='var(--red)'; status.textContent='⚠️ 請先填寫課程名稱'; return; }
+  status.style.color='var(--ink3)'; status.textContent='儲存中…';
+  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'saveCourseBasicInfo', courseId:currentCourseId, name, courseType, startDate, remarks, active }) })
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.status==='ok'){
+        status.style.color='var(--green)'; status.textContent='✅ 已儲存';
+        currentCourse.name = name; currentCourse.courseType = courseType; currentCourse.startDate = startDate; currentCourse.remarks = remarks; currentCourse.active = active;
+        document.getElementById('cd-title').textContent = name;
+      } else { status.style.color='var(--red)'; status.textContent = '❌ ' + (d.message||'儲存失敗'); }
+      setTimeout(()=>status.textContent='',4000);
+    })
+    .catch(()=>{ status.style.color='var(--red)'; status.textContent='❌ 連線失敗'; });
 }
 
 // ── 測驗設定 ──
@@ -1381,6 +1566,149 @@ function filterEmployeeTable(){
   renderEmployeeTable();
 }
 
+// ═══════════ 檔案下載 ═══════════
+let exportCourses = [];
+
+function loadExportTab(){
+  fetch(`${GS_URL}?action=getCourses`)
+    .then(r=>r.json())
+    .then(d=>{
+      exportCourses = d.courses || [];
+      const types = Array.from(new Set(exportCourses.map(c=>c.courseType).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'zh-TW'));
+      const sel = document.getElementById('exp-course-type');
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">所有類型</option>' + types.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+      if(types.includes(cur)) sel.value = cur;
+      updateExportCoursePreview();
+    });
+  fetch(`${GS_URL}?action=getEmployeeMaster`)
+    .then(r=>r.json())
+    .then(d=>{
+      const employees = d.employees || [];
+      const depts = Array.from(new Set(employees.map(e=>e.dept).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'zh-TW'));
+      const jobs  = Array.from(new Set(employees.map(e=>e.jobType).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'zh-TW'));
+      const deptSel = document.getElementById('exp-dept');
+      const jobSel  = document.getElementById('exp-jobtype');
+      const curDept = deptSel.value, curJob = jobSel.value;
+      deptSel.innerHTML = '<option value="">所有部門</option>' + depts.map(dd=>`<option value="${escapeHtml(dd)}">${escapeHtml(dd)}</option>`).join('');
+      jobSel.innerHTML  = '<option value="">所有職類</option>' + jobs.map(j=>`<option value="${escapeHtml(j)}">${escapeHtml(j)}</option>`).join('');
+      if(depts.includes(curDept)) deptSel.value = curDept;
+      if(jobs.includes(curJob)) jobSel.value = curJob;
+    });
+}
+
+let exportFilteredCourses = [];
+let exportDeselectedCourseIds = new Set();
+
+function updateExportCoursePreview(){
+  const startFrom = document.getElementById('exp-start-from').value;
+  const startTo = document.getElementById('exp-start-to').value;
+  const courseType = document.getElementById('exp-course-type').value;
+  const status = document.getElementById('exp-status').value;
+  const list = exportCourses.filter(c=>{
+    if(courseType && c.courseType !== courseType) return false;
+    if(status === 'active' && c.active === false) return false;
+    if(status === 'inactive' && c.active !== false) return false;
+    if(startFrom && (!c.startDate || c.startDate < startFrom)) return false;
+    if(startTo && (!c.startDate || c.startDate > startTo)) return false;
+    return true;
+  });
+  exportFilteredCourses = list;
+  document.getElementById('exp-course-count').textContent = `（${list.length}）`;
+  const wrap = document.getElementById('exp-course-preview-wrap');
+  if(!exportCourses.length){ wrap.innerHTML = '<div class="table-empty">尚無課程資料</div>'; return; }
+  if(!list.length){ wrap.innerHTML = '<div class="table-empty">無符合篩選條件的課程</div>'; return; }
+  wrap.innerHTML = `<table><thead><tr><th><input type="checkbox" id="exp-select-all" onchange="toggleExportSelectAll()"></th><th>課程名稱</th><th>課程類型</th><th>起始日期</th><th>狀態</th><th>指定人數</th></tr></thead><tbody>
+    ${list.map(c=>`<tr>
+      <td><input type="checkbox" data-course-id="${escapeHtml(c.id)}" ${exportDeselectedCourseIds.has(c.id)?'':'checked'} onchange="toggleExportCourseSelection('${escapeHtml(c.id)}', this.checked)"></td>
+      <td><strong>${escapeHtml(c.name)}</strong></td>
+      <td>${escapeHtml(c.courseType||'—')}</td>
+      <td>${escapeHtml(c.startDate||'—')}</td>
+      <td>${c.active!==false?'<span class="badge pass">進行中</span>':'<span class="badge neutral">關閉</span>'}</td>
+      <td>${c.total}</td>
+    </tr>`).join('')}
+    </tbody></table>`;
+  updateExportSelectAllState();
+}
+
+function toggleExportCourseSelection(courseId, checked){
+  if(checked) exportDeselectedCourseIds.delete(courseId);
+  else exportDeselectedCourseIds.add(courseId);
+  updateExportSelectAllState();
+}
+
+function toggleExportSelectAll(){
+  const checked = document.getElementById('exp-select-all').checked;
+  exportFilteredCourses.forEach(c=>{
+    if(checked) exportDeselectedCourseIds.delete(c.id);
+    else exportDeselectedCourseIds.add(c.id);
+  });
+  updateExportCoursePreview();
+}
+
+function updateExportSelectAllState(){
+  const selectAllBox = document.getElementById('exp-select-all');
+  if(!selectAllBox || !exportFilteredCourses.length) return;
+  const selectedCount = exportFilteredCourses.filter(c=>!exportDeselectedCourseIds.has(c.id)).length;
+  selectAllBox.checked = selectedCount === exportFilteredCourses.length;
+  selectAllBox.indeterminate = selectedCount > 0 && selectedCount < exportFilteredCourses.length;
+}
+
+function exportCourseAssigneesExcel(){
+  const statusMsg = document.getElementById('exp-status-msg');
+  const selectedIds = exportFilteredCourses.filter(c=>!exportDeselectedCourseIds.has(c.id)).map(c=>c.id);
+  if(!exportFilteredCourses.length){ statusMsg.style.color = 'var(--red)'; statusMsg.textContent = '⚠️ 查無符合條件的課程'; return; }
+  if(!selectedIds.length){ statusMsg.style.color = 'var(--red)'; statusMsg.textContent = '⚠️ 請至少勾選一個課程'; return; }
+  const params = new URLSearchParams({
+    action: 'getExportData',
+    startFrom: document.getElementById('exp-start-from').value,
+    startTo: document.getElementById('exp-start-to').value,
+    courseType: document.getElementById('exp-course-type').value,
+    status: document.getElementById('exp-status').value,
+    dept: document.getElementById('exp-dept').value,
+    jobType: document.getElementById('exp-jobtype').value,
+    courseIds: selectedIds.join(',')
+  });
+  statusMsg.style.color = 'var(--ink3)'; statusMsg.textContent = '資料匯出中…';
+  fetch(`${GS_URL}?${params.toString()}`)
+    .then(r=>r.json())
+    .then(async d=>{
+      const rows = d.rows || [];
+      if(!rows.length){ statusMsg.style.color = 'var(--red)'; statusMsg.textContent = '⚠️ 查無符合條件的資料'; return; }
+      const header = ['課程名稱','課程類別','工號','姓名','部門','職類','影片觀看','測驗紀錄','課程完成時間'];
+
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet('課程指定人員');
+      ws.addRow(header);
+      rows.forEach(r=>ws.addRow([r.courseName, r.courseType, r.empId, r.name, r.dept, r.jobType, r.videoStatus, r.quizResult, r.completedAt]));
+      ws.columns.forEach(col=>{ col.width = 16; });
+
+      ws.getRow(1).eachCell(cell=>{
+        cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFE8671A'} };
+        cell.font = { name:'微軟正黑體', size:12, bold:true, color:{argb:'FFFFFFFF'} };
+        cell.alignment = { horizontal:'center', vertical:'middle' };
+      });
+      ws.eachRow(row=>{
+        row.eachCell(cell=>{
+          if(!cell.font) cell.font = { name:'微軟正黑體', size:12 };
+          cell.alignment = { horizontal:'center', vertical:'middle' };
+        });
+      });
+
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const stamp = new Date().toISOString().slice(0,10).replace(/-/g,'');
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `課程指定人員匯出_${stamp}.xlsx`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      statusMsg.style.color = 'var(--green)'; statusMsg.textContent = `✅ 已匯出 ${rows.length} 筆資料`;
+    })
+    .catch(()=>{ statusMsg.style.color = 'var(--red)'; statusMsg.textContent = '❌ 連線失敗'; });
+}
+
 const EMP_COL_GETTERS = {
   empId: e=>e.empId||'', name: e=>e.name||'', dept: e=>e.dept||'', jobType: e=>e.jobType||'',
   requiredCourses: e=>e.requiredCourses||0, completedCourses: e=>e.completedCourses||0,
@@ -1445,6 +1773,7 @@ function openEmployeeCourseModal(emp){
   document.getElementById('emp-courses-modal-title').textContent = `課程管理－${emp.name}（${emp.empId}）`;
   document.getElementById('emp-courses-list').innerHTML = '<div class="loading-wrap"><div class="spinner"></div><div>資料載入中…</div></div>';
   document.getElementById('ec-default-deadline').value = '';
+  document.getElementById('ec-start-date-filter').value = '';
   document.getElementById('modal-emp-courses').classList.add('open');
 
   Promise.all([
@@ -1471,8 +1800,11 @@ function renderEmpCoursesList(){
   const wrap = document.getElementById('emp-courses-list');
   document.getElementById('ec-select-all').checked = false;
   if(!empCourseAllCourses.length){ wrap.innerHTML = '<div class="table-empty">尚無課程，請先至「課程管理」新增課程</div>'; return; }
+  const startDateFilter = document.getElementById('ec-start-date-filter').value;
   const typeFilter = document.getElementById('ec-type-filter').value;
-  const list = typeFilter ? empCourseAllCourses.filter(c=>c.courseType===typeFilter) : empCourseAllCourses;
+  let list = empCourseAllCourses.filter(c=>c.active!==false);
+  if(startDateFilter) list = list.filter(c=>c.startDate && c.startDate >= startDateFilter);
+  if(typeFilter) list = list.filter(c=>c.courseType===typeFilter);
   if(!list.length){ wrap.innerHTML = '<div class="table-empty">無符合條件的課程</div>'; return; }
   wrap.innerHTML = list.map(c=>{
     const state = empCourseSelectionState[String(c.id)] || { checked:false, deadline:'' };
@@ -1480,7 +1812,9 @@ function renderEmpCoursesList(){
     <label class="cand-row" style="cursor:pointer">
       <input type="checkbox" class="emp-course-check" data-course-id="${escapeHtml(c.id)}" ${state.checked?'checked':''}>
       <span style="flex:1"><strong>${escapeHtml(c.name)}</strong></span>
+      <span class="cand-meta">${c.videoRequired!==false?'有影片':'無影片'}</span>
       <span class="cand-meta">${c.hasQuiz?'需測驗':'無測驗'}</span>
+      <span class="cand-meta">完成期限</span>
       <input type="date" class="ec-course-deadline" data-course-id="${escapeHtml(c.id)}" value="${state.deadline||''}" style="width:150px" onclick="event.stopPropagation()" title="此課程的完成期限（優先於上方預設完成期限）">
     </label>`;
   }).join('');

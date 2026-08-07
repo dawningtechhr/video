@@ -96,16 +96,17 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
 .courses-section-title{font-size:.95rem;font-weight:700;color:var(--ink2);margin:1.5rem 0 .85rem;display:flex;align-items:center;gap:.5rem}
 .courses-section-title .count{font-size:.75rem;font-weight:400;color:var(--ink3)}
 .course-card{background:#fff;border:1px solid var(--paper3);border-radius:var(--radius-lg);padding:1.1rem 1.3rem;margin-bottom:.9rem;box-shadow:0 2px 10px rgba(0,0,0,.03)}
-.course-card .cc-title{font-size:1.02rem;font-weight:700;color:var(--ink);cursor:pointer;margin-bottom:.55rem}
+.course-card .cc-title{font-size:1.02rem;font-weight:700;color:var(--ink);cursor:pointer}
 .course-card .cc-title:hover{color:var(--accent)}
-.cc-progress-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
-.cc-bar-wrap{flex:1;height:9px;background:var(--paper3);border-radius:5px;overflow:hidden}
-.cc-bar-fill{height:100%;background:var(--accent);transition:width .3s}
-.cc-percent{font-size:.78rem;color:var(--ink3);width:38px;text-align:right;flex-shrink:0}
-.cc-quiz-status{font-size:.8rem;padding:.25rem .7rem;border-radius:12px;display:inline-flex;align-items:center;gap:.3rem}
-.cc-quiz-status.wait{background:var(--paper2);color:var(--ink3)}
-.cc-quiz-status.ready{background:var(--accent-light);color:var(--accent2)}
-.cc-quiz-status.fail{background:var(--red-light);color:var(--red)}
+.cc-header-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.5rem}
+.cc-deadline{font-size:1.02rem;color:var(--ink3);flex-shrink:0;white-space:nowrap}
+.cc-info-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem;font-size:.78rem;color:var(--ink3);flex-wrap:wrap}
+.cc-enter-btn{margin-top:.75rem;width:100%;text-align:center;display:block}
+.cc-name-row{font-size:1.02rem;color:var(--ink);cursor:pointer;margin-bottom:.5rem}
+.cc-name-row:hover{color:var(--accent)}
+.cc-name-row strong{font-weight:700}
+.course-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.course-grid .course-card{margin-bottom:0}
 .cc-meta{font-size:.78rem;color:var(--ink3);margin-top:.4rem}
 .cc-score-badge{font-size:.8rem;font-weight:700;padding:.25rem .7rem;border-radius:12px;background:var(--green-light);color:var(--green);display:inline-block}
 .courses-empty{background:#fff;border:1px dashed var(--paper3);border-radius:var(--radius-lg);padding:2rem;text-align:center;color:var(--ink3);font-size:.85rem}
@@ -446,29 +447,26 @@ async function goCourses(targetTab){
 }
 
 function pendingCardHtml(c){
-  let quizHtml = '';
-  if(c.hasQuiz){
-    if(!c.videoDone) quizHtml = `<span class="cc-quiz-status wait">📝 需先看完影片才能測驗</span>`;
-    else if(!c.quizAttempted) quizHtml = `<span class="cc-quiz-status ready">📝 可進行測驗</span>`;
-    else if(!c.quizPassed) quizHtml = `<span class="cc-quiz-status fail">📝 未通過（上次 ${c.quizScore}分），可重新測驗</span>`;
-  }
+  const videoText = c.videoRequired === false ? '不須觀看' : (c.percent > 0 ? `已觀看 ${c.percent}%` : '須觀看');
+  const quizText = c.hasQuiz ? `須測驗（及格 ${c.passScore}分）` : '不須測驗';
   return `
   <div class="course-card">
-    <div class="cc-title" data-open-course="${escapeHtml(c.courseId)}">${escapeHtml(c.courseName)}</div>
-    <div class="cc-progress-row">
-      <div class="cc-bar-wrap"><div class="cc-bar-fill" style="width:${c.percent}%"></div></div>
-      <div class="cc-percent">${c.percent}%</div>
-    </div>
-    <div class="cc-meta">影片觀看：${c.videoDone?'已看完':(c.watchedSeconds>0?'觀看中（'+formatMinSec(c.watchedSeconds)+'）':'尚未開始')}</div>
-    ${quizHtml ? '<div style="margin-top:.5rem">'+quizHtml+'</div>' : ''}
+    <div class="cc-name-row" data-open-course="${escapeHtml(c.courseId)}"><strong>課程名稱：</strong>${escapeHtml(c.courseName)}</div>
+    <div class="cc-meta">完成期限：${escapeHtml(c.deadline || '無期限')}</div>
+    <div class="cc-meta">課程類型：${escapeHtml(c.courseType || '未分類')}</div>
+    <div class="cc-meta">影片觀看：${videoText}</div>
+    <div class="cc-meta">測驗：${quizText}</div>
+    <button class="btn btn-primary cc-enter-btn" data-open-course="${escapeHtml(c.courseId)}">進入課程</button>
   </div>`;
 }
 function completedCardHtml(c){
   return `
   <div class="course-card">
-    <div class="cc-title" data-open-course="${escapeHtml(c.courseId)}">${escapeHtml(c.courseName)}</div>
-    <div class="cc-meta">完成時間：${formatTimestamp(c.completedAt)}</div>
-    ${c.hasQuiz ? `<div style="margin-top:.5rem"><span class="cc-score-badge">測驗分數：${c.quizScore}分</span></div>` : ''}
+    <div class="cc-header-row">
+      <div class="cc-title" data-open-course="${escapeHtml(c.courseId)}">${escapeHtml(c.courseName)}</div>
+      <div class="cc-deadline">完成日期：${escapeHtml(formatTimestamp(c.completedAt))}</div>
+    </div>
+    ${c.hasQuiz ? `<div class="cc-info-row"><span class="cc-score-badge">測驗分數：${c.quizScore}分</span></div>` : ''}
   </div>`;
 }
 function bindCourseOpenHandlers(container){
@@ -493,7 +491,7 @@ function renderCourseLists(){
   if(!incomplete.length){
     dbPreview.innerHTML = '<div class="courses-empty">目前沒有尚未完成的課程，太棒了！</div>';
   } else {
-    dbPreview.innerHTML = incomplete.slice(0,3).map(pendingCardHtml).join('')
+    dbPreview.innerHTML = '<div class="course-grid">' + incomplete.slice(0,3).map(pendingCardHtml).join('') + '</div>'
       + (incomplete.length > 3 ? `<div style="text-align:center;margin-top:.5rem"><span class="switch-link" onclick="showEmpTab('pending')">查看全部 ${incomplete.length} 門待完成課程 →</span></div>` : '');
   }
   bindCourseOpenHandlers(dbPreview);
@@ -501,7 +499,7 @@ function renderCourseLists(){
   // 待完成課程分頁
   document.getElementById('pending-page-sub').textContent = incomplete.length ? `您目前有 ${incomplete.length} 門課程尚未完成` : '目前沒有尚未完成的課程';
   const wrapIncomplete = document.getElementById('cl-incomplete-list');
-  wrapIncomplete.innerHTML = incomplete.length ? incomplete.map(pendingCardHtml).join('') : '<div class="courses-empty">目前沒有尚未完成的課程</div>';
+  wrapIncomplete.innerHTML = incomplete.length ? ('<div class="course-grid">' + incomplete.map(pendingCardHtml).join('') + '</div>') : '<div class="courses-empty">目前沒有尚未完成的課程</div>';
   bindCourseOpenHandlers(wrapIncomplete);
 
   // 已完成課程分頁
@@ -636,22 +634,25 @@ function renderVideoScreenState(){
   const hint = document.getElementById('video-hint');
   const saveBtn = document.getElementById('btn-save-progress');
   const quizBtn = document.getElementById('btn-go-quiz');
-  const hasQuiz = currentCourseData.course.hasQuiz;
+  const course = currentCourseData.course;
   const videoDone = currentCourseData.videoStatus === '完成';
   const quizPassed = currentCourseData.quizPassed;
+  const videoRequired = course.videoRequired !== false;
+  const quizUnlocked = course.hasQuiz && (videoDone || !videoRequired);
+  const isComplete = course.hasQuiz ? quizPassed : (videoRequired && videoDone);
 
-  if(!videoDone){
+  if(isComplete){
+    hint.textContent = course.hasQuiz ? `🎉 恭喜！您已完成本課程（測驗 ${currentCourseData.quizScore}分）` : '🎉 恭喜！您已完成本課程';
+    hint.style.color = 'var(--green)'; hint.style.fontSize='1.3rem'; hint.style.fontWeight='700';
+    saveBtn.style.display = 'none'; quizBtn.style.display = 'none';
+  } else if(quizUnlocked){
+    hint.textContent = videoDone ? '✅ 影片已看完，請進行測驗以完成本課程' : '📝 本課程無需看完影片，可直接進行測驗';
+    hint.style.color = 'var(--green)'; hint.style.fontSize='1.1rem'; hint.style.fontWeight='700';
+    saveBtn.style.display = ''; quizBtn.style.display = '';
+  } else {
     hint.textContent = '▶ 請開始觀看影片，隨時可點擊暫停並點擊「儲存學習進度」保留進度';
     hint.style.color = 'var(--ink3)'; hint.style.fontSize='.85rem'; hint.style.fontWeight='400';
     saveBtn.style.display = ''; quizBtn.style.display = 'none';
-  } else if(hasQuiz && !quizPassed){
-    hint.textContent = '✅ 影片已看完，請進行測驗以完成本課程';
-    hint.style.color = 'var(--green)'; hint.style.fontSize='1.1rem'; hint.style.fontWeight='700';
-    saveBtn.style.display = 'none'; quizBtn.style.display = '';
-  } else {
-    hint.textContent = hasQuiz ? `🎉 恭喜！您已完成本課程（測驗 ${currentCourseData.quizScore}分）` : '🎉 恭喜！您已完成本課程';
-    hint.style.color = 'var(--green)'; hint.style.fontSize='1.3rem'; hint.style.fontWeight='700';
-    saveBtn.style.display = 'none'; quizBtn.style.display = 'none';
   }
 }
 
