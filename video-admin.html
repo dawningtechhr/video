@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>教育訓練系統管理後台</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <style>
 :root{
   --ink:#1a1814;--ink2:#3d3a34;--ink3:#7a7570;
@@ -346,6 +346,18 @@ tr.clickable{cursor:pointer}
               <label>課程類型</label>
               <div class="vid-input-wrap">
                 <input type="text" id="basic-type-input" placeholder="例如：法定教育訓練、職能訓練（選填）" list="course-type-datalist">
+              </div>
+            </div>
+            <div class="vid-row">
+              <label>課程時數</label>
+              <div class="vid-input-wrap">
+                <div style="display:flex;align-items:center;gap:.4rem">
+                  <input type="number" id="basic-hours-h" min="0" style="width:80px" placeholder="0">
+                  <span>時</span>
+                  <input type="number" id="basic-hours-m" min="0" max="59" style="width:80px" placeholder="0">
+                  <span>分</span>
+                </div>
+                <div class="vid-hint">選填，例如：3 時 30 分。</div>
               </div>
             </div>
             <div class="vid-row">
@@ -1054,6 +1066,9 @@ function openCourseDetail(courseId){
 
       document.getElementById('basic-name-input').value = currentCourse.name;
       document.getElementById('basic-type-input').value = currentCourse.courseType || '';
+      const hoursMatch = /(\d+)時(\d+)分/.exec(currentCourse.courseHours || '');
+      document.getElementById('basic-hours-h').value = hoursMatch ? hoursMatch[1] : '';
+      document.getElementById('basic-hours-m').value = hoursMatch ? hoursMatch[2] : '';
       document.getElementById('basic-start-date').value = currentCourse.startDate || '';
       document.getElementById('basic-remarks').value = currentCourse.remarks || '';
       document.getElementById('basic-save-status').textContent = '';
@@ -1163,18 +1178,21 @@ function saveCourseVideo(){
 function saveCourseBasicInfoClick(){
   const name = document.getElementById('basic-name-input').value.trim();
   const courseType = document.getElementById('basic-type-input').value.trim();
+  const hoursH = document.getElementById('basic-hours-h').value;
+  const hoursM = document.getElementById('basic-hours-m').value;
+  const courseHours = (hoursH || hoursM) ? `${hoursH||0}時${hoursM||0}分` : '';
   const startDate = document.getElementById('basic-start-date').value;
   const remarks = document.getElementById('basic-remarks').value.trim();
   const active = document.getElementById('course-active-toggle').checked;
   const status = document.getElementById('basic-save-status');
   if(!name){ status.style.color='var(--red)'; status.textContent='⚠️ 請先填寫課程名稱'; return; }
   status.style.color='var(--ink3)'; status.textContent='儲存中…';
-  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'saveCourseBasicInfo', courseId:currentCourseId, name, courseType, startDate, remarks, active }) })
+  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'saveCourseBasicInfo', courseId:currentCourseId, name, courseType, courseHours, startDate, remarks, active }) })
     .then(r=>r.json())
     .then(d=>{
       if(d.status==='ok'){
         status.style.color='var(--green)'; status.textContent='✅ 已儲存';
-        currentCourse.name = name; currentCourse.courseType = courseType; currentCourse.startDate = startDate; currentCourse.remarks = remarks; currentCourse.active = active;
+        currentCourse.name = name; currentCourse.courseType = courseType; currentCourse.courseHours = courseHours; currentCourse.startDate = startDate; currentCourse.remarks = remarks; currentCourse.active = active;
         document.getElementById('cd-title').textContent = name;
       } else { status.style.color='var(--red)'; status.textContent = '❌ ' + (d.message||'儲存失敗'); }
       setTimeout(()=>status.textContent='',4000);
@@ -1675,12 +1693,12 @@ function exportCourseAssigneesExcel(){
     .then(async d=>{
       const rows = d.rows || [];
       if(!rows.length){ statusMsg.style.color = 'var(--red)'; statusMsg.textContent = '⚠️ 查無符合條件的資料'; return; }
-      const header = ['課程名稱','課程類別','工號','姓名','部門','職類','影片觀看','測驗紀錄','課程完成時間'];
+      const header = ['課程名稱','課程類別','課程時數','工號','姓名','部門','職類','影片觀看','測驗紀錄','課程完成時間'];
 
       const wb = new ExcelJS.Workbook();
       const ws = wb.addWorksheet('課程指定人員');
       ws.addRow(header);
-      rows.forEach(r=>ws.addRow([r.courseName, r.courseType, r.empId, r.name, r.dept, r.jobType, r.videoStatus, r.quizResult, r.completedAt]));
+      rows.forEach(r=>ws.addRow([r.courseName, r.courseType, r.courseHours, r.empId, r.name, r.dept, r.jobType, r.videoStatus, r.quizResult, r.completedAt]));
       ws.columns.forEach(col=>{ col.width = 16; });
 
       ws.getRow(1).eachCell(cell=>{
