@@ -260,9 +260,10 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
           <span style="color:#fff;font-size:.9rem;font-weight:500;text-shadow:0 1px 4px rgba(0,0,0,.6)">點此開始播放</span>
         </div>
       </div>
-      <p id="video-hint" style="margin-top:1rem;font-size:1.1rem;color:var(--red)">▶ 請開始觀看影片，隨時可點擊暫停並點擊「儲存學習進度」保留進度</p>
+      <p id="video-hint" style="margin-top:1rem;font-size:1.1rem;color:#ff0000">如要儲存學習進度請先點擊暫停再點擊「儲存學習進度」</p>
       <div class="watch-actions">
         <button id="btn-save-progress" class="btn btn-secondary" onclick="saveWatchProgress()">💾 儲存學習進度</button>
+        <span id="save-progress-status" style="margin-left:.5rem;font-size:.85rem;color:var(--ink3)"></span>
         <button id="btn-go-quiz" class="btn btn-primary" style="display:none" onclick="goToQuiz()">📝 前往測驗</button>
       </div>
       <div id="save-banner" class="save-banner"></div>
@@ -557,6 +558,7 @@ async function openCourse(courseId){
   document.getElementById('video-course-title').textContent = data.course.name;
   document.getElementById('save-banner').className = 'save-banner';
   document.getElementById('save-banner').textContent = '';
+  document.getElementById('save-progress-status').textContent = '';
 
   var overlay = document.getElementById('video-play-overlay');
   if(overlay){ overlay.style.display='flex'; overlay.style.opacity='1'; }
@@ -632,8 +634,8 @@ function renderVideoScreenState(){
     hint.style.color = 'var(--green)'; hint.style.fontSize='1.1rem'; hint.style.fontWeight='700';
     saveBtn.style.display = ''; quizBtn.style.display = '';
   } else {
-    hint.textContent = '▶ 請開始觀看影片，隨時可點擊暫停並點擊「儲存學習進度」保留進度';
-    hint.style.color = 'var(--red)'; hint.style.fontSize='1.1rem'; hint.style.fontWeight='400';
+    hint.textContent = '如要儲存學習進度請先點擊暫停再點擊「儲存學習進度」';
+    hint.style.color = '#ff0000'; hint.style.fontSize='1.1rem'; hint.style.fontWeight='400';
     saveBtn.style.display = ''; quizBtn.style.display = 'none';
   }
 }
@@ -650,13 +652,24 @@ function onVideoEnded(){
 function saveWatchProgress(){
   if(!userData.empId){ alert('請先完成員工登入'); return; }
   var seconds = ytPlayer && typeof ytPlayer.getCurrentTime === 'function' ? ytPlayer.getCurrentTime() : ytMaxTime;
-  recordVideo('進行中', seconds);
+  const statusSpan = document.getElementById('save-progress-status');
+  statusSpan.style.color = 'var(--ink3)';
+  statusSpan.textContent = '儲存中..';
+  recordVideo('進行中', seconds, function(){
+    statusSpan.style.color = 'var(--green)';
+    statusSpan.textContent = '已儲存進度';
+  }, function(){
+    statusSpan.style.color = 'var(--red)';
+    statusSpan.textContent = '⚠️ 儲存失敗，請重試';
+  });
 }
 
-function recordVideo(status, seconds, onDone){
+function recordVideo(status, seconds, onDone, onError){
   const banner = document.getElementById('save-banner');
-  banner.className = 'save-banner';
-  banner.textContent = '⏳ 儲存中…';
+  if(status === '完成'){
+    banner.className = 'save-banner';
+    banner.textContent = '⏳ 儲存中…';
+  }
   const data = {
     action:'recordVideo', courseId: currentCourseData.courseId, timestamp:new Date().toLocaleString('zh-TW'),
     name:userData.name, dept:userData.dept, empId:userData.empId,
@@ -664,13 +677,18 @@ function recordVideo(status, seconds, onDone){
   };
   fetch(GOOGLE_SCRIPT_URL, { method:'POST', body:JSON.stringify(data) })
     .then(()=>{
-      banner.className = 'save-banner ok';
-      banner.textContent = status === '完成' ? '✅ 已完成影片觀看，紀錄已儲存' : '✅ 觀看紀錄已儲存，下次登入可從此進度繼續觀看';
+      if(status === '完成'){
+        banner.className = 'save-banner ok';
+        banner.textContent = '✅ 已完成影片觀看，紀錄已儲存';
+      }
       if(onDone) onDone();
     })
     .catch(()=>{
-      banner.className = 'save-banner err';
-      banner.textContent = '⚠️ 儲存失敗，請確認網路連線後再試一次';
+      if(status === '完成'){
+        banner.className = 'save-banner err';
+        banner.textContent = '⚠️ 儲存失敗，請確認網路連線後再試一次';
+      }
+      if(onError) onError();
     });
 }
 
