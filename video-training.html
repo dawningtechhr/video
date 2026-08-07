@@ -167,7 +167,6 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
     </div>
     <nav class="sb-nav">
       <div class="nav-item active" data-emptab="dashboard" onclick="goToEmpTab('dashboard')"><span class="ni">📊</span>儀表板</div>
-      <div class="nav-item" data-emptab="pending" onclick="goToEmpTab('pending')"><span class="ni">📌</span>待完成課程</div>
       <div class="nav-item" data-emptab="completed" onclick="goToEmpTab('completed')"><span class="ni">✅</span>已完成課程</div>
       <div class="nav-item" data-emptab="password" onclick="goToEmpTab('password')"><span class="ni">🔒</span>修改密碼</div>
     </nav>
@@ -194,13 +193,6 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
       </div>
       <div class="courses-section-title">📌 待完成課程 <span class="count" id="db-pending-count"></span></div>
       <div id="db-pending-preview"></div>
-    </div>
-
-    <!-- 待完成課程 -->
-    <div class="tab-content" id="etab-pending">
-      <div class="page-title">待完成課程</div>
-      <div class="page-sub" id="pending-page-sub">—</div>
-      <div id="cl-incomplete-list"></div>
     </div>
 
     <!-- 已完成課程 -->
@@ -235,7 +227,6 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
     </div>
     <nav class="sb-nav">
       <div class="nav-item" data-emptab="dashboard" onclick="goToEmpTab('dashboard')"><span class="ni">📊</span>儀表板</div>
-      <div class="nav-item" data-emptab="pending" onclick="goToEmpTab('pending')"><span class="ni">📌</span>待完成課程</div>
       <div class="nav-item" data-emptab="completed" onclick="goToEmpTab('completed')"><span class="ni">✅</span>已完成課程</div>
       <div class="nav-item" data-emptab="password" onclick="goToEmpTab('password')"><span class="ni">🔒</span>修改密碼</div>
     </nav>
@@ -288,7 +279,6 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
     </div>
     <nav class="sb-nav">
       <div class="nav-item" data-emptab="dashboard" onclick="goToEmpTab('dashboard')"><span class="ni">📊</span>儀表板</div>
-      <div class="nav-item" data-emptab="pending" onclick="goToEmpTab('pending')"><span class="ni">📌</span>待完成課程</div>
       <div class="nav-item" data-emptab="completed" onclick="goToEmpTab('completed')"><span class="ni">✅</span>已完成課程</div>
       <div class="nav-item" data-emptab="password" onclick="goToEmpTab('password')"><span class="ni">🔒</span>修改密碼</div>
     </nav>
@@ -428,7 +418,6 @@ async function goCourses(targetTab){
   showEmpTab(targetTab || 'dashboard');
   show('courses');
 
-  document.getElementById('cl-incomplete-list').innerHTML = '<div class="courses-empty">載入中…</div>';
   document.getElementById('cl-complete-list').innerHTML = '';
   document.getElementById('db-pending-preview').innerHTML = '';
 
@@ -491,16 +480,9 @@ function renderCourseLists(){
   if(!incomplete.length){
     dbPreview.innerHTML = '<div class="courses-empty">目前沒有尚未完成的課程，太棒了！</div>';
   } else {
-    dbPreview.innerHTML = '<div class="course-grid">' + incomplete.slice(0,3).map(pendingCardHtml).join('') + '</div>'
-      + (incomplete.length > 3 ? `<div style="text-align:center;margin-top:.5rem"><span class="switch-link" onclick="showEmpTab('pending')">查看全部 ${incomplete.length} 門待完成課程 →</span></div>` : '');
+    dbPreview.innerHTML = '<div class="course-grid">' + incomplete.map(pendingCardHtml).join('') + '</div>';
   }
   bindCourseOpenHandlers(dbPreview);
-
-  // 待完成課程分頁
-  document.getElementById('pending-page-sub').textContent = incomplete.length ? `您目前有 ${incomplete.length} 門課程尚未完成` : '目前沒有尚未完成的課程';
-  const wrapIncomplete = document.getElementById('cl-incomplete-list');
-  wrapIncomplete.innerHTML = incomplete.length ? ('<div class="course-grid">' + incomplete.map(pendingCardHtml).join('') + '</div>') : '<div class="courses-empty">目前沒有尚未完成的課程</div>';
-  bindCourseOpenHandlers(wrapIncomplete);
 
   // 已完成課程分頁
   document.getElementById('completed-page-sub').textContent = complete.length ? `您已完成 ${complete.length} 門課程` : '尚無已完成的課程';
