@@ -252,6 +252,7 @@ tr.clickable{cursor:pointer}
       <div class="nav-item" onclick="showTab('courses')"><span class="ni">📚</span>課程管理</div>
       <div class="nav-item" onclick="showTab('employees');loadEmployeeMaster()"><span class="ni">🧑‍🤝‍🧑</span>員工總表</div>
       <div class="nav-item" onclick="showTab('export');loadExportTab()"><span class="ni">📥</span>檔案下載</div>
+      <div class="nav-item" onclick="showTab('empsync');loadEmpSyncTab()"><span class="ni">🔄</span>同步員工資料設定</div>
       <div class="nav-item" onclick="showTab('admins');loadAdminsFromGS()"><span class="ni">👤</span>管理員設定</div>
     </nav>
     <div class="sb-footer">
@@ -634,6 +635,76 @@ tr.clickable{cursor:pointer}
       </div>
     </div>
 
+    <!-- 同步員工資料設定 -->
+    <div class="tab-content" id="tab-empsync">
+      <div class="page-title">同步員工資料設定</div>
+      <div class="page-sub">設定固定檔名與欄位對應，從雲端硬碟同步員工總表資料，可手動執行或設定每日自動同步</div>
+      <div class="notif-card">
+        <h3>1. 設定來源檔案與欄位對應</h3>
+        <div class="vid-row">
+          <label>固定檔名</label>
+          <div class="vid-input-wrap">
+            <input type="text" id="emp-sync-filename" placeholder="例如：HR員工名冊">
+            <div class="vid-hint">系統每次同步都會在雲端硬碟中尋找此檔名、且最近更新的 Google 試算表檔案，適合每天用同一個檔名覆蓋/另存的情境。</div>
+          </div>
+        </div>
+        <div class="vid-row">
+          <label>標題列（第幾列）</label>
+          <div class="vid-input-wrap">
+            <div style="display:flex;gap:.5rem;align-items:center">
+              <input type="number" id="emp-sync-header-row" min="1" value="1" style="width:90px">
+              <button class="btn-sm btn-secondary" onclick="loadSyncFieldHeaders()">讀取欄位</button>
+            </div>
+            <div class="vid-hint">若來源檔案前面有幾列說明或空白，欄位標題不是在第 1 列，請填實際所在的列數（例如第 9 列）。</div>
+          </div>
+        </div>
+        <div id="emp-sync-headers-msg" style="font-size:.82rem;margin:.3rem 0 .6rem"></div>
+        <div id="emp-sync-mapping-area" style="display:none">
+          <div class="vid-row"><label>工號 <span style="color:var(--red)">*</span></label><div class="vid-input-wrap"><select id="emp-sync-map-empId"></select></div></div>
+          <div class="vid-row"><label>在職狀態 <span style="color:var(--red)">*</span></label><div class="vid-input-wrap"><select id="emp-sync-map-status"></select><div class="vid-hint">來源欄位內容須為「在職」或「離職」文字，用於判斷新增／刪除。</div></div></div>
+          <div class="vid-row"><label>身分證號</label><div class="vid-input-wrap"><select id="emp-sync-map-idNumber"></select><div class="vid-hint">選填，新增員工時作為登入密碼的預設值。</div></div></div>
+          <div class="vid-row"><label>姓名</label><div class="vid-input-wrap"><select id="emp-sync-map-name"></select></div></div>
+          <div class="vid-row"><label>部門</label><div class="vid-input-wrap"><select id="emp-sync-map-dept"></select></div></div>
+          <div class="vid-row"><label>職類</label><div class="vid-input-wrap"><select id="emp-sync-map-jobType"></select></div></div>
+          <div class="vid-row"><label>Email</label><div class="vid-input-wrap"><select id="emp-sync-map-email"></select></div></div>
+          <button class="btn-sm btn-primary" onclick="saveSyncMapping()">💾 儲存對應設定</button>
+          <span id="emp-sync-map-savemsg" style="margin-left:.6rem;font-size:.82rem"></span>
+        </div>
+      </div>
+      <div class="notif-card">
+        <h3>2. 每日自動同步</h3>
+        <div class="notif-row">
+          <label>是否啟用每日自動同步</label>
+          <div class="toggle-wrap">
+            <label class="toggle"><input type="checkbox" id="emp-sync-auto-toggle" onchange="updateEmpSyncAutoStatus()"><span class="toggle-slider"></span></label>
+            <span id="emp-sync-auto-text" style="font-size:.82rem;color:var(--ink3)"><span class="status-dot off"></span>關閉</span>
+          </div>
+        </div>
+        <div class="vid-row">
+          <label>每日同步時間</label>
+          <div class="vid-input-wrap">
+            <select id="emp-sync-auto-hour" style="width:120px">
+              <option value="0">00:00</option><option value="1">01:00</option><option value="2">02:00</option><option value="3">03:00</option>
+              <option value="4">04:00</option><option value="5">05:00</option><option value="6">06:00</option><option value="7">07:00</option>
+              <option value="8">08:00</option><option value="9">09:00</option><option value="10">10:00</option><option value="11">11:00</option>
+              <option value="12">12:00</option><option value="13">13:00</option><option value="14">14:00</option><option value="15">15:00</option>
+              <option value="16">16:00</option><option value="17">17:00</option><option value="18">18:00</option><option value="19">19:00</option>
+              <option value="20">20:00</option><option value="21">21:00</option><option value="22">22:00</option><option value="23">23:00</option>
+            </select>
+            <div class="vid-hint">Apps Script 觸發器僅保證在此時段內的某個時間點執行，非精確整點。</div>
+          </div>
+        </div>
+        <button class="btn-sm btn-primary" onclick="saveSyncMapping()">💾 儲存設定</button>
+        <span id="emp-sync-auto-savemsg" style="margin-left:.6rem;font-size:.82rem"></span>
+      </div>
+      <div class="notif-card">
+        <h3>3. 執行同步</h3>
+        <p style="font-size:.82rem;color:var(--ink2);margin-bottom:.6rem">以來源檔案「工號」為主要依據：<strong>來源為在職且員工總表尚無資料 → 新增</strong>（密碼取自來源「身分證號」欄）；<strong>來源為離職、或員工總表有資料但來源已無此工號 → 從員工總表刪除</strong>；其餘已存在者只更新已對應的欄位，<strong style="color:var(--red)">密碼不會被覆蓋</strong>。此操作會實際刪除／新增員工總表資料，請確認來源檔案正確後再執行。</p>
+        <button class="btn-sm btn-primary" id="emp-sync-confirm-btn" onclick="confirmEmpSync()">🔄 立即同步</button>
+        <div id="emp-sync-result" style="font-size:.82rem;margin-top:.5rem"></div>
+      </div>
+    </div>
+
     <!-- ADMINS -->
     <div class="tab-content" id="tab-admins">
       <div class="page-title">管理員設定</div>
@@ -861,7 +932,7 @@ function showTab(name){
   if(name === 'dashboard') loadDashboard();
   if(name === 'courses' && !currentCourseId) loadCourseList();
 }
-function tabLabel(n){ return {dashboard:'儀表板',courses:'課程管理',employees:'員工總表',export:'檔案下載',admins:'管理員設定'}[n]||n; }
+function tabLabel(n){ return {dashboard:'儀表板',courses:'課程管理',employees:'員工總表',export:'檔案下載',empsync:'同步員工資料設定',admins:'管理員設定'}[n]||n; }
 
 // ═══════════ DASHBOARD ═══════════
 let dashCourses = [];
@@ -1911,6 +1982,116 @@ function openEmpUploadModal(){
 }
 function closeEmpUploadModal(){ document.getElementById('modal-emp-upload').classList.remove('open'); }
 document.getElementById('modal-emp-upload').addEventListener('click', function(e){ if(e.target===this) closeEmpUploadModal(); });
+
+let empSyncHeaders = [];
+
+function loadEmpSyncTab(){
+  document.getElementById('emp-sync-headers-msg').textContent = '';
+  document.getElementById('emp-sync-mapping-area').style.display = 'none';
+  document.getElementById('emp-sync-result').textContent = '';
+  fetch(`${GS_URL}?action=getEmpSyncConfigInfo`)
+    .then(r=>r.json())
+    .then(cfg=>{
+      document.getElementById('emp-sync-filename').value = cfg.fileName || '';
+      document.getElementById('emp-sync-header-row').value = cfg.headerRow || 1;
+      document.getElementById('emp-sync-auto-toggle').checked = !!cfg.autoSyncEnabled;
+      document.getElementById('emp-sync-auto-hour').value = cfg.autoSyncHour != null ? cfg.autoSyncHour : 2;
+      updateEmpSyncAutoStatus();
+      if(cfg.fileName) loadSyncFieldHeaders(cfg.mapping || {});
+    })
+    .catch(()=>{});
+}
+
+function updateEmpSyncAutoStatus(){
+  const on = document.getElementById('emp-sync-auto-toggle').checked;
+  document.getElementById('emp-sync-auto-text').innerHTML = on ? '<span class="status-dot on"></span>開啟' : '<span class="status-dot off"></span>關閉';
+}
+
+function loadSyncFieldHeaders(prefillMapping){
+  const fileName = document.getElementById('emp-sync-filename').value.trim();
+  const headerRow = document.getElementById('emp-sync-header-row').value || 1;
+  const msgEl = document.getElementById('emp-sync-headers-msg');
+  if(!fileName){ msgEl.style.color='var(--red)'; msgEl.textContent='⚠️ 請先輸入檔名'; return; }
+  msgEl.style.color='var(--ink3)'; msgEl.textContent='讀取中…';
+  fetch(`${GS_URL}?action=getSyncFieldHeaders&fileName=${encodeURIComponent(fileName)}&headerRow=${encodeURIComponent(headerRow)}`)
+    .then(r=>r.json())
+    .then(d=>{
+      if(!d.found){
+        msgEl.style.color='var(--red)'; msgEl.textContent='❌ ' + (d.message||'讀取失敗');
+        document.getElementById('emp-sync-mapping-area').style.display='none';
+        return;
+      }
+      empSyncHeaders = d.headers;
+      msgEl.style.color='var(--green)'; msgEl.textContent = `✅ 已讀取「${d.fileName}」，共 ${d.headers.length} 個欄位`;
+      populateSyncMappingSelects(prefillMapping || {});
+      document.getElementById('emp-sync-mapping-area').style.display='block';
+    })
+    .catch(()=>{ msgEl.style.color='var(--red)'; msgEl.textContent='❌ 連線失敗'; });
+}
+
+function populateSyncMappingSelects(prefill){
+  const fields = ['empId','status','idNumber','name','dept','jobType','email'];
+  fields.forEach(key=>{
+    const sel = document.getElementById('emp-sync-map-'+key);
+    sel.innerHTML = '<option value="">（不對應）</option>' + empSyncHeaders.map(h=>`<option value="${escapeHtml(h)}">${escapeHtml(h)}</option>`).join('');
+    if(prefill[key] && empSyncHeaders.includes(prefill[key])) sel.value = prefill[key];
+  });
+}
+
+function saveSyncMapping(){
+  const fileName = document.getElementById('emp-sync-filename').value.trim();
+  const headerRow = document.getElementById('emp-sync-header-row').value || 1;
+  const mapping = {
+    empId: document.getElementById('emp-sync-map-empId').value,
+    status: document.getElementById('emp-sync-map-status').value,
+    idNumber: document.getElementById('emp-sync-map-idNumber').value,
+    name: document.getElementById('emp-sync-map-name').value,
+    dept: document.getElementById('emp-sync-map-dept').value,
+    jobType: document.getElementById('emp-sync-map-jobType').value,
+    email: document.getElementById('emp-sync-map-email').value
+  };
+  const autoSyncEnabled = document.getElementById('emp-sync-auto-toggle').checked;
+  const autoSyncHour = document.getElementById('emp-sync-auto-hour').value;
+  const statusEl = document.getElementById('emp-sync-map-savemsg');
+  const autoStatusEl = document.getElementById('emp-sync-auto-savemsg');
+  function setStatus(color, text){
+    statusEl.style.color = color; statusEl.textContent = text;
+    autoStatusEl.style.color = color; autoStatusEl.textContent = text;
+  }
+  if(!mapping.empId){ setStatus('var(--red)', '⚠️ 「工號」為必要對應欄位'); return; }
+  if(!mapping.status){ setStatus('var(--red)', '⚠️ 「在職狀態」為必要對應欄位'); return; }
+  setStatus('var(--ink3)', '儲存中…');
+  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'saveEmpSyncConfig', fileName, headerRow, mapping, autoSyncEnabled, autoSyncHour }) })
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.status==='ok'){ setStatus('var(--green)', '✅ 已儲存'); }
+      else { setStatus('var(--red)', '❌ ' + (d.message||'儲存失敗')); }
+      setTimeout(()=>{ statusEl.textContent=''; autoStatusEl.textContent=''; },3000);
+    })
+    .catch(()=>{ setStatus('var(--red)', '❌ 連線失敗'); });
+}
+
+function confirmEmpSync(){
+  if(!confirm('此操作將依來源檔案新增／更新員工總表資料，離職或來源檔案中已不存在的工號將被「刪除」，是否繼續？')) return;
+  const resultEl = document.getElementById('emp-sync-result');
+  const btn = document.getElementById('emp-sync-confirm-btn');
+  resultEl.style.color = 'var(--ink3)'; resultEl.textContent = '同步中…';
+  btn.disabled = true;
+  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'syncEmployeeMasterFromDrive' }) })
+    .then(r=>r.json())
+    .then(d=>{
+      btn.disabled = false;
+      if(d.status === 'ok'){
+        resultEl.style.color = 'var(--green)';
+        resultEl.textContent = `✅ 同步完成：新增 ${d.added} 筆、更新 ${d.updated} 筆、刪除 ${d.deleted} 筆`;
+        loadEmployeeMaster();
+      } else {
+        resultEl.style.color = 'var(--red)';
+        resultEl.textContent = '❌ ' + (d.message || '同步失敗');
+      }
+    })
+    .catch(()=>{ btn.disabled = false; resultEl.style.color = 'var(--red)'; resultEl.textContent = '❌ 連線失敗'; });
+}
 
 const empUploadZone = document.getElementById('emp-upload-zone');
 empUploadZone.addEventListener('dragover', e=>{ e.preventDefault(); empUploadZone.classList.add('drag'); });
