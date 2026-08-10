@@ -263,7 +263,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
           <span style="color:#fff;font-size:.9rem;font-weight:500;text-shadow:0 1px 4px rgba(0,0,0,.6)">點此開始播放</span>
         </div>
       </div>
-      <p id="video-hint" style="margin-top:1rem;font-size:1.1rem;color:#ff0000">如要儲存學習進度請先點擊暫停再點擊「儲存學習進度」</p>
+      <p id="video-hint" style="margin-top:1rem;font-size:1.1rem;color:#ff0000">※學習中如需暫離，請先點「暫停」再點「儲存學習進度」，下次即可接續觀看；未儲存進度則需重新觀看。</p>
       <div class="watch-actions">
         <button id="btn-save-progress" class="btn btn-secondary" onclick="saveWatchProgress()">💾 儲存學習進度</button>
         <span id="save-progress-status" style="margin-left:.5rem;font-size:.85rem;color:var(--ink3)"></span>
@@ -643,7 +643,7 @@ function renderVideoScreenState(){
     hint.style.color = 'var(--green)'; hint.style.fontSize='1.1rem'; hint.style.fontWeight='700';
     saveBtn.style.display = ''; quizBtn.style.display = '';
   } else {
-    hint.textContent = '如要儲存學習進度請先點擊暫停再點擊「儲存學習進度」';
+    hint.textContent = '※學習中如需暫離，請先點「暫停」再點「儲存學習進度」，下次即可接續觀看；未儲存進度則需重新觀看。';
     hint.style.color = '#ff0000'; hint.style.fontSize='1.1rem'; hint.style.fontWeight='400';
     saveBtn.style.display = ''; quizBtn.style.display = 'none';
   }
