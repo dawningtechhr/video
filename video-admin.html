@@ -476,7 +476,7 @@ tr.clickable{cursor:pointer}
               <div class="form-group"><label>部門</label><select id="asg-dept-filter" onchange="renderCandidateList()"><option value="">全部部門</option></select></div>
               <div class="form-group"><label>職類</label><select id="asg-job-filter" onchange="renderCandidateList()"><option value="">全部職類</option></select></div>
               <div class="form-group" style="flex:1"><label>搜尋姓名／工號</label><input type="text" id="asg-search" placeholder="輸入姓名或工號" oninput="renderCandidateList()"></div>
-              <div class="form-group"><label>完成期限</label><input type="date" id="asg-default-deadline" title="套用到所有勾選人員的預設完成期限，個別人員可再自訂覆蓋"></div>
+              <div class="form-group"><label>批次設定人員完成期限</label><input type="date" id="asg-default-deadline" title="套用到所有勾選人員的預設完成期限，個別人員可再自訂覆蓋"></div>
             </div>
             <div style="margin-bottom:.6rem"><label style="font-size:.82rem;color:var(--ink2)"><input type="checkbox" id="asg-select-all" style="width:auto;margin-right:.4rem" onchange="toggleSelectAllCandidates(this)">全選目前篩選結果</label></div>
             <div class="candidate-list" id="asg-candidate-list"></div>
@@ -854,7 +854,7 @@ tr.clickable{cursor:pointer}
       <div class="filter-row">
         <div class="form-group"><label>課程起始日期</label><input type="date" id="ec-start-date-filter" onchange="renderEmpCoursesList()"></div>
         <div class="form-group"><label>課程類型</label><select id="ec-type-filter" onchange="renderEmpCoursesList()"><option value="">全部類型</option></select></div>
-        <div class="form-group" style="margin-left:auto;margin-right:.95rem;text-align:right"><label>設定所有勾選課程完成期限</label><input type="date" id="ec-default-deadline" style="width:150px" title="套用到所有勾選課程的預設完成期限，個別課程可再自訂覆蓋"></div>
+        <div class="form-group" style="margin-left:auto;margin-right:.95rem;text-align:right"><label>批次設定課程完成期限</label><input type="date" id="ec-default-deadline" style="width:150px" title="套用到所有勾選課程的預設完成期限，個別課程可再自訂覆蓋"></div>
       </div>
       <div style="margin-bottom:.6rem"><label style="font-size:.82rem;color:var(--ink2)"><input type="checkbox" id="ec-select-all" style="width:auto;margin-right:.4rem" onchange="toggleSelectAllEmpCourses(this)">全選目前篩選結果</label></div>
       <div class="candidate-list" id="emp-courses-list" style="max-height:340px"></div>
