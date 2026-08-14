@@ -497,7 +497,7 @@ tr.clickable{cursor:pointer}
                 </select>
               </div>
             </div>
-            <div id="asg-table-wrap"><div class="table-empty">尚無指定人員</div></div>
+            <div id="asg-table-wrap"><div class="loading-wrap"><div class="spinner"></div><div>資料載入中…</div></div></div>
           </div>
         </div>
 
@@ -1374,6 +1374,7 @@ function loadEmployeeMasterForCourse(cb){
   fetch(`${GS_URL}?action=getEmployeeMaster`).then(r=>r.json()).then(d=>{ employeeMasterList = d.employees || []; if(cb) cb(); }).catch(()=>{ employeeMasterList=[]; if(cb) cb(); });
 }
 function loadCourseAssignees(){
+  document.getElementById('asg-table-wrap').innerHTML = '<div class="loading-wrap"><div class="spinner"></div><div>資料載入中…</div></div>';
   fetch(`${GS_URL}?action=getCourseAssignees&courseId=${encodeURIComponent(currentCourseId)}`)
     .then(r=>r.json())
     .then(d=>{ courseAssignees = d.assignees || []; renderAssigneeTable(); loadEmployeeMasterForCourse(()=>{ populateAssigneeFilters(); renderCandidateList(); }); });
