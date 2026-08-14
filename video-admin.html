@@ -796,6 +796,25 @@ tr.clickable{cursor:pointer}
   </div>
 </div>
 
+<!-- EDIT ASSIGNEE DEADLINE MODAL -->
+<div class="modal-overlay" id="modal-edit-deadline">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head"><h3>修改完成期限</h3><button class="btn-close" onclick="closeEditDeadlineModal()">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:.85rem;color:var(--ink2);margin-bottom:.75rem">員工：<strong id="ed-emp-name"></strong>（<span id="ed-emp-id"></span>）</p>
+      <div class="form-group">
+        <label>完成期限</label>
+        <input type="date" id="ed-deadline-input">
+      </div>
+      <div id="ed-err" style="color:var(--red);font-size:.8rem;margin-top:.5rem;display:none"></div>
+      <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">
+        <button class="btn-sm btn-secondary" onclick="closeEditDeadlineModal()">取消</button>
+        <button class="btn-sm btn-primary" id="ed-save-btn" onclick="saveEditDeadline()">儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- EMPLOYEE ADD MODAL -->
 <div class="modal-overlay" id="modal-emp-add">
   <div class="modal">
@@ -1475,9 +1494,13 @@ function renderAssigneeTable(){
       <td style="color:var(--ink3)">${i+1}</td><td>${escapeHtml(a.empId)}</td><td><strong>${escapeHtml(a.name)}</strong></td>
       <td>${escapeHtml(a.dept||'—')}</td><td>${escapeHtml(a.jobType||'—')}</td><td style="color:var(--ink3)">${escapeHtml(a.deadline||'無期限')}</td>
       <td>${a.completed ? '<span class="badge pass">已完成</span>' : '<span class="badge fail">未完成</span>'}</td>
-      <td><button class="btn-sm btn-danger" data-remove-empid="${escapeHtml(a.empId)}" data-remove-name="${escapeHtml(a.name)}">移除</button></td>
+      <td style="white-space:nowrap">
+        <button class="btn-sm btn-secondary" data-edit-empid="${escapeHtml(a.empId)}" data-edit-name="${escapeHtml(a.name)}" data-edit-deadline="${escapeHtml(a.deadline||'')}">修改完成期限</button>
+        <button class="btn-sm btn-danger" data-remove-empid="${escapeHtml(a.empId)}" data-remove-name="${escapeHtml(a.name)}" style="margin-left:.35rem">移除</button>
+      </td>
     </tr>`).join('')}</tbody></table>`;
   wrap.querySelectorAll('[data-remove-empid]').forEach(btn=>btn.addEventListener('click', ()=>removeAssignee(btn.dataset.removeEmpid, btn.dataset.removeName)));
+  wrap.querySelectorAll('[data-edit-empid]').forEach(btn=>btn.addEventListener('click', ()=>openEditDeadlineModal(btn.dataset.editEmpid, btn.dataset.editName, btn.dataset.editDeadline)));
 }
 function removeAssignee(empId, name){
   if(!confirm(`確定要將「${name}」從本課程指定人員中移除？`)) return;
@@ -1485,6 +1508,35 @@ function removeAssignee(empId, name){
     .then(r=>r.json())
     .then(d=>{ if(d.status==='error'){ alert(d.message||'移除失敗'); return; } loadCourseAssignees(); })
     .catch(()=>alert('連線失敗，請稍後再試'));
+}
+
+let editDeadlineEmpId = null;
+function openEditDeadlineModal(empId, name, currentDeadline){
+  editDeadlineEmpId = empId;
+  document.getElementById('ed-emp-name').textContent = name;
+  document.getElementById('ed-emp-id').textContent = empId;
+  document.getElementById('ed-deadline-input').value = currentDeadline || '';
+  document.getElementById('ed-err').style.display = 'none';
+  document.getElementById('modal-edit-deadline').classList.add('open');
+}
+function closeEditDeadlineModal(){ document.getElementById('modal-edit-deadline').classList.remove('open'); }
+document.getElementById('modal-edit-deadline').addEventListener('click', function(e){ if(e.target===this) closeEditDeadlineModal(); });
+
+function saveEditDeadline(){
+  const deadline = document.getElementById('ed-deadline-input').value;
+  const errEl = document.getElementById('ed-err');
+  const btn = document.getElementById('ed-save-btn');
+  errEl.style.display = 'none';
+  btn.textContent = '儲存中…'; btn.disabled = true;
+  fetch(GS_URL, { method:'POST', body:JSON.stringify({ action:'updateCourseAssigneeDeadline', courseId:currentCourseId, empId:editDeadlineEmpId, deadline }) })
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.status==='error'){ errEl.textContent = d.message||'儲存失敗'; errEl.style.display='block'; return; }
+      closeEditDeadlineModal();
+      loadCourseAssignees();
+    })
+    .catch(()=>{ errEl.textContent='連線失敗，請稍後再試'; errEl.style.display='block'; })
+    .finally(()=>{ btn.textContent='儲存'; btn.disabled=false; });
 }
 
 // ── 通知設定 ──
