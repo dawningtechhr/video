@@ -33,7 +33,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
 /* COVER */
 #screen-cover{background:var(--paper);align-items:center;justify-content:center;text-align:center;padding:2rem}
 #screen-cover .logo-wrap{margin-bottom:2rem;padding-bottom:1.75rem;border-bottom:1px solid var(--paper3)}
-#screen-cover .logo-wrap img{height:auto;max-height:88px;max-width:265px;width:auto}
+#screen-cover .logo-wrap img{height:auto;max-height:58.7px;max-width:176.7px;width:auto}
 #screen-cover h1{font-size:2rem;font-weight:700;color:var(--ink);line-height:1.35;margin-bottom:.6rem}
 #screen-cover h2{font-size:.95rem;font-weight:400;color:var(--ink2);margin-bottom:2.25rem;line-height:1.6}
 #screen-cover .meta{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.75rem}
@@ -155,7 +155,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--i
     <h2>員工訓練登入</h2>
     <p>請輸入工號與密碼登入查看您被指定的訓練課程</p>
     <div class="form-group"><label>工號</label><input type="text" id="login-empid" placeholder="請輸入員工工號" onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()"></div>
-    <div class="form-group"><label>密碼</label><input type="password" id="login-pwd" placeholder="請輸入密碼（預設為身分證號）" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="form-group"><label>密碼</label><input type="password" id="login-pwd" placeholder="請輸入密碼(預設為身份證號, 登入後請修改密碼)" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div id="login-err" style="color:var(--red);font-size:.82rem;margin-bottom:.9rem;display:none"></div>
     <button class="btn btn-primary" style="width:100%;padding:.72rem;font-size:.92rem" onclick="doLogin()" id="btn-lookup">登入</button>
   </div>
@@ -448,6 +448,7 @@ function pendingCardHtml(c){
     <div class="cc-name-row" data-open-course="${escapeHtml(c.courseId)}"><strong>課程名稱：</strong>${escapeHtml(c.courseName)}</div>
     <div class="cc-meta${isOverdue ? ' cc-overdue-text' : ''}">完成期限：${escapeHtml(c.deadline || '無期限')}${isOverdue ? ' <span class="cc-overdue-badge">⚠ 已逾期</span>' : ''}</div>
     <div class="cc-meta">課程類型：${escapeHtml(c.courseType || '未分類')}</div>
+    <div class="cc-meta">上課方式：${c.trainingMode === '實體' ? '實體' : '線上'}</div>
     <div class="cc-meta">課程時數：${escapeHtml(c.courseHours || '未提供')}</div>
     <div class="cc-meta">影片觀看：${videoText}</div>
     <div class="cc-meta">測驗：${quizText}</div>
@@ -462,6 +463,7 @@ function completedCardHtml(c){
     <div class="cc-name-row" data-open-course="${escapeHtml(c.courseId)}"><strong>課程名稱：</strong>${escapeHtml(c.courseName)}</div>
     <div class="cc-meta">完成日期：${escapeHtml(formatTimestamp(c.completedAt))}</div>
     <div class="cc-meta">課程類型：${escapeHtml(c.courseType || '未分類')}</div>
+    <div class="cc-meta">上課方式：${c.trainingMode === '實體' ? '實體' : '線上'}</div>
     <div class="cc-meta">課程時數：${escapeHtml(c.courseHours || '未提供')}</div>
     <div class="cc-meta">影片觀看：${videoText}</div>
     <div class="cc-meta">測驗：${quizText}</div>
