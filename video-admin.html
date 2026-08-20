@@ -1106,7 +1106,7 @@ function populateCourseTypeFilter(){
 }
 
 const COURSE_COL_GETTERS = {
-  name: c=>c.name||'', courseType: c=>c.courseType||'', trainingMode: c=>c.trainingMode==='實體'?'實體':'線上',
+  name: c=>c.name||'', courseType: c=>c.courseType||'', courseHours: c=>c.courseHours||'', trainingMode: c=>c.trainingMode==='實體'?'實體':'線上',
   startDate: c=>c.startDate||'', active: c=>c.active!==false?1:0, videoRequired: c=>c.videoRequired!==false?1:0,
   hasQuiz: c=>c.hasQuiz?1:0, passScore: c=>c.hasQuiz?c.passScore:-1,
   total: c=>c.total, completed: c=>c.completed,
@@ -1139,12 +1139,13 @@ function renderCourseTable(){
   if(!list.length){ wrap.innerHTML = '<div class="table-empty">無符合條件的課程</div>'; return; }
 
   wrap.innerHTML = `<table style="width:max-content;min-width:100%"><thead><tr>
-    ${sortableTh('課程名稱','name',courseSortState,'240px')}${sortableTh('課程類型','courseType',courseSortState)}${sortableTh('上課方式','trainingMode',courseSortState)}${sortableTh('起始日期','startDate',courseSortState)}${sortableTh('狀態','active',courseSortState)}${sortableTh('觀看影片','videoRequired',courseSortState)}${sortableTh('是否測驗','hasQuiz',courseSortState)}${sortableTh('及格分數','passScore',courseSortState)}${sortableTh('指定人數','total',courseSortState)}${sortableTh('已完成','completed',courseSortState)}${sortableTh('完成率','rate',courseSortState)}${sortableTh('測驗平均分數','avgQuizScore',courseSortState)}<th style="white-space:nowrap"></th>
+    ${sortableTh('課程名稱','name',courseSortState,'240px')}${sortableTh('課程類型','courseType',courseSortState)}${sortableTh('上課方式','trainingMode',courseSortState)}${sortableTh('起始日期','startDate',courseSortState)}${sortableTh('課程時數','courseHours',courseSortState)}${sortableTh('狀態','active',courseSortState)}${sortableTh('觀看影片','videoRequired',courseSortState)}${sortableTh('是否測驗','hasQuiz',courseSortState)}${sortableTh('及格分數','passScore',courseSortState)}${sortableTh('指定人數','total',courseSortState)}${sortableTh('已完成','completed',courseSortState)}${sortableTh('完成率','rate',courseSortState)}${sortableTh('測驗平均分數','avgQuizScore',courseSortState)}<th style="white-space:nowrap"></th>
   </tr></thead><tbody>${list.map(c=>`<tr>
     <td class="clickable" style="width:240px;white-space:normal;word-break:break-word" data-open-id="${c.id}"><strong>${escapeHtml(c.name)}</strong></td>
     <td>${escapeHtml(c.courseType||'—')}</td>
     <td>${c.trainingMode==='實體'?'實體':'線上'}</td>
     <td>${escapeHtml(c.startDate||'—')}</td>
+    <td style="white-space:nowrap">${escapeHtml(c.courseHours||'—')}</td>
     <td style="white-space:nowrap">${c.active!==false?'<span class="badge pass">進行中</span>':'<span class="badge neutral">關閉</span>'}</td>
     <td style="white-space:nowrap">${c.videoRequired!==false?'<span class="badge pass">需要</span>':'<span class="badge neutral">不需要</span>'}</td>
     <td style="white-space:nowrap">${c.hasQuiz?'<span class="badge pass">需測驗</span>':'<span class="badge neutral">無測驗</span>'}</td>
@@ -2041,7 +2042,7 @@ function renderEmployeeTable(){
     <th style="text-align:center">#</th>${sortableTh('工號','empId',empSortState,null,'center')}${sortableTh('姓名','name',empSortState,null,'center')}${sortableTh('部門','dept',empSortState,null,'center')}${sortableTh('職類','jobType',empSortState,null,'center')}${sortableTh('應上課程','requiredCourses',empSortState,null,'center')}${sortableTh('已完成','completedCourses',empSortState,null,'center')}${sortableTh('未完成','incompleteCourses',empSortState,null,'center')}${sortableTh('Email','email',empSortState,null,'center')}<th style="text-align:center"></th>
   </tr></thead><tbody>
     ${list.map((e,i)=>`<tr>
-      <td style="text-align:center;color:var(--ink3)">${i+1}</td><td style="text-align:center">${escapeHtml(e.empId)}</td><td style="text-align:center"><strong>${escapeHtml(e.name)}</strong></td>
+      <td style="text-align:center;color:var(--ink3)">${i+1}</td><td style="text-align:center">${escapeHtml(e.empId)}</td><td style="text-align:center;white-space:nowrap"><strong>${escapeHtml(e.name)}</strong></td>
       <td style="text-align:center">${escapeHtml(e.dept||'—')}</td><td style="text-align:center">${escapeHtml(e.jobType||'—')}</td>
       <td style="text-align:center">${e.requiredCourses||0}</td>
       <td style="text-align:center">${e.completedCourses ? `<span class="badge pass">${e.completedCourses}</span>` : '0'}</td>
